@@ -32,9 +32,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Ionic.Zip">
-      <HintPath>..\packages\NPOI.1.2.5\lib\net40\Ionic.Zip.dll</HintPath>
-    </Reference>
     <Reference Include="NPOI">
       <HintPath>..\packages\NPOI.1.2.5\lib\net40\NPOI.dll</HintPath>
     </Reference>
@@ -43,8 +40,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TableBuilderComplex.cs" />
-    <Compile Include="TableBuilderSimple.cs" />
+    <Compile Include="TableWriterComplex.cs" />
+    <Compile Include="TableConfiguration.cs" />
+    <Compile Include="TableWriterSimple.cs" />
+    <Compile Include="TableWriterStyle.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
