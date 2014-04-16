@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using NPOI.HSSF.UserModel;
+using NPOI.HSSF.Util;
 using NPOI.SS.UserModel;
 
 
@@ -112,13 +113,22 @@ namespace FormattedExcelExport {
 			IFont cellFont = _workbook.CreateFont();
 			cellFont.FontName = _style.HeaderCell.FontName;
 			cellFont.FontHeightInPoints = _style.HeaderCell.FontHeightInPoints;
-			cellFont.IsItalic = _style.HeaderCell.IsItalic;
+			cellFont.IsItalic = _style.HeaderCell.Italic;
 			cellFont.Underline = _style.HeaderCell.Underline ? FontUnderline.SINGLE.ByteValue : FontUnderline.NONE.ByteValue;
-			cellFont.Boldweight = _style.HeaderCell.BoldWeight;
+			cellFont.Boldweight = (short)_style.HeaderCell.BoldWeight;
 
+			HSSFPalette palette = _workbook.GetCustomPalette();
+			palette.SetColorAtIndex(HSSFColor.LIGHT_ORANGE.index, _style.HeaderCell.FontColor.Red, _style.HeaderCell.FontColor.Green, _style.HeaderCell.FontColor.Blue); // Redefine some arbitrary color so we could create our custom color
+			cellFont.Color = HSSFColor.LIGHT_ORANGE.index;
 
 			ICellStyle cellStyle = _workbook.CreateCellStyle();
 			cellStyle.SetFont(cellFont);
+
+			palette.SetColorAtIndex(HSSFColor.AQUA.index, _style.HeaderCell.BackgroundColor.Red, _style.HeaderCell.BackgroundColor.Green, _style.HeaderCell.BackgroundColor.Blue); // Redefine some arbitrary color so we could create our custom color
+			cellStyle.FillForegroundColor = HSSFColor.AQUA.index;
+			cellStyle.FillPattern = FillPatternType.SOLID_FOREGROUND;
+
+			cellStyle.VerticalAlignment = VerticalAlignment.CENTER;
 
 			int columnIndex = 0;
 			foreach (string cell in cells) {

@@ -17,19 +17,24 @@ namespace FormattedExcelExport.Example {
 			contact.RegisterColumnIf(true, "Название", x => x.Title);
 			contact.RegisterColumnIf(true, "Email", x => x.Email);
 
-			List<ClientExampleModel> models = InitializeModel();
+			List<ClientExampleModel> testModels = InitializeModels();
 
 			TableWriterStyle style = new TableWriterStyle();
-			MemoryStream ms = TableWriterComplex.Write(new ExcelTableWriterComplex(style), models, confBuilder.Value);
+			style.HeaderCell.Italic = true;
+			style.HeaderCell.Underline = true;
+			style.HeaderCell.FontColor = new StyleSettings.Color(255, 255, 255);
+			style.HeaderCell.BoldWeight = StyleSettings.FontBoldWeight.Bold;
 
-			using (FileStream file = new FileStream("test.xls", FileMode.Create, System.IO.FileAccess.Write)) {
+			MemoryStream ms = TableWriterComplex.Write(new ExcelTableWriterComplex(style), testModels, confBuilder.Value);
+
+			using (FileStream file = new FileStream("test.xls", FileMode.Create, FileAccess.Write)) {
 				byte[] bytes = new byte[ms.Length];
 				ms.Read(bytes, 0, (int)ms.Length);
 				file.Write(bytes, 0, bytes.Length);
 				ms.Close();
 			}
 		}
-		private static List<ClientExampleModel> InitializeModel() {
+		private static List<ClientExampleModel> InitializeModels() {
 			return new List<ClientExampleModel> {
 				new ClientExampleModel(
 					"Первая компания", 
@@ -43,7 +48,9 @@ namespace FormattedExcelExport.Example {
 					DateTime.Now, 
 					"+7 222 1124 44", 
 					new List<ClientExampleModel.Contact> {
-						new ClientExampleModel.Contact("Олег", "oleg@mail.ru")
+						new ClientExampleModel.Contact("Олег", "oleg@mail.ru"),
+						new ClientExampleModel.Contact("Анна", "anna@mail.ru"),
+						new ClientExampleModel.Contact("Николай", "nikolay@mail.ru")
 					})		
 			};
 		}

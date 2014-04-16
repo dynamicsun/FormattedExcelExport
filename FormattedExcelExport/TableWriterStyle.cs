@@ -9,21 +9,21 @@ namespace FormattedExcelExport {
 	public class StyleSettings {
 		public string FontName { get; set; }
 		public short FontHeightInPoints { get; set; }
-		public short BoldWeight { get; set; }
-		public bool IsItalic { get; set; }
+		public FontBoldWeight BoldWeight { get; set; }
+		public bool Italic { get; set; }
 		public bool Underline { get; set; }
 		public Color FontColor { get; set; }
 		public Color BackgroundColor { get; set; }
 		List<KeyValuePair<string, Color>> ColorsCollection { get; set; }
 
 		public StyleSettings() {
-			FontName = "Times New Roman";
-			FontHeightInPoints = 7;
-			BoldWeight = (short)FontBoldWeight.Normal;
-			IsItalic = false;
+			FontName = "Arial";
+			FontHeightInPoints = 10;
+			BoldWeight = FontBoldWeight.Normal;
+			Italic = false;
 			Underline = false;
-			FontColor = new Color(255, 255, 255);
-			BackgroundColor = new Color(0, 0, 0);
+			FontColor = new Color();
+			BackgroundColor = new Color(2, 101, 203);
 			ColorsCollection = new List<KeyValuePair<string, Color>> {
 				new KeyValuePair<string, Color>("LIGHT_ORANGE", new Color(255, 217, 102)),
 				new KeyValuePair<string, Color>("SEA_GREEN", new Color(198, 224, 180)),
@@ -33,10 +33,10 @@ namespace FormattedExcelExport {
 			};
 		}
 
-		public enum FontBoldWeight : short {
-			None = (short)0,
-			Normal = (short)400,
-			Bold = (short)700,
+		public enum FontBoldWeight {
+			None = 0,
+			Normal = 400,
+			Bold = 700,
 		}
 		public class Color {
 			public Color(byte red = 0, byte green = 0, byte blue = 0) {
@@ -58,6 +58,9 @@ namespace FormattedExcelExport {
 			HeaderHeight = 400;
 
 			HeaderCell = new StyleSettings();
+			RegularCell = new StyleSettings();
+			HeaderChildCell = new StyleSettings();
+			RegularChildCell = new StyleSettings();
 		}
 
 		public StyleSettings HeaderCell { get; set; }
@@ -91,8 +94,6 @@ namespace FormattedExcelExport {
 		private readonly List<short> _colors;
 		public TableWriterStyleDefault() {
 			_workbook = new HSSFWorkbook();
-
-			var xx = new TableWriterStyle();
 
 			IFont headerFont = _workbook.CreateFont();
 			headerFont.Color = HSSFColor.WHITE.index;
