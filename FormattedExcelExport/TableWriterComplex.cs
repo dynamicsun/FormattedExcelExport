@@ -27,6 +27,8 @@ namespace FormattedExcelExport {
 			foreach (TModel model in models) {
 				writer.WriteHeader(headerNamesList.ToArray());
 				var cells = new List<string>();
+
+				var xxx = new KeyValuePair<string, StyleSettings>();
 				foreach (Func<object, string> parentTableCellValueGetter in parentTableCellValueGetters) {
 					string cell = parentTableCellValueGetter(model);
 					cells.Add(cell);
@@ -99,7 +101,7 @@ namespace FormattedExcelExport {
 		private readonly HSSFWorkbook _workbook = new HSSFWorkbook();
 		private readonly ISheet _workSheet;
 		private readonly TableWriterStyle _style;
-		private bool _isFirstChildHeader = true;
+		private byte colorIndex;
 
 		public ExcelTableWriterComplex(TableWriterStyle style) {
 			_style = style;
@@ -108,26 +110,8 @@ namespace FormattedExcelExport {
 		public void WriteHeader(params string[] cells) {
 			IRow row = _workSheet.CreateRow(_rowIndex);
 			row.Height = _style.HeaderHeight;
-
-
-			IFont cellFont = _workbook.CreateFont();
-			cellFont.FontName = _style.HeaderCell.FontName;
-			cellFont.FontHeightInPoints = _style.HeaderCell.FontHeightInPoints;
-			cellFont.IsItalic = _style.HeaderCell.Italic;
-			cellFont.Underline = _style.HeaderCell.Underline ? FontUnderline.SINGLE.ByteValue : FontUnderline.NONE.ByteValue;
-			cellFont.Boldweight = (short)_style.HeaderCell.BoldWeight;
-
-			HSSFPalette palette = _workbook.GetCustomPalette();
-			palette.SetColorAtIndex(HSSFColor.LIGHT_ORANGE.index, _style.HeaderCell.FontColor.Red, _style.HeaderCell.FontColor.Green, _style.HeaderCell.FontColor.Blue); // Redefine some arbitrary color so we could create our custom color
-			cellFont.Color = HSSFColor.LIGHT_ORANGE.index;
-
-			ICellStyle cellStyle = _workbook.CreateCellStyle();
-			cellStyle.SetFont(cellFont);
-
-			palette.SetColorAtIndex(HSSFColor.AQUA.index, _style.HeaderCell.BackgroundColor.Red, _style.HeaderCell.BackgroundColor.Green, _style.HeaderCell.BackgroundColor.Blue); // Redefine some arbitrary color so we could create our custom color
-			cellStyle.FillForegroundColor = HSSFColor.AQUA.index;
-			cellStyle.FillPattern = FillPatternType.SOLID_FOREGROUND;
-
+			
+			ICellStyle cellStyle = ConvertToNpoiStyle(_style.HeaderCell);
 			cellStyle.VerticalAlignment = VerticalAlignment.CENTER;
 
 			int columnIndex = 0;
@@ -138,52 +122,82 @@ namespace FormattedExcelExport {
 				columnIndex++;
 			}
 			_rowIndex++;
-			_isFirstChildHeader = true;
+			colorIndex = 0;
 		}
 		public void WriteRow(bool prependDelimeter = false, params string[] cells) {
-			IRow newRow = _workSheet.CreateRow(_rowIndex);
+			IRow row = _workSheet.CreateRow(_rowIndex);
+			ICellStyle cellStyle = ConvertToNpoiStyle(_style.RegularCell);
+
 			int columnIndex = 0;
 			if (prependDelimeter) {
-				newRow.CreateCell(columnIndex).SetCellValue("");
+				ICell newCell = row.CreateCell(columnIndex);
+				newCell.SetCellValue("");
+				newCell.CellStyle = cellStyle;
+				
 				columnIndex++;
 			}
 			foreach (var cell in cells) {
-				newRow.CreateCell(columnIndex).SetCellValue(cell);
+				ICell newCell = row.CreateCell(columnIndex);
+				newCell.SetCellValue(cell);
+				newCell.CellStyle = cellStyle;
 				columnIndex++;
 			}
 			_rowIndex++;
 		}
 		public void WriteChildHeader(params string[] cells) {
-			IRow newRow = _workSheet.CreateRow(_rowIndex);
+			IRow row = _workSheet.CreateRow(_rowIndex);
 			int columnIndex = 0;
 			List<string> cellsList = cells.ToList();
 
-			if (cellsList.Any()) {
-				ICell cell = newRow.CreateCell(columnIndex);
-				cell.SetCellValue(cellsList.ElementAt(0));
+			ICellStyle cellStyle = ConvertToNpoiStyle(_style.HeaderChildCell);
 
-				if (_isFirstChildHeader) {
-//					cell.CellStyle = _style.ChildHeaderCellStylePremier;
-					_isFirstChildHeader = false;
-				}
-				else {
-//					cell.CellStyle = _style.ChildHeaderCellStyleNext;
-				}
+			if (colorIndex >= _style.ColorsCollection.Count)
+				colorIndex = 0;
 
-				cellsList.RemoveAt(0);
-				columnIndex++;
+			StyleSettings.Color color = _style.ColorsCollection.ElementAt(colorIndex);
+			if (color != null) {
+				HSSFPalette palette = _workbook.GetCustomPalette();
+				HSSFColor similarColor = palette.FindSimilarColor(color.Red, color.Green, color.Blue);
+				cellStyle.FillForegroundColor = similarColor.GetIndex();
+				cellStyle.FillPattern = FillPatternType.SOLID_FOREGROUND;
+				colorIndex++;
 			}
-
+			
 			foreach (string cell in cellsList) {
-				newRow.CreateCell(columnIndex).SetCellValue(cell);
+				ICell newCell = row.CreateCell(columnIndex);
+				newCell.SetCellValue(cell);
+				newCell.CellStyle = cellStyle;
 				columnIndex++;
 			}
 			_rowIndex++;
 		}
+		private ICellStyle ConvertToNpoiStyle(StyleSettings styleSettings) {
+			IFont cellFont = _workbook.CreateFont();
+
+			cellFont.FontName = styleSettings.FontName;
+			cellFont.FontHeightInPoints = styleSettings.FontHeightInPoints;
+			cellFont.IsItalic = styleSettings.Italic;
+			cellFont.Underline = styleSettings.Underline ? FontUnderline.SINGLE.ByteValue : FontUnderline.NONE.ByteValue;
+			cellFont.Boldweight = (short)styleSettings.BoldWeight;
+
+			HSSFPalette palette = _workbook.GetCustomPalette();
+			HSSFColor similarColor = palette.FindSimilarColor(styleSettings.FontColor.Red, styleSettings.FontColor.Green, styleSettings.FontColor.Blue);
+			cellFont.Color = similarColor.GetIndex();
+			
+			ICellStyle cellStyle = _workbook.CreateCellStyle();
+			cellStyle.SetFont(cellFont);
+
+			if (styleSettings.BackgroundColor != null) {
+				similarColor = palette.FindSimilarColor(styleSettings.BackgroundColor.Red, styleSettings.BackgroundColor.Green, styleSettings.BackgroundColor.Blue);
+				cellStyle.FillForegroundColor = similarColor.GetIndex();
+				cellStyle.FillPattern = FillPatternType.SOLID_FOREGROUND;
+			}
+			return cellStyle;
+		}
 		public void AutosizeColumns() { // Set columns width based on the contents width of their corresponding header cells
 			var columnLengths = new List<int>();
 
-			for (int columnNum = 0; columnNum < _workSheet.GetRow(0).LastCellNum; columnNum++) { // Looping through the each cell of the first row
+			for (int columnNum = 0; columnNum < _workSheet.GetRow(0).LastCellNum; columnNum++) {
 				int columnMaximumLength = 0;
 				for (int rowNum = 0; rowNum < _workSheet.LastRowNum; rowNum++) {
 					IRow currentRow = _workSheet.GetRow(rowNum);
@@ -211,5 +225,5 @@ namespace FormattedExcelExport {
 			return memoryStream;
 		}
 	}
-	
+
 }

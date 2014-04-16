@@ -14,7 +14,27 @@ namespace FormattedExcelExport {
 		public Func<object, IEnumerable<object>> Getter { get; set; }
 	}
 
+
+
 	public sealed class TableConfigurationBuilder<TModel> {
+		public class ConditionTheme {
+			private TableWriterStyle _style;
+			private Func<TModel, bool> _condition;
+			public ConditionTheme(TableWriterStyle style, Func<TModel, bool> condition) {
+				Style = style;
+				Condition = condition;
+			}
+			public Func<TModel, bool> Condition {
+				get { return _condition; }
+				set { _condition = value; }
+			}
+			public TableWriterStyle Style {
+				get { return _style; }
+				set { _style = value; }
+			}
+		}
+
+
 		public TableConfiguration Value { get; set; }
 		private readonly CultureInfo _culture;
 
@@ -38,7 +58,7 @@ namespace FormattedExcelExport {
 			});
 		}
 
-		public void RegisterColumnIf(bool expression, string header, Func<TModel, string> getter) {
+		public void RegisterColumnIf(bool expression, string header, Func<TModel, string> getter, ConditionTheme conditionTheme = null) {
 			if (!expression)
 				return;
 

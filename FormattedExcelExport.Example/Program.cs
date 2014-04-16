@@ -8,25 +8,37 @@ namespace FormattedExcelExport.Example {
 	class Program {
 		static void Main(string[] args) {
 			var confBuilder = new TableConfigurationBuilder<ClientExampleModel>("Клиент", new CultureInfo("ru-RU"));
+			TableWriterStyle condStyle = new TableWriterStyle();
 
-			confBuilder.RegisterColumnIf(true, "Название", x => x.Title);
+			confBuilder.RegisterColumnIf(true, "Название", x => x.Title, new TableConfigurationBuilder<ClientExampleModel>.ConditionTheme(condStyle, x => x.Title == "Вторая компания"));
 			confBuilder.RegisterColumnIf(true, "Дата регистрации", x => x.RegistrationDate);
 			confBuilder.RegisterColumnIf(true, "Телефон", x => x.Phone);
+			confBuilder.RegisterColumnIf(true, "ИНН", x => x.Inn);
+			confBuilder.RegisterColumnIf(true, "Окато", x => x.Okato);
 
 			var contact = confBuilder.RegisterChild("Контакт", x => x.Contacts);
 			contact.RegisterColumnIf(true, "Название", x => x.Title);
 			contact.RegisterColumnIf(true, "Email", x => x.Email);
 
+			var contract = confBuilder.RegisterChild("Контракт", x => x.Contracts);
+			contract.RegisterColumnIf(true, "Дата начала", x => x.BeginDate);
+			contract.RegisterColumnIf(true, "Дата окончания", x => x.EndDate);
+			contract.RegisterColumnIf(true, "Статус", x => x.Status);
+
+			var product = confBuilder.RegisterChild("Продукт", x => x.Products);
+			product.RegisterColumnIf(true, "Наименование", x => x.Title);
+			product.RegisterColumnIf(true, "Количество", x => x.Amount);
+
 			List<ClientExampleModel> testModels = InitializeModels();
 
 			TableWriterStyle style = new TableWriterStyle();
-			style.HeaderCell.Italic = true;
-			style.HeaderCell.Underline = true;
-			style.HeaderCell.FontColor = new StyleSettings.Color(255, 255, 255);
-			style.HeaderCell.BoldWeight = StyleSettings.FontBoldWeight.Bold;
+//			style.HeaderCell.Italic = true;
 
 			MemoryStream ms = TableWriterComplex.Write(new ExcelTableWriterComplex(style), testModels, confBuilder.Value);
+			WriteToFile(ms);
+		}
 
+		private static void WriteToFile(MemoryStream ms) {
 			using (FileStream file = new FileStream("test.xls", FileMode.Create, FileAccess.Write)) {
 				byte[] bytes = new byte[ms.Length];
 				ms.Read(bytes, 0, (int)ms.Length);
@@ -40,18 +52,36 @@ namespace FormattedExcelExport.Example {
 					"Первая компания", 
 					DateTime.Now, 
 					"+7 333 4442 00", 
+					"9040043234562",
+					"OPEEHBSSDD",
 					new List<ClientExampleModel.Contact> {
+						new ClientExampleModel.Contact("Ольга", "olga@mail.ru"),
 						new ClientExampleModel.Contact("Иван", "ivan@mail.ru")
+					},
+					new List<ClientExampleModel.Contract> {
+						new ClientExampleModel.Contract(new DateTime(1999, 1, 7), new DateTime(2009, 11, 9), false),
+						new ClientExampleModel.Contract(new DateTime(1989, 2, 4), DateTime.Now, true)
+					},
+					new List<ClientExampleModel.Product> {
+						new ClientExampleModel.Product("Картофель", 20),
+						new ClientExampleModel.Product("Лук", 100)
 					}),
 				new ClientExampleModel(
 					"Вторая компания", 
 					DateTime.Now, 
 					"+7 222 1124 44", 
+					"9040043234562",
+					"JsKSLPKKHSS",
 					new List<ClientExampleModel.Contact> {
 						new ClientExampleModel.Contact("Олег", "oleg@mail.ru"),
-						new ClientExampleModel.Contact("Анна", "anna@mail.ru"),
+						new ClientExampleModel.Contact("Анна", ""),
 						new ClientExampleModel.Contact("Николай", "nikolay@mail.ru")
-					})		
+					},
+					new List<ClientExampleModel.Contract> {
+						new ClientExampleModel.Contract(new DateTime(1999, 1, 7), new DateTime(2007, 3, 22), true),
+						new ClientExampleModel.Contract(new DateTime(1989, 2, 4), new DateTime(2012, 11, 20), false)
+					},
+					new List<ClientExampleModel.Product> ())		
 			};
 		}
 
@@ -59,16 +89,27 @@ namespace FormattedExcelExport.Example {
 			private readonly string _title;
 			private readonly DateTime _registrationDate;
 			private readonly string _phone;
+			private readonly string _inn;
+			private readonly string _okato;
 			private readonly List<Contact> _contacts;
-			public ClientExampleModel(string title, DateTime registrationDate, string phone, List<Contact> contacts) {
+			private readonly List<Contract> _contracts;
+			private readonly List<Product> _products;
+			public ClientExampleModel(string title, DateTime registrationDate, string phone, string inn, string okato, List<Contact> contacts, List<Contract> contracts, List<Product> products) {
 				_title = title;
 				_registrationDate = registrationDate;
 				_phone = phone;
+				_inn = inn;
+				_okato = okato;
 				_contacts = contacts;
+				_contracts = contracts;
+				_products = products;
 			}
 
 			public List<Contact> Contacts {
 				get { return _contacts; }
+			}
+			public List<Contract> Contracts {
+				get { return _contracts; }
 			}
 			public string Title {
 				get { return _title; }
@@ -79,6 +120,15 @@ namespace FormattedExcelExport.Example {
 
 			public string Phone {
 				get { return _phone; }
+			}
+			public string Okato {
+				get { return _okato; }
+			}
+			public string Inn {
+				get { return _inn; }
+			}
+			public List<Product> Products {
+				get { return _products; }
 			}
 			public sealed class Contact {
 				private readonly string _title;
@@ -92,6 +142,39 @@ namespace FormattedExcelExport.Example {
 				}
 				public string Email {
 					get { return _email; }
+				}
+			}
+			public sealed class Contract {
+				private readonly DateTime _beginDate;
+				private readonly DateTime _endDate;
+				private readonly bool _status;
+				public Contract(DateTime beginDate, DateTime endDate, bool status) {
+					_beginDate = beginDate;
+					_endDate = endDate;
+					_status = status;
+				}
+				public DateTime BeginDate {
+					get { return _beginDate; }
+				}
+				public DateTime EndDate {
+					get { return _endDate; }
+				}
+				public bool Status {
+					get { return _status; }
+				}
+			}
+			public sealed class Product {
+				private readonly string _title;
+				private readonly int _amount;
+				public Product(string title, int amount) {
+					_title = title;
+					_amount = amount;
+				}
+				public string Title {
+					get { return _title; }
+				}
+				public int Amount {
+					get { return _amount; }
 				}
 			}
 		}

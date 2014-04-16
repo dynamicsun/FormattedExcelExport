@@ -23,14 +23,6 @@ namespace FormattedExcelExport {
 			Italic = false;
 			Underline = false;
 			FontColor = new Color();
-			BackgroundColor = new Color(2, 101, 203);
-			ColorsCollection = new List<KeyValuePair<string, Color>> {
-				new KeyValuePair<string, Color>("LIGHT_ORANGE", new Color(255, 217, 102)),
-				new KeyValuePair<string, Color>("SEA_GREEN", new Color(198, 224, 180)),
-				new KeyValuePair<string, Color>("VIOLET", new Color(136, 139, 252)),
-				new KeyValuePair<string, Color>("BROWN", new Color(255, 124, 59)),
-				new KeyValuePair<string, Color>("GREY_40_PERCENT", new Color(174, 170, 170))
-			};
 		}
 
 		public enum FontBoldWeight {
@@ -57,12 +49,27 @@ namespace FormattedExcelExport {
 			MaxColumnWidth = 25500;
 			HeaderHeight = 400;
 
-			HeaderCell = new StyleSettings();
-			RegularCell = new StyleSettings();
+			HeaderCell = new StyleSettings {
+				BoldWeight = StyleSettings.FontBoldWeight.Bold,
+				FontColor = new StyleSettings.Color(255, 255, 255),
+				BackgroundColor = new StyleSettings.Color(2, 101, 203)
+			};
+
+			RegularCell = new StyleSettings {
+				FontColor = new StyleSettings.Color()
+			};
 			HeaderChildCell = new StyleSettings();
 			RegularChildCell = new StyleSettings();
-		}
 
+			ColorsCollection = new List<StyleSettings.Color> {
+				new StyleSettings.Color(255, 217, 102),
+				new StyleSettings.Color(198, 224, 180),
+				new StyleSettings.Color(136, 139, 252),
+				new StyleSettings.Color(255, 124, 59),
+				new StyleSettings.Color(174, 170, 170),
+			};
+		}
+		public List<StyleSettings.Color> ColorsCollection { get; set; }
 		public StyleSettings HeaderCell { get; set; }
 		public StyleSettings RegularCell { get; set; }
 		public StyleSettings HeaderChildCell { get; set; }

@@ -172,7 +172,6 @@ namespace FormattedExcelExport {
 				columnLengths.Add(columnMaximumLength);
 			}
 
-
 			for (int i = 0; i < _workSheet.GetRow(0).LastCellNum; i++) {
 				int width = columnLengths.ElementAt(i) * _style.FontFactor + _style.FontAbsoluteTerm;
 				_workSheet.SetColumnWidth(i, width < _style.MaxColumnWidth ? width : _style.MaxColumnWidth);
