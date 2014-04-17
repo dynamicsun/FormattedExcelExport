@@ -48,17 +48,23 @@ namespace FormattedExcelExport {
 		}
 
 		public void RegisterColumn(string header, Func<TModel, string> getter, ConditionTheme conditionTheme = null) {
-			if (conditionTheme == null)
-				conditionTheme = new ConditionTheme(null, x => false);
-
-			Value.ColumnsMap.Add(header, new AggregatedContainer(x => getter((TModel)x), y => conditionTheme.Condition((TModel)y), conditionTheme.Style));
+			RegisterColumnIf(true, header, getter, conditionTheme);
 		}
 
-		public void RegisterColumn(string header, Func<TModel, decimal?> getter) {
-			RegisterColumn(header, x => {
-				decimal? value = getter(x);
-				return value.HasValue ? string.Format(_culture, "{0:C}", value.Value) : string.Empty;
-			});
+		public void RegisterColumn(string header, Func<TModel, int?> getter, ConditionTheme conditionTheme = null) {
+			RegisterColumnIf(true, header, getter, conditionTheme);
+		}
+
+		public void RegisterColumn(string header, Func<TModel, decimal?> getter, ConditionTheme conditionTheme = null) {
+			RegisterColumnIf(true, header, getter, conditionTheme);
+		}
+
+		public void RegisterColumn(string header, Func<TModel, DateTime?> getter, ConditionTheme conditionTheme = null) {
+			RegisterColumnIf(true, header, getter, conditionTheme);
+		}
+
+		public void RegisterColumn(string header, Func<TModel, bool?> getter, ConditionTheme conditionTheme = null) {
+			RegisterColumnIf(true, header, getter, conditionTheme);
 		}
 
 		public void RegisterColumnIf(bool expression, string header, Func<TModel, string> getter, ConditionTheme conditionTheme = null) {
@@ -71,34 +77,34 @@ namespace FormattedExcelExport {
 			Value.ColumnsMap.Add(header, new AggregatedContainer(x => getter((TModel)x), y => conditionTheme.Condition((TModel)y), conditionTheme.Style));
 		}
 
-		public void RegisterColumnIf(bool expression, string header, Func<TModel, int?> getter) {
-			RegisterColumnIf(expression, header, x => getter(x).ToString());
+		public void RegisterColumnIf(bool expression, string header, Func<TModel, int?> getter, ConditionTheme conditionTheme = null) {
+			RegisterColumnIf(expression, header, x => getter(x).ToString(), conditionTheme);
 		}
 
-		public void RegisterColumnIf(bool expression, string header, Func<TModel, decimal?> getter) {
+		public void RegisterColumnIf(bool expression, string header, Func<TModel, decimal?> getter, ConditionTheme conditionTheme = null) {
 			RegisterColumnIf(expression, header, x => {
 				decimal? value = getter(x);
 
 				return value.HasValue ? string.Format(_culture, "{0:C}", value.Value) : string.Empty;
-			});
+			}, conditionTheme);
 		}
 
-		public void RegisterColumnIf(bool expression, string header, Func<TModel, DateTime?> getter) {
+		public void RegisterColumnIf(bool expression, string header, Func<TModel, DateTime?> getter, ConditionTheme conditionTheme = null) {
 			RegisterColumnIf(expression, header, x => {
 				DateTime? value = getter(x);
 
 				return value.HasValue ? value.Value.ToString(_culture.DateTimeFormat.LongDatePattern, _culture) : string.Empty;
-			});
+			}, conditionTheme);
 		}
 
-		public void RegisterColumnIf(bool expression, string header, Func<TModel, bool?> getter) {
+		public void RegisterColumnIf(bool expression, string header, Func<TModel, bool?> getter, ConditionTheme conditionTheme = null) {
 			RegisterColumnIf(expression, header, x => {
 				bool? value = getter(x);
 				if (!value.HasValue)
 					return string.Empty;
 
 				return value.Value ? "Да" : "Нет";
-			});
+			}, conditionTheme);
 		}
 
 		public TableConfigurationBuilder<TChildModel> RegisterChild<TChildModel>(string title, Func<TModel, IEnumerable<TChildModel>> getter) {

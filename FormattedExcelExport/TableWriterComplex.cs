@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -259,7 +258,7 @@ namespace FormattedExcelExport {
 
 			for (int columnNum = 0; columnNum < _workSheet.GetRow(0).LastCellNum; columnNum++) {
 				int columnMaximumLength = 0;
-				for (int rowNum = 0; rowNum < _workSheet.LastRowNum; rowNum++) {
+				for (int rowNum = 0; rowNum <= _workSheet.LastRowNum; rowNum++) {
 					IRow currentRow = _workSheet.GetRow(rowNum);
 
 					if (!currentRow.Cells.Any()) continue;

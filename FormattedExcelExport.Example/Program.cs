@@ -15,33 +15,39 @@ namespace FormattedExcelExport.Example {
 			TableWriterStyle condStyle3 = new TableWriterStyle();
 			condStyle3.RegularChildCell.BackgroundColor = new StyleSettings.Color(0, 0, 255);
 
-			confBuilder.RegisterColumnIf(true, "Название", x => x.Title, new TableConfigurationBuilder<ClientExampleModel>.ConditionTheme(condStyle, x => x.Title == "Вторая компания"));
-			confBuilder.RegisterColumnIf(true, "Дата регистрации", x => x.RegistrationDate);
-			confBuilder.RegisterColumnIf(true, "Телефон", x => x.Phone, new TableConfigurationBuilder<ClientExampleModel>.ConditionTheme(condStyle2, x => x.Okato == "OPEEHBSSDD"));
-			confBuilder.RegisterColumnIf(true, "ИНН", x => x.Inn);
-			confBuilder.RegisterColumnIf(true, "Окато", x => x.Okato);
+			confBuilder.RegisterColumn("Название", x => x.Title, new TableConfigurationBuilder<ClientExampleModel>.ConditionTheme(condStyle, x => x.Title == "Вторая компания"));
+			confBuilder.RegisterColumn("Дата регистрации", x => x.RegistrationDate);
+			confBuilder.RegisterColumn("Телефон", x => x.Phone, new TableConfigurationBuilder<ClientExampleModel>.ConditionTheme(condStyle2, x => x.Okato == "OPEEHBSSDD"));
+			confBuilder.RegisterColumn("ИНН", x => x.Inn);
+			confBuilder.RegisterColumn("Окато", x => x.Okato);
 
 			var contact = confBuilder.RegisterChild("Контакт", x => x.Contacts);
-			contact.RegisterColumnIf(true, "Название", x => x.Title, new TableConfigurationBuilder<ClientExampleModel.Contact>.ConditionTheme(condStyle3, x => x.Title.StartsWith("О")));
-			contact.RegisterColumnIf(true, "Email", x => x.Email);
+			contact.RegisterColumn("Название", x => x.Title, new TableConfigurationBuilder<ClientExampleModel.Contact>.ConditionTheme(condStyle3, x => x.Title.StartsWith("О")));
+			contact.RegisterColumn("Email", x => x.Email);
 
 			var contract = confBuilder.RegisterChild("Контракт", x => x.Contracts);
-			contract.RegisterColumnIf(true, "Дата начала", x => x.BeginDate);
-			contract.RegisterColumnIf(true, "Дата окончания", x => x.EndDate);
-			contract.RegisterColumnIf(true, "Статус", x => x.Status);
+			contract.RegisterColumn("Дата начала", x => x.BeginDate);
+			contract.RegisterColumn("Дата окончания", x => x.EndDate);
+			contract.RegisterColumn("Статус", x => x.Status, new TableConfigurationBuilder<ClientExampleModel.Contract>.ConditionTheme(new TableWriterStyle(), x => true));
 
 			var product = confBuilder.RegisterChild("Продукт", x => x.Products);
-			product.RegisterColumnIf(true, "Наименование", x => x.Title);
-			product.RegisterColumnIf(true, "Количество", x => x.Amount);
+			product.RegisterColumn("Наименование", x => x.Title);
+			product.RegisterColumn("Количество", x => x.Amount);
 
-			List<ClientExampleModel> testModels = InitializeModels();
+			List<ClientExampleModel> models = InitializeModels();
 
-			MemoryStream ms = TableWriterComplex.Write(new CsvTableWriterComplex(), testModels, confBuilder.Value);
-			WriteToFile(ms, "test.txt");
+			MemoryStream ms = TableWriterComplex.Write(new CsvTableWriterComplex(), models, confBuilder.Value);
+			WriteToFile(ms, "TestComplex.txt");
 
 			TableWriterStyle style = new TableWriterStyle();
-			ms = TableWriterComplex.Write(new ExcelTableWriterComplex(style), testModels, confBuilder.Value);
-			WriteToFile(ms, "test.xls");
+			ms = TableWriterComplex.Write(new ExcelTableWriterComplex(style), models, confBuilder.Value);
+			WriteToFile(ms, "TestComplex.xls");
+
+			ms = TableWriterSimple.Write(new CsvTableWriterSimple(), models, confBuilder.Value);
+			WriteToFile(ms, "TestSimple.txt");
+
+			ms = TableWriterSimple.Write(new ExcelTableWriterSimple(style), models, confBuilder.Value);
+			WriteToFile(ms, "TestSimple.xls");
 		}
 
 		private static void WriteToFile(MemoryStream ms, string fileName) {
