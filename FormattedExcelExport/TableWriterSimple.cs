@@ -15,78 +15,78 @@ namespace FormattedExcelExport {
 		MemoryStream GetStream();
 	}
 
-	public static class TableWriterSimple {
-		public static MemoryStream Write<TModel>(ITableWriterSimple writer, IEnumerable<TModel> models, TableConfiguration parentTableConfiguration, bool appendNumsToChildColumns = true) {
-			List<string> headerNamesList = parentTableConfiguration.ColumnsMap.Keys.ToList();
-			Func<object, string>[] parentTableCellValueGetters = parentTableConfiguration.ColumnsMap.Values.ToArray();
-			ChildTableConfiguration childTableConfiguration = parentTableConfiguration.ChildrenMap.FirstOrDefault();
-
-			if (childTableConfiguration == null) {
-				writer.WriteHeader(headerNamesList.ToArray());
-
-				foreach (TModel model in models) {
-					var cells = new List<string>();
-
-					foreach (Func<object, string> parentTableCellValueGetter in parentTableCellValueGetters) {
-						string cell = parentTableCellValueGetter(model);
-						cells.Add(cell);
-					}
-					writer.WriteRow(cells.ToArray());
-					writer.WriteRow();
-				}
-			}
-			else {
-				Dictionary<string, Func<object, string>> childTableColumnsMap = childTableConfiguration.ColumnsMap;
-				var childColumnNames = new List<string>();
-
-				foreach (KeyValuePair<string, Func<object, string>> keyValuePair in childTableColumnsMap) {
-					childColumnNames.Add(keyValuePair.Key);
-				}
-
-				Func<object, IEnumerable<object>> childTableCellValueGetters = childTableConfiguration.Getter;
-
-				int maximumNestedChildrenCount = 0;
-				foreach (TModel model in models) {
-					IEnumerable<object> nestedChildren = childTableCellValueGetters(model);
-					maximumNestedChildrenCount = maximumNestedChildrenCount > nestedChildren.Count() ? maximumNestedChildrenCount : nestedChildren.Count();
-				}
-
-				for (int i = 1; i <= maximumNestedChildrenCount; i++) {
-					foreach (string childColumnName in childColumnNames) {
-						if (appendNumsToChildColumns) {
-							headerNamesList.Add(childColumnName + i);
-						}
-						else {
-							headerNamesList.Add(childColumnName);
-						}
-					}
-				}
-
-				writer.WriteHeader(headerNamesList.ToArray());
-
-				foreach (TModel model in models) {
-					var cells = new List<string>();
-
-					foreach (Func<object, string> keyValuePair in parentTableCellValueGetters) {
-						string cell = keyValuePair(model);
-						cells.Add(cell);
-					}
-
-					IEnumerable<object> childObjects = childTableCellValueGetters(model);
-					foreach (object childObject in childObjects) {
-						foreach (KeyValuePair<string, Func<object, string>> keyValuePair in childTableColumnsMap) {
-							cells.Add(keyValuePair.Value(childObject));
-						}
-					}
-					writer.WriteRow(cells.ToArray());
-					writer.WriteRow();
-				}
-			}
-
-			writer.AutosizeColumns();
-			return writer.GetStream();
-		}
-	}
+//	public static class TableWriterSimple {
+//		public static MemoryStream Write<TModel>(ITableWriterSimple writer, IEnumerable<TModel> models, TableConfiguration parentTableConfiguration, bool appendNumsToChildColumns = true) {
+//			List<string> headerNamesList = parentTableConfiguration.ColumnsMap.Keys.ToList();
+//			Func<object, string>[] parentTableCellValueGetters = parentTableConfiguration.ColumnsMap.Values.ToArray();
+//			ChildTableConfiguration childTableConfiguration = parentTableConfiguration.ChildrenMap.FirstOrDefault();
+//
+//			if (childTableConfiguration == null) {
+//				writer.WriteHeader(headerNamesList.ToArray());
+//
+//				foreach (TModel model in models) {
+//					var cells = new List<string>();
+//
+//					foreach (Func<object, string> parentTableCellValueGetter in parentTableCellValueGetters) {
+//						string cell = parentTableCellValueGetter(model);
+//						cells.Add(cell);
+//					}
+//					writer.WriteRow(cells.ToArray());
+//					writer.WriteRow();
+//				}
+//			}
+//			else {
+//				Dictionary<string, Func<object, string>> childTableColumnsMap = childTableConfiguration.ColumnsMap;
+//				var childColumnNames = new List<string>();
+//
+//				foreach (KeyValuePair<string, Func<object, string>> keyValuePair in childTableColumnsMap) {
+//					childColumnNames.Add(keyValuePair.Key);
+//				}
+//
+//				Func<object, IEnumerable<object>> childTableCellValueGetters = childTableConfiguration.Getter;
+//
+//				int maximumNestedChildrenCount = 0;
+//				foreach (TModel model in models) {
+//					IEnumerable<object> nestedChildren = childTableCellValueGetters(model);
+//					maximumNestedChildrenCount = maximumNestedChildrenCount > nestedChildren.Count() ? maximumNestedChildrenCount : nestedChildren.Count();
+//				}
+//
+//				for (int i = 1; i <= maximumNestedChildrenCount; i++) {
+//					foreach (string childColumnName in childColumnNames) {
+//						if (appendNumsToChildColumns) {
+//							headerNamesList.Add(childColumnName + i);
+//						}
+//						else {
+//							headerNamesList.Add(childColumnName);
+//						}
+//					}
+//				}
+//
+//				writer.WriteHeader(headerNamesList.ToArray());
+//
+//				foreach (TModel model in models) {
+//					var cells = new List<string>();
+//
+//					foreach (Func<object, string> keyValuePair in parentTableCellValueGetters) {
+//						string cell = keyValuePair(model);
+//						cells.Add(cell);
+//					}
+//
+//					IEnumerable<object> childObjects = childTableCellValueGetters(model);
+//					foreach (object childObject in childObjects) {
+//						foreach (KeyValuePair<string, Func<object, string>> keyValuePair in childTableColumnsMap) {
+//							cells.Add(keyValuePair.Value(childObject));
+//						}
+//					}
+//					writer.WriteRow(cells.ToArray());
+//					writer.WriteRow();
+//				}
+//			}
+//
+//			writer.AutosizeColumns();
+//			return writer.GetStream();
+//		}
+//	}
 	public sealed class CsvTableWriterSimple : ITableWriterSimple {
 		private readonly StringBuilder _stringBuilder = new StringBuilder();
 		private readonly string _delimeter;
@@ -171,6 +171,7 @@ namespace FormattedExcelExport {
 				}
 				columnLengths.Add(columnMaximumLength);
 			}
+
 
 			for (int i = 0; i < _workSheet.GetRow(0).LastCellNum; i++) {
 				int width = columnLengths.ElementAt(i) * _style.FontFactor + _style.FontAbsoluteTerm;

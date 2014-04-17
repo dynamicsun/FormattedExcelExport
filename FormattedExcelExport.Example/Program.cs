@@ -9,15 +9,20 @@ namespace FormattedExcelExport.Example {
 		static void Main(string[] args) {
 			var confBuilder = new TableConfigurationBuilder<ClientExampleModel>("Клиент", new CultureInfo("ru-RU"));
 			TableWriterStyle condStyle = new TableWriterStyle();
+			condStyle.RegularCell.BackgroundColor = new StyleSettings.Color(255, 0, 0);
+			TableWriterStyle condStyle2 = new TableWriterStyle();
+			condStyle2.RegularCell.BackgroundColor = new StyleSettings.Color(0, 255, 0);
+			TableWriterStyle condStyle3 = new TableWriterStyle();
+			condStyle3.RegularChildCell.BackgroundColor = new StyleSettings.Color(0, 0, 255);
 
 			confBuilder.RegisterColumnIf(true, "Название", x => x.Title, new TableConfigurationBuilder<ClientExampleModel>.ConditionTheme(condStyle, x => x.Title == "Вторая компания"));
 			confBuilder.RegisterColumnIf(true, "Дата регистрации", x => x.RegistrationDate);
-			confBuilder.RegisterColumnIf(true, "Телефон", x => x.Phone);
+			confBuilder.RegisterColumnIf(true, "Телефон", x => x.Phone, new TableConfigurationBuilder<ClientExampleModel>.ConditionTheme(condStyle2, x => x.Okato == "OPEEHBSSDD"));
 			confBuilder.RegisterColumnIf(true, "ИНН", x => x.Inn);
 			confBuilder.RegisterColumnIf(true, "Окато", x => x.Okato);
 
 			var contact = confBuilder.RegisterChild("Контакт", x => x.Contacts);
-			contact.RegisterColumnIf(true, "Название", x => x.Title);
+			contact.RegisterColumnIf(true, "Название", x => x.Title, new TableConfigurationBuilder<ClientExampleModel.Contact>.ConditionTheme(condStyle3, x => x.Title.StartsWith("О")));
 			contact.RegisterColumnIf(true, "Email", x => x.Email);
 
 			var contract = confBuilder.RegisterChild("Контракт", x => x.Contracts);
@@ -31,15 +36,16 @@ namespace FormattedExcelExport.Example {
 
 			List<ClientExampleModel> testModels = InitializeModels();
 
-			TableWriterStyle style = new TableWriterStyle();
-//			style.HeaderCell.Italic = true;
+			MemoryStream ms = TableWriterComplex.Write(new CsvTableWriterComplex(), testModels, confBuilder.Value);
+			WriteToFile(ms, "test.txt");
 
-			MemoryStream ms = TableWriterComplex.Write(new ExcelTableWriterComplex(style), testModels, confBuilder.Value);
-			WriteToFile(ms);
+			TableWriterStyle style = new TableWriterStyle();
+			ms = TableWriterComplex.Write(new ExcelTableWriterComplex(style), testModels, confBuilder.Value);
+			WriteToFile(ms, "test.xls");
 		}
 
-		private static void WriteToFile(MemoryStream ms) {
-			using (FileStream file = new FileStream("test.xls", FileMode.Create, FileAccess.Write)) {
+		private static void WriteToFile(MemoryStream ms, string fileName) {
+			using (FileStream file = new FileStream(fileName, FileMode.Create, FileAccess.Write)) {
 				byte[] bytes = new byte[ms.Length];
 				ms.Read(bytes, 0, (int)ms.Length);
 				file.Write(bytes, 0, bytes.Length);

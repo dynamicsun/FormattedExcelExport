@@ -6,7 +6,7 @@ using System.Linq;
 namespace FormattedExcelExport {
 	public class TableConfiguration {
 		public string Title { get; set; }
-		public readonly Dictionary<string, Func<object, string>> ColumnsMap = new Dictionary<string, Func<object, string>>();
+		public readonly Dictionary<string, AggregatedContainer> ColumnsMap = new Dictionary<string, AggregatedContainer>();
 		public readonly List<ChildTableConfiguration> ChildrenMap = new List<ChildTableConfiguration>();
 	}
 
@@ -14,26 +14,26 @@ namespace FormattedExcelExport {
 		public Func<object, IEnumerable<object>> Getter { get; set; }
 	}
 
-
+	public class AggregatedContainer {
+		public AggregatedContainer(Func<object, string> valueFunc, Func<object, bool> conditionFunc, TableWriterStyle style) {
+			ValueFunc = valueFunc;
+			ConditionFunc = conditionFunc;
+			Style = style;
+		}
+		public Func<object, string> ValueFunc { get; set; }
+		public TableWriterStyle Style { get; set; }
+		public Func<object, bool> ConditionFunc { get; set; }
+	}
 
 	public sealed class TableConfigurationBuilder<TModel> {
 		public class ConditionTheme {
-			private TableWriterStyle _style;
-			private Func<TModel, bool> _condition;
 			public ConditionTheme(TableWriterStyle style, Func<TModel, bool> condition) {
 				Style = style;
 				Condition = condition;
 			}
-			public Func<TModel, bool> Condition {
-				get { return _condition; }
-				set { _condition = value; }
-			}
-			public TableWriterStyle Style {
-				get { return _style; }
-				set { _style = value; }
-			}
+			public Func<TModel, bool> Condition { get; set; }
+			public TableWriterStyle Style { get; set; }
 		}
-
 
 		public TableConfiguration Value { get; set; }
 		private readonly CultureInfo _culture;
@@ -47,8 +47,11 @@ namespace FormattedExcelExport {
 			_culture = culture;
 		}
 
-		public void RegisterColumn(string header, Func<TModel, string> getter) {
-			Value.ColumnsMap.Add(header, x => getter((TModel)x));
+		public void RegisterColumn(string header, Func<TModel, string> getter, ConditionTheme conditionTheme = null) {
+			if (conditionTheme == null)
+				conditionTheme = new ConditionTheme(null, x => false);
+
+			Value.ColumnsMap.Add(header, new AggregatedContainer(x => getter((TModel)x), y => conditionTheme.Condition((TModel)y), conditionTheme.Style));
 		}
 
 		public void RegisterColumn(string header, Func<TModel, decimal?> getter) {
@@ -62,7 +65,10 @@ namespace FormattedExcelExport {
 			if (!expression)
 				return;
 
-			Value.ColumnsMap.Add(header, x => getter((TModel)x));
+			if(conditionTheme == null)
+				conditionTheme = new ConditionTheme(null, x => false);
+
+			Value.ColumnsMap.Add(header, new AggregatedContainer(x => getter((TModel)x), y => conditionTheme.Condition((TModel)y), conditionTheme.Style));
 		}
 
 		public void RegisterColumnIf(bool expression, string header, Func<TModel, int?> getter) {
