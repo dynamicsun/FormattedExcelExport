@@ -9,11 +9,11 @@ namespace FormattedExcelExport.Example {
 		static void Main(string[] args) {
 			var confBuilder = new TableConfigurationBuilder<ClientExampleModel>("Клиент", new CultureInfo("ru-RU"));
 			TableWriterStyle condStyle = new TableWriterStyle();
-			condStyle.RegularCell.BackgroundColor = new StyleSettings.Color(255, 0, 0);
+			condStyle.RegularCell.BackgroundColor = new AdHocCellStyle.Color(255, 0, 0);
 			TableWriterStyle condStyle2 = new TableWriterStyle();
-			condStyle2.RegularCell.BackgroundColor = new StyleSettings.Color(0, 255, 0);
+			condStyle2.RegularCell.BackgroundColor = new AdHocCellStyle.Color(0, 255, 0);
 			TableWriterStyle condStyle3 = new TableWriterStyle();
-			condStyle3.RegularChildCell.BackgroundColor = new StyleSettings.Color(0, 0, 255);
+			condStyle3.RegularChildCell.BackgroundColor = new AdHocCellStyle.Color(0, 0, 255);
 
 			confBuilder.RegisterColumn("Название", x => x.Title, new TableConfigurationBuilder<ClientExampleModel>.ConditionTheme(condStyle, x => x.Title == "Вторая компания"));
 			confBuilder.RegisterColumn("Дата регистрации", x => x.RegistrationDate);

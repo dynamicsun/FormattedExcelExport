@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using NPOI.HSSF.UserModel;
-using NPOI.HSSF.Util;
 using NPOI.SS.UserModel;
 
 
 namespace FormattedExcelExport {
 	public interface ITableWriterSimple {
-		void WriteHeader(params string[] cells);
+		void WriteHeader(List<string> cells);
 		void WriteRow(List<KeyValuePair<string, TableWriterStyle>> cells);
 		void AutosizeColumns();
 		MemoryStream GetStream();
@@ -53,7 +50,7 @@ namespace FormattedExcelExport {
 			}
 
 			parentNamesList.AddRange(childNamesList);
-			writer.WriteHeader(parentNamesList.ToArray());
+			writer.WriteHeader(parentNamesList.ToList());
 
 			foreach (TModel model in models) {
 				var cellsWithStyle = new List<KeyValuePair<string, TableWriterStyle>>();
@@ -105,9 +102,10 @@ namespace FormattedExcelExport {
 			_delimeter = delimeter;
 		}
 
-		public void WriteHeader(params string[] cells) {
-			WriteRow(cells);
+		public void WriteHeader(List<string> cells) {
+			WriteRow(cells.ConvertAll(x => new KeyValuePair<string, TableWriterStyle>(x, null)));
 		}
+
 		public void WriteRow(List<KeyValuePair<string, TableWriterStyle>> cells) {
 			int cellsCount = cells.Count() - 1;
 			int i = 0;
@@ -121,18 +119,7 @@ namespace FormattedExcelExport {
 			}
 			_stringBuilder.AppendLine();
 		}
-		public void WriteRow(params string[] cells) {
-			int cellsCount = cells.Length - 1;
-			int i = 0;
-			foreach (string cell in cells) {
-				_stringBuilder.Append(cell);
 
-				if (i < cellsCount)
-					_stringBuilder.Append(_delimeter);
-				i++;
-			}
-			_stringBuilder.AppendLine();
-		}
 		public void AutosizeColumns() { }
 		public MemoryStream GetStream() {
 			MemoryStream memoryStream = new MemoryStream();
@@ -143,22 +130,15 @@ namespace FormattedExcelExport {
 			return memoryStream;
 		}
 	}
-	public sealed class ExcelTableWriterSimple : ITableWriterSimple {
-		private int _rowIndex;
-		private readonly HSSFWorkbook _workbook = new HSSFWorkbook();
-		private readonly ISheet _workSheet;
-		private readonly TableWriterStyle _style;
 
-		public ExcelTableWriterSimple(TableWriterStyle style) {
-			_style = style;
-			_workSheet = _workbook.CreateSheet();
-		}
+	public sealed class ExcelTableWriterSimple : ExcelTableWriterBase, ITableWriterSimple {
+		public ExcelTableWriterSimple(TableWriterStyle style) : base(style) { }
 
-		public void WriteHeader(params string[] cells) {
-			IRow row = _workSheet.CreateRow(_rowIndex);
-			row.Height = _style.HeaderHeight;
+		public void WriteHeader(List<string> cells) {
+			IRow row = WorkSheet.CreateRow(RowIndex);
+			row.Height = Style.HeaderHeight;
 
-			ICellStyle cellStyle = ConvertToNpoiStyle(_style.HeaderCell);
+			ICellStyle cellStyle = ConvertToNpoiStyle(Style.HeaderCell);
 			cellStyle.VerticalAlignment = VerticalAlignment.CENTER;
 
 			int columnIndex = 0;
@@ -168,12 +148,12 @@ namespace FormattedExcelExport {
 				newCell.CellStyle = cellStyle;
 				columnIndex++;
 			}
-			_rowIndex++;
+			RowIndex++;
 		}
 
 		public void WriteRow(List<KeyValuePair<string, TableWriterStyle>> cells) {
-			IRow row = _workSheet.CreateRow(_rowIndex);
-			ICellStyle cellStyle = ConvertToNpoiStyle(_style.RegularCell);
+			IRow row = WorkSheet.CreateRow(RowIndex);
+			ICellStyle cellStyle = ConvertToNpoiStyle(Style.RegularCell);
 
 			int columnIndex = 0;
 			foreach (KeyValuePair<string, TableWriterStyle> cell in cells) {
@@ -191,63 +171,7 @@ namespace FormattedExcelExport {
 				}
 				columnIndex++;
 			}
-			_rowIndex++;
-		}
-
-		private ICellStyle ConvertToNpoiStyle(StyleSettings styleSettings) {
-			IFont cellFont = _workbook.CreateFont();
-
-			cellFont.FontName = styleSettings.FontName;
-			cellFont.FontHeightInPoints = styleSettings.FontHeightInPoints;
-			cellFont.IsItalic = styleSettings.Italic;
-			cellFont.Underline = styleSettings.Underline ? FontUnderline.SINGLE.ByteValue : FontUnderline.NONE.ByteValue;
-			cellFont.Boldweight = (short)styleSettings.BoldWeight;
-
-			HSSFPalette palette = _workbook.GetCustomPalette();
-			HSSFColor similarColor = palette.FindSimilarColor(styleSettings.FontColor.Red, styleSettings.FontColor.Green, styleSettings.FontColor.Blue);
-			cellFont.Color = similarColor.GetIndex();
-
-			ICellStyle cellStyle = _workbook.CreateCellStyle();
-			cellStyle.SetFont(cellFont);
-
-			if (styleSettings.BackgroundColor != null) {
-				similarColor = palette.FindSimilarColor(styleSettings.BackgroundColor.Red, styleSettings.BackgroundColor.Green, styleSettings.BackgroundColor.Blue);
-				cellStyle.FillForegroundColor = similarColor.GetIndex();
-				cellStyle.FillPattern = FillPatternType.SOLID_FOREGROUND;
-			}
-			return cellStyle;
-		}
-
-		public void AutosizeColumns() {
-			var columnLengths = new List<int>();
-
-			for (int columnNum = 0; columnNum < _workSheet.GetRow(0).LastCellNum; columnNum++) {
-				int columnMaximumLength = 0;
-				for (int rowNum = 0; rowNum <= _workSheet.LastRowNum; rowNum++) {
-					IRow currentRow = _workSheet.GetRow(rowNum);
-
-					if (!currentRow.Cells.Any()) continue;
-					ICell cell = currentRow.GetCell(columnNum);
-					if (cell == null) continue;
-
-					if (cell.StringCellValue.Length > columnMaximumLength)
-						columnMaximumLength = cell.StringCellValue.Length;
-				}
-				columnLengths.Add(columnMaximumLength);
-			}
-
-
-			for (int i = 0; i < _workSheet.GetRow(0).LastCellNum; i++) {
-				int width = columnLengths.ElementAt(i) * _style.FontFactor + _style.FontAbsoluteTerm;
-				_workSheet.SetColumnWidth(i, width < _style.MaxColumnWidth ? width : _style.MaxColumnWidth);
-			}
-		}
-
-		public MemoryStream GetStream() {
-			MemoryStream memoryStream = new MemoryStream();
-			_workbook.Write(memoryStream);
-			memoryStream.Position = 0;
-			return memoryStream;
+			RowIndex++;
 		}
 	}
 }
