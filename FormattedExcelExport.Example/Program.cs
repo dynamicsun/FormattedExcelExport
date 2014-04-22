@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using FormattedExcelExport.Configuaration;
+using FormattedExcelExport.Style;
+using FormattedExcelExport.TableWriters;
 
 
 namespace FormattedExcelExport.Example {
@@ -36,18 +39,19 @@ namespace FormattedExcelExport.Example {
 
 			List<ClientExampleModel> models = InitializeModels();
 
-			MemoryStream ms = TableWriterComplex.Write(new CsvTableWriterComplex(), models, confBuilder.Value);
+			MemoryStream ms = TableWriterComplex.Write(new DsvTableWriterComplex(), models, confBuilder.Value);
 			WriteToFile(ms, "TestComplex.txt");
-
+	
 			TableWriterStyle style = new TableWriterStyle();
-			ms = TableWriterComplex.Write(new ExcelTableWriterComplex(style), models, confBuilder.Value);
+			ms = TableWriterComplex.Write(new XlsTableWriterComplex(style), models, confBuilder.Value);
 			WriteToFile(ms, "TestComplex.xls");
 
-			ms = TableWriterSimple.Write(new CsvTableWriterSimple(), models, confBuilder.Value);
+			ms = TableWriterSimple.Write(new DsvTableWriterSimple(), models, confBuilder.Value);
 			WriteToFile(ms, "TestSimple.txt");
 
-			ms = TableWriterSimple.Write(new ExcelTableWriterSimple(style), models, confBuilder.Value);
+			ms = TableWriterSimple.Write(new XlsTableWriterSimple(style), models, confBuilder.Value);
 			WriteToFile(ms, "TestSimple.xls");
+
 		}
 
 		private static void WriteToFile(MemoryStream ms, string fileName) {
@@ -96,7 +100,6 @@ namespace FormattedExcelExport.Example {
 					new List<ClientExampleModel.Product> ())		
 			};
 		}
-
 		public class ClientExampleModel {
 			private readonly string _title;
 			private readonly DateTime _registrationDate;
@@ -123,16 +126,19 @@ namespace FormattedExcelExport.Example {
 			public List<Contract> Contracts {
 				get { return _contracts; }
 			}
+			[ExcelExport(Name = "Название")]
 			public string Title {
 				get { return _title; }
 			}
+			[ExcelExport(Name = "Дата регистрации")]
 			public DateTime RegistrationDate {
 				get { return _registrationDate; }
 			}
-
+			[ExcelExport(Name = "Телефон")]
 			public string Phone {
 				get { return _phone; }
 			}
+			[ExcelExport(Name = "ОКАТО")]
 			public string Okato {
 				get { return _okato; }
 			}

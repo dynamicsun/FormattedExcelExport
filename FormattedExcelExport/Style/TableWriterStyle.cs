@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 
-namespace FormattedExcelExport {
+
+namespace FormattedExcelExport.Style {
 	public class AdHocCellStyle {
 		public string FontName { get; set; }
 		public short FontHeightInPoints { get; set; }

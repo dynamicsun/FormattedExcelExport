@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using NPOI.SS.UserModel;
+using FormattedExcelExport.Configuaration;
+using FormattedExcelExport.Infrastructure;
+using FormattedExcelExport.Style;
 
 
-namespace FormattedExcelExport {
+namespace FormattedExcelExport.TableWriters {
 	public interface ITableWriterSimple {
 		void WriteHeader(List<string> cells);
 		void WriteRow(List<KeyValuePair<string, TableWriterStyle>> cells);
@@ -92,86 +93,6 @@ namespace FormattedExcelExport {
 			}
 			writer.AutosizeColumns();
 			return writer.GetStream();
-		}
-	}
-
-	public sealed class CsvTableWriterSimple : ITableWriterSimple {
-		private readonly StringBuilder _stringBuilder = new StringBuilder();
-		private readonly string _delimeter;
-		public CsvTableWriterSimple(string delimeter = "\t") {
-			_delimeter = delimeter;
-		}
-
-		public void WriteHeader(List<string> cells) {
-			WriteRow(cells.ConvertAll(x => new KeyValuePair<string, TableWriterStyle>(x, null)));
-		}
-
-		public void WriteRow(List<KeyValuePair<string, TableWriterStyle>> cells) {
-			int cellsCount = cells.Count() - 1;
-			int i = 0;
-			foreach (KeyValuePair<string, TableWriterStyle> cell in cells) {
-				if (cell.Key != null)
-					_stringBuilder.Append(cell.Key);
-
-				if (i < cellsCount)
-					_stringBuilder.Append(_delimeter);
-				i++;
-			}
-			_stringBuilder.AppendLine();
-		}
-
-		public void AutosizeColumns() { }
-		public MemoryStream GetStream() {
-			MemoryStream memoryStream = new MemoryStream();
-			StreamWriter streamWriter = new StreamWriter(memoryStream, Encoding.UTF8);
-			streamWriter.WriteLine(_stringBuilder.ToString());
-			streamWriter.Flush();
-			memoryStream.Position = 0;
-			return memoryStream;
-		}
-	}
-
-	public sealed class ExcelTableWriterSimple : ExcelTableWriterBase, ITableWriterSimple {
-		public ExcelTableWriterSimple(TableWriterStyle style) : base(style) { }
-
-		public void WriteHeader(List<string> cells) {
-			IRow row = WorkSheet.CreateRow(RowIndex);
-			row.Height = Style.HeaderHeight;
-
-			ICellStyle cellStyle = ConvertToNpoiStyle(Style.HeaderCell);
-			cellStyle.VerticalAlignment = VerticalAlignment.CENTER;
-
-			int columnIndex = 0;
-			foreach (string cell in cells) {
-				ICell newCell = row.CreateCell(columnIndex);
-				newCell.SetCellValue(cell);
-				newCell.CellStyle = cellStyle;
-				columnIndex++;
-			}
-			RowIndex++;
-		}
-
-		public void WriteRow(List<KeyValuePair<string, TableWriterStyle>> cells) {
-			IRow row = WorkSheet.CreateRow(RowIndex);
-			ICellStyle cellStyle = ConvertToNpoiStyle(Style.RegularCell);
-
-			int columnIndex = 0;
-			foreach (KeyValuePair<string, TableWriterStyle> cell in cells) {
-				ICell newCell = row.CreateCell(columnIndex);
-
-				if (cell.Key != null)
-					newCell.SetCellValue(cell.Key);
-
-				if (cell.Value != null) {
-					ICellStyle customCellStyle = ConvertToNpoiStyle(cell.Value.RegularCell);
-					newCell.CellStyle = customCellStyle;
-				}
-				else {
-					newCell.CellStyle = cellStyle;
-				}
-				columnIndex++;
-			}
-			RowIndex++;
 		}
 	}
 }
