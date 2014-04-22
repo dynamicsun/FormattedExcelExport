@@ -13,11 +13,11 @@ namespace FormattedExcelExport.Style {
 
 		public AdHocCellStyle() {
 			FontName = "Arial";
+			FontColor = new Color(0, 0, 1);
 			FontHeightInPoints = 10;
 			BoldWeight = FontBoldWeight.Normal;
 			Italic = false;
 			Underline = false;
-			FontColor = new Color();
 		}
 
 		public enum FontBoldWeight {
@@ -46,12 +46,12 @@ namespace FormattedExcelExport.Style {
 
 			HeaderCell = new AdHocCellStyle {
 				BoldWeight = AdHocCellStyle.FontBoldWeight.Bold,
-				FontColor = new AdHocCellStyle.Color(255, 255, 255),
+				FontColor = new AdHocCellStyle.Color(255, 255, 254),
 				BackgroundColor = new AdHocCellStyle.Color(2, 101, 203)
 			};
 
 			RegularCell = new AdHocCellStyle {
-				FontColor = new AdHocCellStyle.Color()
+				FontColor = new AdHocCellStyle.Color(0, 0, 1)
 			};
 			HeaderChildCell = new AdHocCellStyle();
 			RegularChildCell = new AdHocCellStyle();

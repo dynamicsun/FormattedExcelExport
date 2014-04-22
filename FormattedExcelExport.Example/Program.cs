@@ -52,6 +52,9 @@ namespace FormattedExcelExport.Example {
 			ms = TableWriterSimple.Write(new XlsTableWriterSimple(style), models, confBuilder.Value);
 			WriteToFile(ms, "TestSimple.xls");
 
+			TableWriterSimple.Write(new XlsxTableWriterSimple(style), models, confBuilder.Value);
+			TableWriterComplex.Write(new XlsxTableWriterComplex(style), models, confBuilder.Value);
+
 		}
 
 		private static void WriteToFile(MemoryStream ms, string fileName) {
