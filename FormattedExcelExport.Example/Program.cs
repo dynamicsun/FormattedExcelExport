@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using FormattedExcelExport.Configuaration;
+using FormattedExcelExport.Reflection;
 using FormattedExcelExport.Style;
 using FormattedExcelExport.TableWriters;
 
@@ -54,7 +55,12 @@ namespace FormattedExcelExport.Example {
 
 			TableWriterSimple.Write(new XlsxTableWriterSimple(style), models, confBuilder.Value);
 			TableWriterComplex.Write(new XlsxTableWriterComplex(style), models, confBuilder.Value);
+			
+			ms = ReflectionWriterSimple.Write(models, new DsvTableWriterSimple(), new CultureInfo("ru-Ru"));
+			WriteToFile(ms, "TestReflectionSimple.txt");
 
+			ms = ReflectionWriterSimple.Write(models, new XlsTableWriterSimple(new TableWriterStyle()), new CultureInfo("ru-Ru"));
+			WriteToFile(ms, "TestReflectionSimple.xls");
 		}
 
 		private static void WriteToFile(MemoryStream ms, string fileName) {
@@ -73,6 +79,9 @@ namespace FormattedExcelExport.Example {
 					"+7 333 4442 00", 
 					"9040043234562",
 					"OPEEHBSSDD",
+					2352666,
+					336,
+					true,
 					new List<ClientExampleModel.Contact> {
 						new ClientExampleModel.Contact("Ольга", "olga@mail.ru"),
 						new ClientExampleModel.Contact("Иван", "ivan@mail.ru")
@@ -89,8 +98,11 @@ namespace FormattedExcelExport.Example {
 					"Вторая компания", 
 					DateTime.Now, 
 					"+7 222 1124 44", 
-					"9040043234562",
+					"5953043385461",
 					"JsKSLPKKHSS",
+					599988,
+					59,
+					false,
 					new List<ClientExampleModel.Contact> {
 						new ClientExampleModel.Contact("Олег", "oleg@mail.ru"),
 						new ClientExampleModel.Contact("Анна", ""),
@@ -109,15 +121,21 @@ namespace FormattedExcelExport.Example {
 			private readonly string _phone;
 			private readonly string _inn;
 			private readonly string _okato;
+			private readonly decimal _revenue;
+			private readonly int _employeeCount;
+			private readonly bool _isActive;
 			private readonly List<Contact> _contacts;
 			private readonly List<Contract> _contracts;
 			private readonly List<Product> _products;
-			public ClientExampleModel(string title, DateTime registrationDate, string phone, string inn, string okato, List<Contact> contacts, List<Contract> contracts, List<Product> products) {
+			public ClientExampleModel(string title, DateTime registrationDate, string phone, string inn, string okato, decimal revenue, int employeeCount, bool isActive, List<Contact> contacts, List<Contract> contracts, List<Product> products) {
 				_title = title;
 				_registrationDate = registrationDate;
 				_phone = phone;
 				_inn = inn;
 				_okato = okato;
+				_revenue = revenue;
+				_employeeCount = employeeCount;
+				_isActive = isActive;
 				_contacts = contacts;
 				_contracts = contracts;
 				_products = products;
@@ -128,6 +146,9 @@ namespace FormattedExcelExport.Example {
 			}
 			public List<Contract> Contracts {
 				get { return _contracts; }
+			}
+			public List<Product> Products {
+				get { return _products; }
 			}
 			[ExcelExport(Name = "Название")]
 			public string Title {
@@ -145,11 +166,21 @@ namespace FormattedExcelExport.Example {
 			public string Okato {
 				get { return _okato; }
 			}
+			[ExcelExport(Name = "ИНН", IsExportable = false)]
 			public string Inn {
 				get { return _inn; }
 			}
-			public List<Product> Products {
-				get { return _products; }
+			[ExcelExport(Name = "Прибыль за прошлый год")]
+			public decimal Revenue {
+				get { return _revenue; }
+			}
+			[ExcelExport(IsExportable = false)]
+			public int EmployeeCount {
+				get { return _employeeCount; }
+			}
+			[ExcelExport(Name = "Удалена")]
+			public bool IsActive {
+				get { return _isActive; }
 			}
 			public sealed class Contact {
 				private readonly string _title;
