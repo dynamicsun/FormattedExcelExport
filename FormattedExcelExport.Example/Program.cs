@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -140,13 +141,15 @@ namespace FormattedExcelExport.Example {
 				_contracts = contracts;
 				_products = products;
 			}
-
+			[ExcelExport(Name = "Контакты")]
 			public List<Contact> Contacts {
 				get { return _contacts; }
 			}
+			[ExcelExport(Name = "Сделки")]
 			public List<Contract> Contracts {
 				get { return _contracts; }
 			}
+			[ExcelExport(Name = "Продукты")]
 			public List<Product> Products {
 				get { return _products; }
 			}
@@ -189,9 +192,11 @@ namespace FormattedExcelExport.Example {
 					_title = title;
 					_email = email;
 				}
+				[ExcelExport(Name = "Название")]
 				public string Title {
 					get { return _title; }
 				}
+				[ExcelExport(Name = "Email")]
 				public string Email {
 					get { return _email; }
 				}
@@ -205,12 +210,15 @@ namespace FormattedExcelExport.Example {
 					_endDate = endDate;
 					_status = status;
 				}
+				[ExcelExport(Name = "Дата начала")]
 				public DateTime BeginDate {
 					get { return _beginDate; }
 				}
+				[ExcelExport(Name = "Дата окончания")]
 				public DateTime EndDate {
 					get { return _endDate; }
 				}
+				[ExcelExport(Name = "Статус")]
 				public bool Status {
 					get { return _status; }
 				}
@@ -222,9 +230,11 @@ namespace FormattedExcelExport.Example {
 					_title = title;
 					_amount = amount;
 				}
+				[ExcelExport(Name = "Наименование продукта")]
 				public string Title {
 					get { return _title; }
 				}
+				[ExcelExport(Name = "Количество")]
 				public int Amount {
 					get { return _amount; }
 				}
