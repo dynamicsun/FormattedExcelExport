@@ -10,13 +10,16 @@ using FormattedExcelExport.TableWriters;
 
 
 namespace FormattedExcelExport.Reflection {
-	public static class ReflectionWriterSimple {
-		public static MemoryStream Write<T>(IEnumerable<T> models, ITableWriterSimple tableWriter, CultureInfo cultureInfo) {
+	public static class ReflectionWriterComplex {
+		public static MemoryStream Write<T>(IEnumerable<T> models, ITableWriterComplex tableWriter, CultureInfo cultureInfo) {
 			IEnumerable<PropertyInfo> nonEnumerableProperties = typeof(T).GetProperties()
 				.Where(x => x.PropertyType == typeof(string) || x.PropertyType == typeof(DateTime) || x.PropertyType == typeof(decimal) || x.PropertyType == typeof(int) || x.PropertyType == typeof(bool));
 
+			ExcelExportClassNameAttribute classAttribute = typeof(T).GetCustomAttribute<ExcelExportClassNameAttribute>();
+			string className = classAttribute != null ? classAttribute.Name : "";
+
 			var exportedProperties = new List<PropertyInfo>();
-			var header = new List<string>();
+			var header = new List<string> { className };
 			foreach (PropertyInfo propertyInfo in nonEnumerableProperties) {
 				ExcelExportAttribute attribute = propertyInfo.GetCustomAttribute<ExcelExportAttribute>();
 				if (attribute != null && !attribute.IsExportable) {
@@ -27,70 +30,51 @@ namespace FormattedExcelExport.Reflection {
 			}
 
 			IEnumerable<PropertyInfo> enumerableProperties = typeof(T).GetProperties().Where(x => x.PropertyType.IsGenericType && x.PropertyType.GetGenericTypeDefinition() == typeof(List<>));
-			int[] maxims = new int[enumerableProperties.Count()];
-			for (int i = 0; i < maxims.Count(); i++) {
-				maxims[i] = 0;
-			}
 			foreach (T model in models) {
+				tableWriter.WriteHeader(header.ToArray());
+
+				List<string> row = new List<string>();
+				GetValue(cultureInfo, exportedProperties, row, model);
+				tableWriter.WriteRow(row.ConvertAll(x => new KeyValuePair<string, TableWriterStyle>(x, null)), true);
+				row.Clear();
+
 				for (int i = 0; i < enumerableProperties.Count(); i++) {
-					object nestedModels = enumerableProperties.ElementAt(i).GetValue(model);
-					if (maxims[i] < ((IList)nestedModels).Count) {
-						maxims[i] = ((IList)nestedModels).Count;
-					}
-				}
-			}
+					PropertyInfo property = enumerableProperties.ElementAt(i);
+					IList submodels = (IList)property.GetValue(model);
 
-			for (int i = 0; i < enumerableProperties.Count(); i++) {
-				Type propertyType = enumerableProperties.ElementAt(i).PropertyType;
-				Type listType = propertyType.GetGenericArguments()[0];
+					Type propertyType = property.PropertyType;
+					Type listType = propertyType.GetGenericArguments()[0];
 
-				IEnumerable<PropertyInfo> props = listType.GetProperties()
+					IEnumerable<PropertyInfo> props = listType.GetProperties()
 					.Where(x => x.PropertyType == typeof(string) || x.PropertyType == typeof(DateTime) || x.PropertyType == typeof(decimal) || x.PropertyType == typeof(int) || x.PropertyType == typeof(bool));
 
-				int counter = 1;
-				for (int j = 0; j < maxims[i]; j++) {
+
+					ExcelExportClassNameAttribute nestedClassAttribute = listType.GetCustomAttribute<ExcelExportClassNameAttribute>();
+					string nestedClassName = nestedClassAttribute != null ? nestedClassAttribute.Name : "";
+					var childHeader = new List<string> { nestedClassName };
 					foreach (PropertyInfo propertyInfo in props) {
 						ExcelExportAttribute attribute = propertyInfo.GetCustomAttribute<ExcelExportAttribute>();
 						if (attribute != null && !attribute.IsExportable) {
 							continue;
 						}
-						header.Add(attribute != null ? attribute.PropertyName + counter : "");
+						childHeader.Add(attribute != null ? attribute.PropertyName : "");
 					}
-					counter++;
-				}
-			}
-
-			tableWriter.WriteHeader(header);
-
-			foreach (T model in models) {
-				var row = new List<string>();
-				GetValue(cultureInfo, exportedProperties, row, model);
-
-				for (int i = 0; i < enumerableProperties.Count(); i++) {
-					var property = enumerableProperties.ElementAt(i);
-					IList submodels = (IList)property.GetValue(model);
-					
-					var propertyType = property.PropertyType;
-					Type listType = propertyType.GetGenericArguments()[0];
-					
-					IEnumerable<PropertyInfo> props = listType.GetProperties()
-					.Where(x => x.PropertyType == typeof(string) || x.PropertyType == typeof(DateTime) || x.PropertyType == typeof(decimal) || x.PropertyType == typeof(int) || x.PropertyType == typeof(bool));
+					tableWriter.WriteChildHeader(childHeader.ToArray());
+					childHeader.Clear();
 
 					foreach (var submodel in submodels) {
 						GetValue(cultureInfo, props, row, submodel);
-					}
-					for (int j = 0; j < (maxims[i] - submodels.Count) * props.Count(); j++) {
-						row.Add("");
+						tableWriter.WriteChildRow(row.ConvertAll(x => new KeyValuePair<string, TableWriterStyle>(x, null)), true);
+						row.Clear();
 					}
 				}
-
-				tableWriter.WriteRow(row.ConvertAll(x => new KeyValuePair<string, TableWriterStyle>(x, null)));
 			}
 
 			tableWriter.AutosizeColumns();
 			MemoryStream stream = tableWriter.GetStream();
 			return stream;
 		}
+
 		private static void GetValue<T>(CultureInfo cultureInfo, IEnumerable<PropertyInfo> exportedProperties, List<string> row, T model) {
 			foreach (PropertyInfo propertyInfo in exportedProperties) {
 				var propertyTypeName = propertyInfo.PropertyType.Name;
@@ -100,7 +84,7 @@ namespace FormattedExcelExport.Reflection {
 						row.Add(propertyInfo.GetValue(model).ToString());
 						break;
 					case "DateTime":
-						row.Add(((DateTime) propertyInfo.GetValue(model)).ToString(cultureInfo.DateTimeFormat.LongDatePattern));
+						row.Add(((DateTime)propertyInfo.GetValue(model)).ToString(cultureInfo.DateTimeFormat.LongDatePattern));
 						break;
 					case "Decimal":
 						row.Add(string.Format(cultureInfo, "{0:C}", propertyInfo.GetValue(model)));
@@ -109,7 +93,7 @@ namespace FormattedExcelExport.Reflection {
 						row.Add(propertyInfo.GetValue(model).ToString());
 						break;
 					case "Boolean":
-						row.Add(((bool) propertyInfo.GetValue(model)) ? "Да" : "Нет");
+						row.Add(((bool)propertyInfo.GetValue(model)) ? "Да" : "Нет");
 						break;
 				}
 			}

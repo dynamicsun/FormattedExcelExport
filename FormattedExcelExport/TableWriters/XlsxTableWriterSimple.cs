@@ -68,7 +68,7 @@ namespace FormattedExcelExport.TableWriters {
 
 		public MemoryStream GetStream() {
 			MemoryStream memoryStream = new MemoryStream();
-			Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
+//			Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
 
 			FileStream sw = File.Create("TestSimple.xlsx");
 			Workbook.Write(sw);

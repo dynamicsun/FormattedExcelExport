@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -62,6 +61,12 @@ namespace FormattedExcelExport.Example {
 
 			ms = ReflectionWriterSimple.Write(models, new XlsTableWriterSimple(new TableWriterStyle()), new CultureInfo("ru-Ru"));
 			WriteToFile(ms, "TestReflectionSimple.xls");
+
+			ms = ReflectionWriterComplex.Write(models, new DsvTableWriterComplex(), new CultureInfo("ru-Ru"));
+			WriteToFile(ms, "TestReflectionSimple.txt");
+
+			ms = ReflectionWriterComplex.Write(models, new XlsTableWriterComplex(new TableWriterStyle()), new CultureInfo("ru-Ru"));
+			WriteToFile(ms, "TestReflectionComplex.xls");
 		}
 
 		private static void WriteToFile(MemoryStream ms, string fileName) {
@@ -116,6 +121,7 @@ namespace FormattedExcelExport.Example {
 					new List<ClientExampleModel.Product> ())		
 			};
 		}
+		[ExcelExportClassName(Name = "Клиент")]
 		public class ClientExampleModel {
 			private readonly string _title;
 			private readonly DateTime _registrationDate;
@@ -141,39 +147,39 @@ namespace FormattedExcelExport.Example {
 				_contracts = contracts;
 				_products = products;
 			}
-			[ExcelExport(Name = "Контакты")]
+			[ExcelExport(PropertyName = "Контакты")]
 			public List<Contact> Contacts {
 				get { return _contacts; }
 			}
-			[ExcelExport(Name = "Сделки")]
+			[ExcelExport(PropertyName = "Сделки")]
 			public List<Contract> Contracts {
 				get { return _contracts; }
 			}
-			[ExcelExport(Name = "Продукты")]
+			[ExcelExport(PropertyName = "Продукты")]
 			public List<Product> Products {
 				get { return _products; }
 			}
-			[ExcelExport(Name = "Название")]
+			[ExcelExport(PropertyName = "Название")]
 			public string Title {
 				get { return _title; }
 			}
-			[ExcelExport(Name = "Дата регистрации")]
+			[ExcelExport(PropertyName = "Дата регистрации")]
 			public DateTime RegistrationDate {
 				get { return _registrationDate; }
 			}
-			[ExcelExport(Name = "Телефон")]
+			[ExcelExport(PropertyName = "Телефон")]
 			public string Phone {
 				get { return _phone; }
 			}
-			[ExcelExport(Name = "ОКАТО")]
+			[ExcelExport(PropertyName = "ОКАТО")]
 			public string Okato {
 				get { return _okato; }
 			}
-			[ExcelExport(Name = "ИНН", IsExportable = false)]
+			[ExcelExport(PropertyName = "ИНН", IsExportable = false)]
 			public string Inn {
 				get { return _inn; }
 			}
-			[ExcelExport(Name = "Прибыль за прошлый год")]
+			[ExcelExport(PropertyName = "Прибыль за прошлый год")]
 			public decimal Revenue {
 				get { return _revenue; }
 			}
@@ -181,10 +187,12 @@ namespace FormattedExcelExport.Example {
 			public int EmployeeCount {
 				get { return _employeeCount; }
 			}
-			[ExcelExport(Name = "Удалена")]
+			[ExcelExport(PropertyName = "Удалена")]
 			public bool IsActive {
 				get { return _isActive; }
 			}
+
+			[ExcelExportClassName(Name = "Контакт")]
 			public sealed class Contact {
 				private readonly string _title;
 				private readonly string _email;
@@ -192,15 +200,17 @@ namespace FormattedExcelExport.Example {
 					_title = title;
 					_email = email;
 				}
-				[ExcelExport(Name = "Название")]
+				[ExcelExport(PropertyName = "Название")]
 				public string Title {
 					get { return _title; }
 				}
-				[ExcelExport(Name = "Email")]
+				[ExcelExport(PropertyName = "Email")]
 				public string Email {
 					get { return _email; }
 				}
 			}
+
+			[ExcelExportClassName(Name = "Сделка")]
 			public sealed class Contract {
 				private readonly DateTime _beginDate;
 				private readonly DateTime _endDate;
@@ -210,19 +220,21 @@ namespace FormattedExcelExport.Example {
 					_endDate = endDate;
 					_status = status;
 				}
-				[ExcelExport(Name = "Дата начала")]
+				[ExcelExport(PropertyName = "Дата начала")]
 				public DateTime BeginDate {
 					get { return _beginDate; }
 				}
-				[ExcelExport(Name = "Дата окончания")]
+				[ExcelExport(PropertyName = "Дата окончания")]
 				public DateTime EndDate {
 					get { return _endDate; }
 				}
-				[ExcelExport(Name = "Статус")]
+				[ExcelExport(PropertyName = "Статус")]
 				public bool Status {
 					get { return _status; }
 				}
 			}
+
+			[ExcelExportClassName(Name = "Продукт")]
 			public sealed class Product {
 				private readonly string _title;
 				private readonly int _amount;
@@ -230,11 +242,11 @@ namespace FormattedExcelExport.Example {
 					_title = title;
 					_amount = amount;
 				}
-				[ExcelExport(Name = "Наименование продукта")]
+				[ExcelExport(PropertyName = "Наименование продукта")]
 				public string Title {
 					get { return _title; }
 				}
-				[ExcelExport(Name = "Количество")]
+				[ExcelExport(PropertyName = "Количество")]
 				public int Amount {
 					get { return _amount; }
 				}

@@ -54,6 +54,7 @@
   <ItemGroup>
     <Compile Include="Infrastructure\AggregatedContainer.cs" />
     <Compile Include="Configuaration\ChildTableConfiguration.cs" />
+    <Compile Include="Reflection\ReflectionWriterComplex.cs" />
     <Compile Include="Reflection\ReflectionWriterSimple.cs" />
     <Compile Include="TableWriters\DsvTableWriterComplex.cs" />
     <Compile Include="TableWriters\DsvTableWriterSimple.cs" />

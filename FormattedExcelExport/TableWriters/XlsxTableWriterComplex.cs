@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using FormattedExcelExport.Style;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
@@ -138,7 +136,7 @@ namespace FormattedExcelExport.TableWriters {
 
 		public MemoryStream GetStream() {
 			MemoryStream memoryStream = new MemoryStream();
-			Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
+//			Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
 
 			FileStream sw = File.Create("TestComplex.xlsx");
 			Workbook.Write(sw);
