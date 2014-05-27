@@ -9,5 +9,9 @@ namespace FormattedExcelExport.Tests {
 		public void SimpleExport() {
             throw new NotImplementedException();
 		}
+        [Test]
+        public void SimpeExportWithHighlight() {
+
+        }
 	}
 }
