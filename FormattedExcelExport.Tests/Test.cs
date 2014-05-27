@@ -1,12 +1,13 @@
 ﻿using NUnit.Framework;
+using System;
 
 
 namespace FormattedExcelExport.Tests {
 	[TestFixture]
 	public class Test {
 		[Test]
-		public void SomeTest() {
-			
+		public void SimpleExport() {
+            throw new NotImplementedException();
 		}
 	}
 }
