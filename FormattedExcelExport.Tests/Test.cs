@@ -7,7 +7,7 @@ namespace FormattedExcelExport.Tests {
 	public class Test {
 		[Test]
 		public void SimpleExport() {
-            throw new NotImplementedException();
+            
 		}
         [Test]
         public void SimpeExportWithHighlight() {
