@@ -5,7 +5,7 @@ using NPOI.SS.UserModel;
 
 namespace FormattedExcelExport.TableWriters {
 	public sealed class XlsTableWriterSimple : XlsTableWriterBase, ITableWriterSimple {
-		public XlsTableWriterSimple(TableWriterStyle style) : base(style) { }
+		public XlsTableWriterSimple(TableWriterStyle style = null) : base(style) { }
 
 		public void WriteHeader(List<string> cells) {
 			IRow row = WorkSheet.CreateRow(RowIndex);

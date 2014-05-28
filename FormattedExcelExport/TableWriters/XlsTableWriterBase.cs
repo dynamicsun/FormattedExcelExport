@@ -16,7 +16,7 @@ namespace FormattedExcelExport.TableWriters {
 
 		protected XlsTableWriterBase(TableWriterStyle style) {
 			Workbook = new HSSFWorkbook();
-			Style = style;
+			Style = style ?? new TableWriterStyle();
 			WorkSheet = Workbook.CreateSheet();
 		}
 
