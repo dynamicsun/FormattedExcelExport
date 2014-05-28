@@ -1,83 +1,16 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Extensions;
-using NPOI.HSSF.Record;
+using FormattedExcelExport.Configuaration;
 using NPOI.HSSF.UserModel;
-using NPOI.HSSF.Util;
-using NPOI.SS.Formula.Functions;
 using NPOI.SS.UserModel;
 using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
-using FormattedExcelExport.Configuaration;
-using FormattedExcelExport.Reflection;
-using FormattedExcelExport.Style;
 using FormattedExcelExport.TableWriters;
 
 namespace FormattedExcelExport.Tests {
     [TestFixture]
     public class Test {
-        /*static void Main(string[] args) {
-            var confBuilder = new TableConfigurationBuilder<TestDataEntities.ClientExampleModel>("Клиент", new CultureInfo("ru-RU"));
-            TableWriterStyle condStyle = new TableWriterStyle();
-            condStyle.RegularCell.BackgroundColor = new AdHocCellStyle.Color(255, 0, 0);
-            TableWriterStyle condStyle2 = new TableWriterStyle();
-            condStyle2.RegularCell.BackgroundColor = new AdHocCellStyle.Color(0, 255, 0);
-            TableWriterStyle condStyle3 = new TableWriterStyle();
-            condStyle3.RegularChildCell.BackgroundColor = new AdHocCellStyle.Color(0, 0, 255);
-
-            confBuilder.RegisterColumn("Название", x => x.Title, new TableConfigurationBuilder<TestDataEntities.ClientExampleModel>.ConditionTheme(condStyle, x => x.Title == "Вторая компания"));
-            confBuilder.RegisterColumn("Дата регистрации", x => x.RegistrationDate);
-            confBuilder.RegisterColumn("Телефон", x => x.Phone, new TableConfigurationBuilder<TestDataEntities.ClientExampleModel>.ConditionTheme(condStyle2, x => x.Okato == "OPEEHBSSDD"));
-            confBuilder.RegisterColumn("ИНН", x => x.Inn);
-            confBuilder.RegisterColumn("Окато", x => x.Okato);
-
-            var contact = confBuilder.RegisterChild("Контакт", x => x.Contacts);
-            contact.RegisterColumn("Название", x => x.Title, new TableConfigurationBuilder<TestDataEntities.ClientExampleModel.Contact>.ConditionTheme(condStyle3, x => x.Title.StartsWith("О")));
-            contact.RegisterColumn("Email", x => x.Email);
-
-            var contract = confBuilder.RegisterChild("Контракт", x => x.Contracts);
-            contract.RegisterColumn("Дата начала", x => x.BeginDate);
-            contract.RegisterColumn("Дата окончания", x => x.EndDate);
-            contract.RegisterColumn("Статус", x => x.Status, new TableConfigurationBuilder<TestDataEntities.ClientExampleModel.Contract>.ConditionTheme(new TableWriterStyle(), x => true));
-
-            var product = confBuilder.RegisterChild("Продукт", x => x.Products);
-            product.RegisterColumn("Наименование", x => x.Title);
-            product.RegisterColumn("Количество", x => x.Amount);
-
-            List<TestDataEntities.ClientExampleModel> models = InitializeModels();
-
-            MemoryStream ms = TableWriterComplex.Write(new DsvTableWriterComplex(), models, confBuilder.Value);
-            WriteToFile(ms, "TestComplex.txt");
-
-            TableWriterStyle style = new TableWriterStyle();
-            ms = TableWriterComplex.Write(new XlsTableWriterComplex(style), models, confBuilder.Value);
-            WriteToFile(ms, "TestComplex.xls");
-
-            ms = TableWriterSimple.Write(new DsvTableWriterSimple(), models, confBuilder.Value);
-            WriteToFile(ms, "TestSimple.txt");
-
-            ms = TableWriterSimple.Write(new XlsTableWriterSimple(style), models, confBuilder.Value);
-            WriteToFile(ms, "TestSimple.xls");
-
-            TableWriterSimple.Write(new XlsxTableWriterSimple(style), models, confBuilder.Value);
-            TableWriterComplex.Write(new XlsxTableWriterComplex(style), models, confBuilder.Value);
-
-            ms = ReflectionWriterSimple.Write(models, new DsvTableWriterSimple(), new CultureInfo("ru-Ru"));
-            WriteToFile(ms, "TestReflectionSimple.txt");
-
-            ms = ReflectionWriterSimple.Write(models, new XlsTableWriterSimple(new TableWriterStyle()), new CultureInfo("ru-Ru"));
-            WriteToFile(ms, "TestReflectionSimple.xls");
-
-            ms = ReflectionWriterComplex.Write(models, new DsvTableWriterComplex(), new CultureInfo("ru-Ru"));
-            WriteToFile(ms, "TestReflectionSimple.txt");
-
-            ms = ReflectionWriterComplex.Write(models, new XlsTableWriterComplex(new TableWriterStyle()), new CultureInfo("ru-Ru"));
-            WriteToFile(ms, "TestReflectionComplex.xls");
-        }*/
-
-
         [Test]
         public void ExcelSimpleExport() {
             TestDataEntities.TestData simpleTestData = TestDataEntities.CreateSimpleTestData();
@@ -98,13 +31,54 @@ namespace FormattedExcelExport.Tests {
             int testDataContactColumnsQuantity = simpleTestData.Models.Max(x => x.Contacts.Count) * contactsFieldsQuantity;
             int testDataContractColumnsQuantity = simpleTestData.Models.Max(x => x.Contracts.Count) * contractsFieldsQuantity;
 
+            List<string> parentColumnsNames = simpleTestData.ConfigurationBuilder.Value.ColumnsMap.Keys.ToList();
+            List<List<string>> childsColumnsNames = new List<List<string>>();
+            foreach (ChildTableConfiguration childs in simpleTestData.ConfigurationBuilder.Value.ChildrenMap) {
+                childsColumnsNames.Add(childs.ColumnsMap.Keys.ToList());
+            }
+
             HSSFWorkbook xlsFile;
             using (FileStream file = new FileStream("TestSimple.xls", FileMode.Open, FileAccess.Read)) {
                 xlsFile = new HSSFWorkbook(file);
             }
             ISheet sheet = xlsFile.GetSheetAt(0);
-            for (int rowNumber = 1; rowNumber <= sheet.LastRowNum; rowNumber++) {
-                IRow row = sheet.GetRow(rowNumber);
+            int rowNumber = 0;
+            IRow row = sheet.GetRow(rowNumber);
+
+            int columnNumber;           
+            for (columnNumber = 0; columnNumber < parentColumnsNames.Count; columnNumber++) {
+                Assert.AreEqual(row.GetCell(columnNumber).StringCellValue, parentColumnsNames[columnNumber]);
+            }
+
+            columnNumber = parentColumnsQuantity;
+            for (int childNumber = 0; childNumber < childsColumnsNames.Count; childNumber++) {
+                List<string> child = childsColumnsNames[childNumber];
+                int childFieldsQuantity = 0;
+                switch (childNumber) {
+                    case 0: {
+                        childFieldsQuantity = simpleTestData.Models.Max(x => x.Contacts.Count);
+                        break;
+                    }
+                    case 1: {
+                        childFieldsQuantity = simpleTestData.Models.Max(x => x.Contracts.Count);
+                        break;
+                    }
+                    case 2: {
+                        childFieldsQuantity = simpleTestData.Models.Max(x => x.Products.Count);
+                        break;
+                    }                   
+                }
+                for (int index = 1; index <= childFieldsQuantity; index++) {
+                    for (int childPropertyNumber = 0; childPropertyNumber < child.Count; childPropertyNumber++) {
+                        string childPropertyName = child[childPropertyNumber];
+                        Assert.AreEqual(row.GetCell(columnNumber).StringCellValue, childPropertyName + index);
+                        columnNumber++;
+                    }
+                }
+            }
+
+            for (rowNumber = 1; rowNumber <= sheet.LastRowNum; rowNumber++) {
+                row = sheet.GetRow(rowNumber);
                 Assert.AreNotEqual(row, null);
                 TestDataEntities.ClientExampleModel currentTestDataRow = simpleTestData.Models[rowNumber - 1];
                 Assert.AreEqual(row.GetCell(0).StringCellValue, currentTestDataRow.Title);
