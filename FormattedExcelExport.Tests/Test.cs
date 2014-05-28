@@ -49,26 +49,26 @@ namespace FormattedExcelExport.Tests {
             for (columnNumber = 0; columnNumber < parentColumnsNames.Count; columnNumber++) {
                 Assert.AreEqual(row.GetCell(columnNumber).StringCellValue, parentColumnsNames[columnNumber]);
             }
-
+            
             columnNumber = parentColumnsQuantity;
             for (int childNumber = 0; childNumber < childsColumnsNames.Count; childNumber++) {
                 List<string> child = childsColumnsNames[childNumber];
-                int childFieldsQuantity = 0;
+                int childColumnsQuantity = 0;
                 switch (childNumber) {
                     case 0: {
-                        childFieldsQuantity = simpleTestData.Models.Max(x => x.Contacts.Count);
+                        childColumnsQuantity = simpleTestData.Models.Max(x => x.Contacts.Count);
                         break;
                     }
                     case 1: {
-                        childFieldsQuantity = simpleTestData.Models.Max(x => x.Contracts.Count);
+                        childColumnsQuantity = simpleTestData.Models.Max(x => x.Contracts.Count);
                         break;
                     }
                     case 2: {
-                        childFieldsQuantity = simpleTestData.Models.Max(x => x.Products.Count);
+                        childColumnsQuantity = simpleTestData.Models.Max(x => x.Products.Count);
                         break;
                     }                   
                 }
-                for (int index = 1; index <= childFieldsQuantity; index++) {
+                for (int index = 1; index <= childColumnsQuantity; index++) {
                     for (int childPropertyNumber = 0; childPropertyNumber < child.Count; childPropertyNumber++) {
                         string childPropertyName = child[childPropertyNumber];
                         Assert.AreEqual(row.GetCell(columnNumber).StringCellValue, childPropertyName + index);
