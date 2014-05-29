@@ -2,7 +2,9 @@
 using System.Linq;
 using Extensions;
 using FormattedExcelExport.Configuaration;
+using FormattedExcelExport.Style;
 using NPOI.HSSF.UserModel;
+using NPOI.HSSF.Util;
 using NPOI.SS.UserModel;
 using NUnit.Framework;
 using System.IO;
@@ -79,7 +81,7 @@ namespace FormattedExcelExport.Tests {
 
             for (rowNumber = 1; rowNumber <= sheet.LastRowNum; rowNumber++) {
                 row = sheet.GetRow(rowNumber);
-                Assert.AreNotEqual(row, null);
+                Assert.NotNull(row);
                 TestDataEntities.ClientExampleModel currentTestDataRow = simpleTestData.Models[rowNumber - 1];
                 Assert.AreEqual(row.GetCell(0).StringCellValue, currentTestDataRow.Title);
                 Assert.AreEqual(row.GetCell(1).StringCellValue, currentTestDataRow.RegistrationDate.ToRussianFullString());
@@ -111,41 +113,67 @@ namespace FormattedExcelExport.Tests {
             }
         }
 
-        //[Test]
-        //public void ExcelStyleExport() {
-        //    MemoryStream ms;
-        //    TableConfigurationBuilder<TestDataEntities.ClientExampleModel> confBuilder;
-        //    List<TestDataEntities.ClientExampleModel> models = CreateTestExample(out ms, out confBuilder);
-        //    TableWriterStyle style = new TableWriterStyle();
-        //    ms = TableWriterComplex.Write(new XlsTableWriterComplex(style), models, confBuilder.Value);
-        //    WriteToFile(ms, "TestComplex.xls");
+        [Test]
+        public void ExcelStyleSimpleExport() {
+            TestDataEntities.TestData simpleTestData = TestDataEntities.CreateSimpleTestData(true);
+            TestDataEntities.ClientExampleModel firstTestDataRow = simpleTestData.Models.FirstOrDefault();
+            Assert.NotNull(firstTestDataRow);
+            TableWriterStyle style = new TableWriterStyle();
+            MemoryStream memoryStream = TableWriterSimple.Write(new XlsTableWriterSimple(style), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
+            WriteToFile(memoryStream, "TestStyleSimple.xls");
 
+            ExcelSimpleExport();
 
-        //}
+            HSSFWorkbook xlsFile;
+            using (FileStream file = new FileStream("TestStyleSimple.xls", FileMode.Open, FileAccess.Read)) {
+                xlsFile = new HSSFWorkbook(file);
+            }
+            ISheet sheet = xlsFile.GetSheetAt(0);
 
-        //protected ICellStyle ConvertToNpoiStyle(AdHocCellStyle adHocCellStyle, HSSFWorkbook workbook) {
-        //    IFont cellFont = workbook.CreateFont();
+            short[] red = {255, 0, 0};
+            short[] green = {0, 255, 0};
+            short[] blue = {0, 0, 255};
+            
+            int rowNumber = 0;
+            IRow row = sheet.GetRow(rowNumber);
+            for (int cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
+                IFont cellFont = row.GetCell(cellNumber).CellStyle.GetFont(xlsFile);
 
-        //    cellFont.FontName = adHocCellStyle.FontName;
-        //    cellFont.FontHeightInPoints = adHocCellStyle.FontHeightInPoints;
-        //    cellFont.IsItalic = adHocCellStyle.Italic;
-        //    cellFont.Underline = adHocCellStyle.Underline ? FontUnderlineType.Single : FontUnderlineType.None;
-        //    cellFont.Boldweight = (short)adHocCellStyle.BoldWeight;
+                Assert.AreEqual(cellFont.FontName, "Arial");
+                Assert.AreEqual(cellFont.FontHeightInPoints, 10);
+                Assert.AreEqual(cellFont.Boldweight, (int) FontBoldWeight.Bold);
+            }
+            
+            for (rowNumber = 1; rowNumber < sheet.LastRowNum; rowNumber++) {
+                row = sheet.GetRow(rowNumber);
+                for (int cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
+                    IFont cellFont = row.GetCell(cellNumber).CellStyle.GetFont(xlsFile);
 
-        //    HSSFPalette palette = workbook.GetCustomPalette();
-        //    HSSFColor similarColor = palette.FindSimilarColor(adHocCellStyle.FontColor.Red, adHocCellStyle.FontColor.Green, adHocCellStyle.FontColor.Blue);
-        //    cellFont.Color = similarColor.GetIndex();
-
-        //    ICellStyle cellStyle = workbook.CreateCellStyle();
-        //    cellStyle.SetFont(cellFont);
-
-        //    if (adHocCellStyle.BackgroundColor != null) {
-        //        similarColor = palette.FindSimilarColor(adHocCellStyle.BackgroundColor.Red, adHocCellStyle.BackgroundColor.Green, adHocCellStyle.BackgroundColor.Blue);
-        //        cellStyle.FillForegroundColor = similarColor.GetIndex();
-        //        cellStyle.FillPattern = FillPattern.SolidForeground;
-        //    }
-        //    return cellStyle;
-        //}
+                    if ((rowNumber == 1) & (cellNumber == 2)) {
+                        Assert.AreEqual(cellFont.FontName, "Times New Roman");
+                        Assert.AreEqual(cellFont.FontHeightInPoints, 14);
+                        Assert.AreEqual(cellFont.Boldweight, (int)FontBoldWeight.Bold);
+                    }
+                    else {
+                        Assert.AreEqual(cellFont.FontName, "Arial");
+                        Assert.AreEqual(cellFont.FontHeightInPoints, 10);
+                        Assert.AreEqual(cellFont.Boldweight, (int) FontBoldWeight.Normal);
+                    }
+                }
+            }
+            Assert.IsTrue(EqualsColors((HSSFColor)sheet.GetRow(1).GetCell(2).CellStyle.FillForegroundColorColor, green));
+            Assert.IsTrue(EqualsColors((HSSFColor)sheet.GetRow(1).GetCell(5).CellStyle.FillForegroundColorColor, blue));
+            Assert.IsTrue(EqualsColors((HSSFColor)sheet.GetRow(2).GetCell(0).CellStyle.FillForegroundColorColor, red));
+            Assert.IsTrue(EqualsColors((HSSFColor)sheet.GetRow(2).GetCell(5).CellStyle.FillForegroundColorColor, blue));
+        }
+        //работает только на простых цветах
+        private bool EqualsColors(HSSFColor objectColor, short[] color) {
+            short[] triplet = objectColor.GetTriplet();
+            if ((triplet[0] == color[0]) & (triplet[1] == color[1]) & (triplet[2] == color[2])) {
+                return true;
+            }
+            else return false;
+        }
 
         private static void WriteToFile(MemoryStream ms, string fileName) {
             using (FileStream file = new FileStream(fileName, FileMode.Create, FileAccess.Write)) {
@@ -154,6 +182,12 @@ namespace FormattedExcelExport.Tests {
                 file.Write(bytes, 0, bytes.Length);
                 ms.Close();
             }
+        }
+
+        public enum FontBoldWeight {
+            None = 0,
+            Normal = 400,
+            Bold = 700,
         }
     }
 }
