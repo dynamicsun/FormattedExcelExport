@@ -121,9 +121,6 @@ namespace FormattedExcelExport.Tests {
             TableWriterStyle style = new TableWriterStyle();
             MemoryStream memoryStream = TableWriterSimple.Write(new XlsTableWriterSimple(style), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
             WriteToFile(memoryStream, "TestStyleSimple.xls");
-
-            ExcelSimpleExport();
-
             HSSFWorkbook xlsFile;
             using (FileStream file = new FileStream("TestStyleSimple.xls", FileMode.Open, FileAccess.Read)) {
                 xlsFile = new HSSFWorkbook(file);
@@ -136,9 +133,9 @@ namespace FormattedExcelExport.Tests {
             
             int rowNumber = 0;
             IRow row = sheet.GetRow(rowNumber);
+            Assert.AreEqual(row.Height, 400);
             for (int cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
                 IFont cellFont = row.GetCell(cellNumber).CellStyle.GetFont(xlsFile);
-
                 Assert.AreEqual(cellFont.FontName, "Arial");
                 Assert.AreEqual(cellFont.FontHeightInPoints, 10);
                 Assert.AreEqual(cellFont.Boldweight, (int) FontBoldWeight.Bold);
@@ -161,13 +158,111 @@ namespace FormattedExcelExport.Tests {
                     }
                 }
             }
-            Assert.IsTrue(EqualsColors((HSSFColor)sheet.GetRow(1).GetCell(2).CellStyle.FillForegroundColorColor, green));
-            Assert.IsTrue(EqualsColors((HSSFColor)sheet.GetRow(1).GetCell(5).CellStyle.FillForegroundColorColor, blue));
-            Assert.IsTrue(EqualsColors((HSSFColor)sheet.GetRow(2).GetCell(0).CellStyle.FillForegroundColorColor, red));
-            Assert.IsTrue(EqualsColors((HSSFColor)sheet.GetRow(2).GetCell(5).CellStyle.FillForegroundColorColor, blue));
+            Assert.IsTrue(EqualsSimpleColors((HSSFColor)sheet.GetRow(1).GetCell(2).CellStyle.FillForegroundColorColor, green));
+            Assert.IsTrue(EqualsSimpleColors((HSSFColor)sheet.GetRow(1).GetCell(5).CellStyle.FillForegroundColorColor, blue));
+            Assert.IsTrue(EqualsSimpleColors((HSSFColor)sheet.GetRow(2).GetCell(0).CellStyle.FillForegroundColorColor, red));
+            Assert.IsTrue(EqualsSimpleColors((HSSFColor)sheet.GetRow(2).GetCell(5).CellStyle.FillForegroundColorColor, blue));
         }
-        //работает только на простых цветах
-        private bool EqualsColors(HSSFColor objectColor, short[] color) {
+
+        [Test]
+        public void ExcelComplexExport() {
+            TestDataEntities.TestData simpleTestData = TestDataEntities.CreateSimpleTestData();
+            TestDataEntities.ClientExampleModel firstTestDataRow = simpleTestData.Models.FirstOrDefault();
+            Assert.NotNull(firstTestDataRow);
+            TableWriterStyle style = new TableWriterStyle();
+            MemoryStream memoryStream = TableWriterComplex.Write(new XlsTableWriterComplex(style), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
+            WriteToFile(memoryStream, "TestComplex.xls");
+
+            HSSFWorkbook xlsFile;
+            using (FileStream file = new FileStream("TestComplex.xls", FileMode.Open, FileAccess.Read)) {
+                xlsFile = new HSSFWorkbook(file);
+            }
+            ISheet sheet = xlsFile.GetSheetAt(0);
+            List<string> parentColumnsNames = simpleTestData.ConfigurationBuilder.Value.ColumnsMap.Keys.ToList();
+
+            int modelsQuantity = simpleTestData.Models.Count;
+            int rowNumber = 0;
+            for (int modelNumber = 0; modelNumber < modelsQuantity; modelNumber++) {
+                TestDataEntities.ClientExampleModel currentTestDataRow = simpleTestData.Models[modelNumber];
+                IRow row = sheet.GetRow(rowNumber);
+                ICell cell = row.GetCell(0);
+                Assert.AreEqual(cell.StringCellValue, simpleTestData.ConfigurationBuilder.Value.Title);
+                for (int cellNumber = 1; cellNumber < row.LastCellNum; cellNumber++) {
+                    cell = row.GetCell(cellNumber);
+                    Assert.AreEqual(cell.StringCellValue, parentColumnsNames[cellNumber - 1]);
+                }
+                rowNumber++;
+                row = sheet.GetRow(rowNumber);
+
+                Assert.AreEqual(row.GetCell(1).StringCellValue, currentTestDataRow.Title);
+                Assert.AreEqual(row.GetCell(2).StringCellValue, currentTestDataRow.RegistrationDate.ToRussianFullString());
+                Assert.AreEqual(row.GetCell(3).StringCellValue, currentTestDataRow.Phone);
+                Assert.AreEqual(row.GetCell(4).StringCellValue, currentTestDataRow.Inn);
+                Assert.AreEqual(row.GetCell(5).StringCellValue, currentTestDataRow.Okato);
+                rowNumber++;
+                row = sheet.GetRow(rowNumber);
+
+                int childsQuantity = simpleTestData.ConfigurationBuilder.Value.ChildrenMap.Count;
+
+                for (int childNumber = 0; childNumber < childsQuantity; childNumber++) {
+                    switch (childNumber) {
+                        case 0: {
+                                List<TestDataEntities.ClientExampleModel.Contact> child = currentTestDataRow.Contacts;
+                                TestChildHeader(row, childNumber, simpleTestData);
+                                rowNumber++;
+                                row = sheet.GetRow(rowNumber);
+                                for (int childPropertyNumber = 0; childPropertyNumber < child.Count; childPropertyNumber++) {
+                                    Assert.AreEqual(row.GetCell(1).StringCellValue, child[childPropertyNumber].Title);
+                                    Assert.AreEqual(row.GetCell(2).StringCellValue, child[childPropertyNumber].Email);
+                                    rowNumber++;
+                                    row = sheet.GetRow(rowNumber);
+                                }
+                                break;
+                            }
+                        case 1: {
+                                List<TestDataEntities.ClientExampleModel.Contract> child = currentTestDataRow.Contracts;
+                                TestChildHeader(row, childNumber, simpleTestData);
+                                rowNumber++;
+                                row = sheet.GetRow(rowNumber);
+                                for (int childPropertyNumber = 0; childPropertyNumber < child.Count; childPropertyNumber++) {
+                                    Assert.AreEqual(row.GetCell(1).StringCellValue, child[childPropertyNumber].BeginDate.ToRussianFullString());
+                                    Assert.AreEqual(row.GetCell(2).StringCellValue, child[childPropertyNumber].EndDate.ToRussianFullString());
+                                    Assert.AreEqual(row.GetCell(3).StringCellValue, child[childPropertyNumber].Status.ToRussianString());
+                                    rowNumber++;
+                                    row = sheet.GetRow(rowNumber);
+                                }
+                                break;
+                            }
+                        case 2: {
+                                List<TestDataEntities.ClientExampleModel.Product> child = currentTestDataRow.Products;
+                                TestChildHeader(row, childNumber, simpleTestData);
+                                rowNumber++;
+                                row = sheet.GetRow(rowNumber);
+                                for (int childPropertyNumber = 0; childPropertyNumber < child.Count; childPropertyNumber++) {
+                                    Assert.AreEqual(row.GetCell(1).StringCellValue, child[childPropertyNumber].Title);
+                                    Assert.AreEqual(row.GetCell(2).StringCellValue, child[childPropertyNumber].Amount.ToString());
+                                    rowNumber++;
+                                    row = sheet.GetRow(rowNumber);
+                                }
+                                break;
+                            }
+                    }
+                }
+            }
+        }
+
+        private static void TestChildHeader(IRow row, int childNumber, TestDataEntities.TestData simpleTestData) {
+            string childName = simpleTestData.ConfigurationBuilder.Value.ChildrenMap[childNumber].Title;
+            List<string> childColumnsNames = simpleTestData.ConfigurationBuilder.Value.ChildrenMap[childNumber].ColumnsMap.Keys.ToList();
+
+            Assert.AreEqual(row.GetCell(0).StringCellValue, childName);
+            for (int cellNumber = 1; cellNumber < row.LastCellNum; cellNumber++) {
+                int numberProperty = cellNumber - 1;
+                Assert.AreEqual(row.GetCell(cellNumber).StringCellValue, childColumnsNames[numberProperty]);
+            }
+        }
+
+        private bool EqualsSimpleColors(HSSFColor objectColor, short[] color) {
             short[] triplet = objectColor.GetTriplet();
             if ((triplet[0] == color[0]) & (triplet[1] == color[1]) & (triplet[2] == color[2])) {
                 return true;
