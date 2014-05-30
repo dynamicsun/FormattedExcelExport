@@ -18,9 +18,6 @@ namespace FormattedExcelExport.Tests {
                 condStyle.RegularCell.BackgroundColor = new AdHocCellStyle.Color(255, 0, 0);
                 TableWriterStyle condStyle2 = new TableWriterStyle();
                 condStyle2.RegularCell.BackgroundColor = new AdHocCellStyle.Color(0, 255, 0);
-                condStyle2.RegularCell.BoldWeight = AdHocCellStyle.FontBoldWeight.Bold;
-                condStyle2.RegularCell.FontName = "Times New Roman";
-                condStyle2.RegularCell.FontHeightInPoints = 14;
                 TableWriterStyle condStyle3 = new TableWriterStyle();
                 condStyle3.RegularChildCell.BackgroundColor = new AdHocCellStyle.Color(0, 0, 255);
                 

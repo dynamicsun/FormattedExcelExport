@@ -145,17 +145,9 @@ namespace FormattedExcelExport.Tests {
                 row = sheet.GetRow(rowNumber);
                 for (int cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
                     IFont cellFont = row.GetCell(cellNumber).CellStyle.GetFont(xlsFile);
-
-                    if ((rowNumber == 1) & (cellNumber == 2)) {
-                        Assert.AreEqual(cellFont.FontName, "Times New Roman");
-                        Assert.AreEqual(cellFont.FontHeightInPoints, 14);
-                        Assert.AreEqual(cellFont.Boldweight, (int)FontBoldWeight.Bold);
-                    }
-                    else {
-                        Assert.AreEqual(cellFont.FontName, "Arial");
-                        Assert.AreEqual(cellFont.FontHeightInPoints, 10);
-                        Assert.AreEqual(cellFont.Boldweight, (int) FontBoldWeight.Normal);
-                    }
+                    Assert.AreEqual(cellFont.FontName, "Arial");
+                    Assert.AreEqual(cellFont.FontHeightInPoints, 10);
+                    Assert.AreEqual(cellFont.Boldweight, (int)FontBoldWeight.Normal);
                 }
             }
             Assert.IsTrue(EqualsSimpleColors((HSSFColor)sheet.GetRow(1).GetCell(2).CellStyle.FillForegroundColorColor, green));
@@ -246,6 +238,57 @@ namespace FormattedExcelExport.Tests {
                                 }
                                 break;
                             }
+                    }
+                }
+            }
+        }
+
+        [Test]
+        public void ExcelStyleComplexExport() {
+            TestDataEntities.TestData simpleTestData = TestDataEntities.CreateSimpleTestData(true);
+            TestDataEntities.ClientExampleModel firstTestDataRow = simpleTestData.Models.FirstOrDefault();
+            Assert.NotNull(firstTestDataRow);
+            TableWriterStyle style = new TableWriterStyle();
+            MemoryStream memoryStream = TableWriterComplex.Write(new XlsTableWriterComplex(style), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
+            WriteToFile(memoryStream, "TestStyleComplex.xls");
+
+            HSSFWorkbook xlsFile;
+            using (FileStream file = new FileStream("TestStyleComplex.xls", FileMode.Open, FileAccess.Read)) {
+                xlsFile = new HSSFWorkbook(file);
+            }
+            ISheet sheet = xlsFile.GetSheetAt(0);
+
+            short[] red = { 255, 0, 0 };
+            short[] green = { 0, 255, 0 };
+            short[] blue = { 0, 0, 255 };
+
+            Assert.IsTrue(EqualsSimpleColors((HSSFColor)sheet.GetRow(1).GetCell(3).CellStyle.FillForegroundColorColor, green));
+            Assert.IsTrue(EqualsSimpleColors((HSSFColor)sheet.GetRow(3).GetCell(1).CellStyle.FillForegroundColorColor, blue));
+            Assert.IsTrue(EqualsSimpleColors((HSSFColor)sheet.GetRow(12).GetCell(1).CellStyle.FillForegroundColorColor, red));
+            Assert.IsTrue(EqualsSimpleColors((HSSFColor)sheet.GetRow(14).GetCell(1).CellStyle.FillForegroundColorColor, blue));
+
+            int modelsQuantity = simpleTestData.Models.Count;
+            int rowNumber = 0;
+            int childsQuantity = 0;
+            for (int modelNumber = 0; modelNumber < modelsQuantity; modelNumber++) {
+                childsQuantity += 5 + simpleTestData.Models[modelNumber].Contacts.Count + simpleTestData.Models[modelNumber].Contracts.Count + simpleTestData.Models[modelNumber].Products.Count;
+                IRow row = sheet.GetRow(rowNumber);
+                Assert.AreEqual(row.Height, 400);
+                for (int cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
+                    IFont cellFont = row.GetCell(cellNumber).CellStyle.GetFont(xlsFile);
+                    Assert.AreEqual(cellFont.FontName, "Arial");
+                    Assert.AreEqual(cellFont.FontHeightInPoints, 10);
+                    Assert.AreEqual(cellFont.Boldweight, (int) FontBoldWeight.Bold);
+                }
+                rowNumber++;
+
+                for (rowNumber = rowNumber; rowNumber < childsQuantity; rowNumber++) {
+                    row = sheet.GetRow(rowNumber);
+                    for (int cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
+                        IFont cellFont = row.GetCell(cellNumber).CellStyle.GetFont(xlsFile);
+                        Assert.AreEqual(cellFont.FontName, "Arial");
+                        Assert.AreEqual(cellFont.FontHeightInPoints, 10);
+                        Assert.AreEqual(cellFont.Boldweight, (int) FontBoldWeight.Normal);
                     }
                 }
             }
