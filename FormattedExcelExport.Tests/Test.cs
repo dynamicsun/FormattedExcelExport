@@ -22,102 +22,44 @@ namespace FormattedExcelExport.Tests {
         public void ExcelReflectionSimpleExport() {
             List<TestDataEntities.ClientExampleModel> models = TestDataEntities.CreateSimpleTestDataModels();
             MemoryStream memoryStream = ReflectionWriterSimple.Write(models, new XlsTableWriterSimple(), new CultureInfo("ru-Ru"));
-            WriteToFile(memoryStream, "TestReflectionSimple.xls");
+            string fileName = "TestReflectionSimple.xls";
+            WriteToFile(memoryStream, fileName);
 
-            ExcelReflectionSimpleExport(models);
+            ExcelReflectionSimpleExport(models, fileName);
         }
 
-        public void ExcelReflectionSimpleExport<T>(List<T> models) {
-            Assert.NotNull(models.FirstOrDefault());
-            IEnumerable<PropertyInfo> nonEnumerableProperties = models.FirstOrDefault().GetType().GetProperties()
-                .Where(x => x.PropertyType == typeof(string) || x.PropertyType == typeof(DateTime) || x.PropertyType == typeof(decimal) || x.PropertyType == typeof(int) || x.PropertyType == typeof(bool));
-
-            IEnumerable<PropertyInfo> enumerableProperties = models.FirstOrDefault().GetType().GetProperties().Where(x => x.PropertyType.IsGenericType && x.PropertyType.GetGenericTypeDefinition() == typeof(List<>));
+        [Test]
+        public void ExcelStyleReflectionSimpleExport() {
+            List<TestDataEntities.ClientExampleModel> models = TestDataEntities.CreateSimpleTestDataModels();
+            TableWriterStyle style = new TableWriterStyle();
+            MemoryStream memoryStream = ReflectionWriterSimple.Write(models, new XlsTableWriterSimple(style), new CultureInfo("ru-Ru"));
+            string fileName = "TestReflectionStyleSimple.xls";
+            WriteToFile(memoryStream, fileName);
 
             HSSFWorkbook xlsFile;
-            using (FileStream file = new FileStream("TestReflectionSimple.xls", FileMode.Open, FileAccess.Read)) {
+            using (FileStream file = new FileStream(fileName, FileMode.Open, FileAccess.Read)) {
                 xlsFile = new HSSFWorkbook(file);
             }
             ISheet sheet = xlsFile.GetSheetAt(0);
+
             int rowNumber = 0;
             IRow row = sheet.GetRow(rowNumber);
-            int cellNumber = 0;
-
-            int[] maxims = new int[enumerableProperties.Count()];
-            for (int i = 0; i < maxims.Count(); i++) {
-                maxims[i] = 0;
+            Assert.AreEqual(row.Height, 400);
+            for (int cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
+                IFont cellFont = row.GetCell(cellNumber).CellStyle.GetFont(xlsFile);
+                Assert.AreEqual(cellFont.FontName, "Arial");
+                Assert.AreEqual(cellFont.FontHeightInPoints, 10);
+                Assert.AreEqual(cellFont.Boldweight, (int)FontBoldWeight.Bold);
             }
 
-            foreach (T model in models) {
-                for (int i = 0; i < enumerableProperties.Count(); i++) {
-                    object nestedModels = enumerableProperties.ElementAt(i).GetValue(model);
-                    IList a = (IList)nestedModels;
-                    if (maxims[i] < ((IList)nestedModels).Count) {
-                        maxims[i] = ((IList)nestedModels).Count;
-                    }
-                }
-            }
-
-            foreach (PropertyInfo property in nonEnumerableProperties) {
-                ExcelExportAttribute attribute = property.GetCustomAttribute<ExcelExportAttribute>();
-                if (attribute != null & attribute.IsExportable) {
-                    Assert.AreEqual(row.GetCell(cellNumber).StringCellValue, attribute.PropertyName);
-                    cellNumber++;
-                }
-            }
-
-            for (int i = 0; i < enumerableProperties.Count(); i++) {
-                PropertyInfo property = enumerableProperties.ElementAt(i);
-                Type propertyType = property.PropertyType;
-                Type listType = propertyType.GetGenericArguments()[0];
-
-                IEnumerable<PropertyInfo> props = listType.GetProperties()
-                .Where(x => x.PropertyType == typeof(string) || x.PropertyType == typeof(DateTime) || x.PropertyType == typeof(decimal) || x.PropertyType == typeof(int) || x.PropertyType == typeof(bool));
-                for (int j = 0; j < maxims[i]; j++) {
-                    foreach (PropertyInfo prop in props) {
-                        ExcelExportAttribute attribute = prop.GetCustomAttribute<ExcelExportAttribute>();
-                        Assert.AreEqual(row.GetCell(cellNumber).StringCellValue, attribute.PropertyName + (j + 1));
-                        cellNumber++;
-                    }
-                }
-            }
-            CultureInfo cultureInfo = new CultureInfo("ru-RU");
-            rowNumber = 1;
-            foreach (T model in models) {
-                cellNumber = 0;
+            for (rowNumber = 1; rowNumber < sheet.LastRowNum; rowNumber++) {
                 row = sheet.GetRow(rowNumber);
-                foreach (PropertyInfo nonEnumerableProperty in nonEnumerableProperties) {
-                    ExcelExportAttribute attribute = nonEnumerableProperty.GetCustomAttribute<ExcelExportAttribute>();
-                    if (attribute != null & attribute.IsExportable) {
-                        string value = ConvertPropertyToString(nonEnumerableProperty, model, cultureInfo);
-                        Assert.AreEqual(row.GetCell(cellNumber).StringCellValue, value);
-                        cellNumber++;
-                    }
+                for (int cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
+                    IFont cellFont = row.GetCell(cellNumber).CellStyle.GetFont(xlsFile);
+                    Assert.AreEqual(cellFont.FontName, "Arial");
+                    Assert.AreEqual(cellFont.FontHeightInPoints, 10);
+                    Assert.AreEqual(cellFont.Boldweight, (int)FontBoldWeight.Normal);
                 }
-
-                for (int i = 0; i < enumerableProperties.Count(); i++) {
-                    PropertyInfo property = enumerableProperties.ElementAt(i);
-                    IList submodels = (IList)property.GetValue(model);
-
-                    Type propertyType = property.PropertyType;
-                    Type listType = propertyType.GetGenericArguments()[0];
-
-                    IEnumerable<PropertyInfo> props = listType.GetProperties()
-                    .Where(x => x.PropertyType == typeof(string) || x.PropertyType == typeof(DateTime) || x.PropertyType == typeof(decimal) || x.PropertyType == typeof(int) || x.PropertyType == typeof(bool));
-
-                    foreach (object submodel in submodels) {
-                        foreach (PropertyInfo prop in props) {
-                            ExcelExportAttribute attribute = prop.GetCustomAttribute<ExcelExportAttribute>();
-                            if (attribute != null & attribute.IsExportable) {
-                                string value = ConvertPropertyToString(prop, submodel, cultureInfo);
-                                Assert.AreEqual(row.GetCell(cellNumber).StringCellValue, value);
-                                cellNumber++;
-                            }
-                        }
-                    }
-                    cellNumber += (maxims[i] - submodels.Count) * props.Count();
-                }
-                rowNumber++;
             }
         }
 
@@ -399,6 +341,101 @@ namespace FormattedExcelExport.Tests {
                         Assert.AreEqual(cellFont.Boldweight, (int) FontBoldWeight.Normal);
                     }
                 }
+            }
+        }
+
+        public void ExcelReflectionSimpleExport<T>(List<T> models, string fileName) {
+            Assert.NotNull(models.FirstOrDefault());
+            IEnumerable<PropertyInfo> nonEnumerableProperties = models.FirstOrDefault().GetType().GetProperties()
+                .Where(x => x.PropertyType == typeof(string) || x.PropertyType == typeof(DateTime) || x.PropertyType == typeof(decimal) || x.PropertyType == typeof(int) || x.PropertyType == typeof(bool));
+
+            IEnumerable<PropertyInfo> enumerableProperties = models.FirstOrDefault().GetType().GetProperties()
+                .Where(x => x.PropertyType.IsGenericType && x.PropertyType.GetGenericTypeDefinition() == typeof(List<>));
+
+            HSSFWorkbook xlsFile;
+            using (FileStream file = new FileStream(fileName, FileMode.Open, FileAccess.Read)) {
+                xlsFile = new HSSFWorkbook(file);
+            }
+            ISheet sheet = xlsFile.GetSheetAt(0);
+            int rowNumber = 0;
+            IRow row = sheet.GetRow(rowNumber);
+            int cellNumber = 0;
+
+            int[] maxims = new int[enumerableProperties.Count()];
+            for (int i = 0; i < maxims.Count(); i++) {
+                maxims[i] = 0;
+            }
+
+            foreach (T model in models) {
+                for (int i = 0; i < enumerableProperties.Count(); i++) {
+                    object nestedModels = enumerableProperties.ElementAt(i).GetValue(model);
+                    IList a = (IList)nestedModels;
+                    if (maxims[i] < ((IList)nestedModels).Count) {
+                        maxims[i] = ((IList)nestedModels).Count;
+                    }
+                }
+            }
+
+            foreach (PropertyInfo property in nonEnumerableProperties) {
+                ExcelExportAttribute attribute = property.GetCustomAttribute<ExcelExportAttribute>();
+                if (attribute != null & attribute.IsExportable) {
+                    Assert.AreEqual(row.GetCell(cellNumber).StringCellValue, attribute.PropertyName);
+                    cellNumber++;
+                }
+            }
+
+            for (int i = 0; i < enumerableProperties.Count(); i++) {
+                PropertyInfo property = enumerableProperties.ElementAt(i);
+                Type propertyType = property.PropertyType;
+                Type listType = propertyType.GetGenericArguments()[0];
+
+                IEnumerable<PropertyInfo> props = listType.GetProperties()
+                .Where(x => x.PropertyType == typeof(string) || x.PropertyType == typeof(DateTime) || x.PropertyType == typeof(decimal) || x.PropertyType == typeof(int) || x.PropertyType == typeof(bool));
+                for (int j = 0; j < maxims[i]; j++) {
+                    foreach (PropertyInfo prop in props) {
+                        ExcelExportAttribute attribute = prop.GetCustomAttribute<ExcelExportAttribute>();
+                        Assert.AreEqual(row.GetCell(cellNumber).StringCellValue, attribute.PropertyName + (j + 1));
+                        cellNumber++;
+                    }
+                }
+            }
+            CultureInfo cultureInfo = new CultureInfo("ru-RU");
+            rowNumber = 1;
+            foreach (T model in models) {
+                cellNumber = 0;
+                row = sheet.GetRow(rowNumber);
+                foreach (PropertyInfo nonEnumerableProperty in nonEnumerableProperties) {
+                    ExcelExportAttribute attribute = nonEnumerableProperty.GetCustomAttribute<ExcelExportAttribute>();
+                    if (attribute != null & attribute.IsExportable) {
+                        string value = ConvertPropertyToString(nonEnumerableProperty, model, cultureInfo);
+                        Assert.AreEqual(row.GetCell(cellNumber).StringCellValue, value);
+                        cellNumber++;
+                    }
+                }
+
+                for (int i = 0; i < enumerableProperties.Count(); i++) {
+                    PropertyInfo property = enumerableProperties.ElementAt(i);
+                    IList submodels = (IList)property.GetValue(model);
+
+                    Type propertyType = property.PropertyType;
+                    Type listType = propertyType.GetGenericArguments()[0];
+
+                    IEnumerable<PropertyInfo> props = listType.GetProperties()
+                    .Where(x => x.PropertyType == typeof(string) || x.PropertyType == typeof(DateTime) || x.PropertyType == typeof(decimal) || x.PropertyType == typeof(int) || x.PropertyType == typeof(bool));
+
+                    foreach (object submodel in submodels) {
+                        foreach (PropertyInfo prop in props) {
+                            ExcelExportAttribute attribute = prop.GetCustomAttribute<ExcelExportAttribute>();
+                            if (attribute != null & attribute.IsExportable) {
+                                string value = ConvertPropertyToString(prop, submodel, cultureInfo);
+                                Assert.AreEqual(row.GetCell(cellNumber).StringCellValue, value);
+                                cellNumber++;
+                            }
+                        }
+                    }
+                    cellNumber += (maxims[i] - submodels.Count) * props.Count();
+                }
+                rowNumber++;
             }
         }
 
