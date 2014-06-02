@@ -66,7 +66,7 @@ namespace FormattedExcelExport.Tests {
                 return confBuilder;
             }
         }
-        private static List<ClientExampleModel> CreateSimpleTestDataModels() {
+        internal static List<ClientExampleModel> CreateSimpleTestDataModels() {
             return new List<ClientExampleModel> {
 				new ClientExampleModel(
 					"Первая компания", 
