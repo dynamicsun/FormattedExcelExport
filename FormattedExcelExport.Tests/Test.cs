@@ -25,7 +25,18 @@ namespace FormattedExcelExport.Tests {
             string fileName = "TestReflectionSimple.xls";
             WriteToFile(memoryStream, fileName);
 
-            ExcelReflectionSimpleExport(models, fileName);
+            ExcelReflectionSimpleExportTest(models, fileName);
+        }
+
+        [Test]
+        public void ExcelReflectionComplexExport() {
+            List<TestDataEntities.ClientExampleModel> models = TestDataEntities.CreateSimpleTestDataModels();
+            TableWriterStyle style = new TableWriterStyle();
+            MemoryStream memoryStream = ReflectionWriterComplex.Write(models, new XlsTableWriterComplex(style), new CultureInfo("ru-Ru"));
+            string fileName = "TestReflectionComplex.xls";
+            WriteToFile(memoryStream, fileName);
+
+            ExcelReflectionComplexExportTest(models, fileName);
         }
 
         [Test]
@@ -97,28 +108,28 @@ namespace FormattedExcelExport.Tests {
             int rowNumber = 0;
             IRow row = sheet.GetRow(rowNumber);
 
-            int columnNumber;           
+            int columnNumber;
             for (columnNumber = 0; columnNumber < parentColumnsNames.Count; columnNumber++) {
                 Assert.AreEqual(row.GetCell(columnNumber).StringCellValue, parentColumnsNames[columnNumber]);
             }
-            
+
             columnNumber = parentColumnsQuantity;
             for (int childNumber = 0; childNumber < childsColumnsNames.Count; childNumber++) {
                 List<string> child = childsColumnsNames[childNumber];
                 int childColumnsQuantity = 0;
                 switch (childNumber) {
                     case 0: {
-                        childColumnsQuantity = simpleTestData.Models.Max(x => x.Contacts.Count);
-                        break;
-                    }
+                            childColumnsQuantity = simpleTestData.Models.Max(x => x.Contacts.Count);
+                            break;
+                        }
                     case 1: {
-                        childColumnsQuantity = simpleTestData.Models.Max(x => x.Contracts.Count);
-                        break;
-                    }
+                            childColumnsQuantity = simpleTestData.Models.Max(x => x.Contracts.Count);
+                            break;
+                        }
                     case 2: {
-                        childColumnsQuantity = simpleTestData.Models.Max(x => x.Products.Count);
-                        break;
-                    }                   
+                            childColumnsQuantity = simpleTestData.Models.Max(x => x.Products.Count);
+                            break;
+                        }
                 }
                 for (int index = 1; index <= childColumnsQuantity; index++) {
                     for (int childPropertyNumber = 0; childPropertyNumber < child.Count; childPropertyNumber++) {
@@ -150,7 +161,7 @@ namespace FormattedExcelExport.Tests {
                         currentTestDataRow.Contracts[contractNumber].BeginDate.ToRussianFullString());
                     Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + (contractNumber * contractsFieldsQuantity + 1)).StringCellValue,
                         currentTestDataRow.Contracts[contractNumber].EndDate.ToRussianFullString());
-                    Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + (contractNumber * contractsFieldsQuantity + 2)).StringCellValue, 
+                    Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + (contractNumber * contractsFieldsQuantity + 2)).StringCellValue,
                         currentTestDataRow.Contracts[contractNumber].Status.ToRussianString());
                 }
 
@@ -177,10 +188,10 @@ namespace FormattedExcelExport.Tests {
             }
             ISheet sheet = xlsFile.GetSheetAt(0);
 
-            short[] red = {255, 0, 0};
-            short[] green = {0, 255, 0};
-            short[] blue = {0, 0, 255};
-            
+            short[] red = { 255, 0, 0 };
+            short[] green = { 0, 255, 0 };
+            short[] blue = { 0, 0, 255 };
+
             int rowNumber = 0;
             IRow row = sheet.GetRow(rowNumber);
             Assert.AreEqual(row.Height, 400);
@@ -188,9 +199,9 @@ namespace FormattedExcelExport.Tests {
                 IFont cellFont = row.GetCell(cellNumber).CellStyle.GetFont(xlsFile);
                 Assert.AreEqual(cellFont.FontName, "Arial");
                 Assert.AreEqual(cellFont.FontHeightInPoints, 10);
-                Assert.AreEqual(cellFont.Boldweight, (int) FontBoldWeight.Bold);
+                Assert.AreEqual(cellFont.Boldweight, (int)FontBoldWeight.Bold);
             }
-            
+
             for (rowNumber = 1; rowNumber < sheet.LastRowNum; rowNumber++) {
                 row = sheet.GetRow(rowNumber);
                 for (int cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
@@ -328,7 +339,7 @@ namespace FormattedExcelExport.Tests {
                     IFont cellFont = row.GetCell(cellNumber).CellStyle.GetFont(xlsFile);
                     Assert.AreEqual(cellFont.FontName, "Arial");
                     Assert.AreEqual(cellFont.FontHeightInPoints, 10);
-                    Assert.AreEqual(cellFont.Boldweight, (int) FontBoldWeight.Bold);
+                    Assert.AreEqual(cellFont.Boldweight, (int)FontBoldWeight.Bold);
                 }
                 rowNumber++;
 
@@ -338,13 +349,13 @@ namespace FormattedExcelExport.Tests {
                         IFont cellFont = row.GetCell(cellNumber).CellStyle.GetFont(xlsFile);
                         Assert.AreEqual(cellFont.FontName, "Arial");
                         Assert.AreEqual(cellFont.FontHeightInPoints, 10);
-                        Assert.AreEqual(cellFont.Boldweight, (int) FontBoldWeight.Normal);
+                        Assert.AreEqual(cellFont.Boldweight, (int)FontBoldWeight.Normal);
                     }
                 }
             }
         }
 
-        public void ExcelReflectionSimpleExport<T>(List<T> models, string fileName) {
+        public void ExcelReflectionSimpleExportTest<T>(List<T> models, string fileName) {
             Assert.NotNull(models.FirstOrDefault());
             IEnumerable<PropertyInfo> nonEnumerableProperties = models.FirstOrDefault().GetType().GetProperties()
                 .Where(x => x.PropertyType == typeof(string) || x.PropertyType == typeof(DateTime) || x.PropertyType == typeof(decimal) || x.PropertyType == typeof(int) || x.PropertyType == typeof(bool));
@@ -439,6 +450,89 @@ namespace FormattedExcelExport.Tests {
             }
         }
 
+        public void ExcelReflectionComplexExportTest<T>(List<T> models, string fileName) {
+            Assert.NotNull(models.FirstOrDefault());
+            IEnumerable<PropertyInfo> nonEnumerableProperties = models.FirstOrDefault().GetType().GetProperties()
+                .Where(x => x.PropertyType == typeof(string) || x.PropertyType == typeof(DateTime) || x.PropertyType == typeof(decimal) || x.PropertyType == typeof(int) || x.PropertyType == typeof(bool));
+
+            IEnumerable<PropertyInfo> enumerableProperties = models.FirstOrDefault().GetType().GetProperties()
+                .Where(x => x.PropertyType.IsGenericType && x.PropertyType.GetGenericTypeDefinition() == typeof(List<>));
+
+            HSSFWorkbook xlsFile;
+            using (FileStream file = new FileStream(fileName, FileMode.Open, FileAccess.Read)) {
+                xlsFile = new HSSFWorkbook(file);
+            }
+            ISheet sheet = xlsFile.GetSheetAt(0);
+            int rowNumber = 0;
+            IRow row = sheet.GetRow(rowNumber);
+            int cellNumber = 0;
+            CultureInfo cultureInfo = new CultureInfo("ru-RU");
+            foreach (T model in models) {
+                Assert.AreEqual(row.GetCell(cellNumber).StringCellValue, model.GetType().GetCustomAttribute<ExcelExportClassNameAttribute>().Name);
+                cellNumber++;
+
+                foreach (PropertyInfo nonEnumerableProperty in nonEnumerableProperties) {
+                    ExcelExportAttribute attribute = nonEnumerableProperty.GetCustomAttribute<ExcelExportAttribute>();
+                    if (attribute != null & attribute.IsExportable) {
+                        Assert.AreEqual(row.GetCell(cellNumber).StringCellValue, attribute.PropertyName);
+                        cellNumber++;
+                    }
+                }
+                rowNumber++;
+                cellNumber = 1;
+
+                row = sheet.GetRow(rowNumber);
+                foreach (PropertyInfo nonEnumerableProperty in nonEnumerableProperties) {
+                    ExcelExportAttribute attribute = nonEnumerableProperty.GetCustomAttribute<ExcelExportAttribute>();
+                    if (attribute != null & attribute.IsExportable) {
+                        string value = ConvertPropertyToString(nonEnumerableProperty, model, cultureInfo);
+                        Assert.AreEqual(row.GetCell(cellNumber).StringCellValue, value);
+                        cellNumber++;
+                    }
+                }
+                rowNumber++;
+                cellNumber = 0;
+
+                row = sheet.GetRow(rowNumber);
+                foreach (PropertyInfo property in enumerableProperties) {
+                    Type propertyType = property.PropertyType;
+                    Type listType = propertyType.GetGenericArguments()[0];
+
+                    IEnumerable<PropertyInfo> props = listType.GetProperties()
+                    .Where(x => x.PropertyType == typeof(string) || x.PropertyType == typeof(DateTime) || x.PropertyType == typeof(decimal) || x.PropertyType == typeof(int) || x.PropertyType == typeof(bool));
+                    IList submodels = (IList)property.GetValue(model);
+                    if (submodels.Count != 0) {
+                        string submodelName = submodels[0].GetType().GetCustomAttribute<ExcelExportClassNameAttribute>().Name;
+                        Assert.AreEqual(row.GetCell(cellNumber).StringCellValue, submodelName);
+                    }
+                    cellNumber++;
+                    foreach (PropertyInfo prop in props) {
+                        var attribute1 = prop.GetCustomAttribute<ExcelExportAttribute>();
+                        Assert.AreEqual(row.GetCell(cellNumber).StringCellValue, attribute1.PropertyName);
+                        cellNumber++;
+                    }
+                    rowNumber++;
+                    row = sheet.GetRow(rowNumber);
+                    if (((IList)property.GetValue(model)).Count != 0) {
+                        foreach (object submodel in submodels) {
+                            cellNumber = 1;
+                            foreach (PropertyInfo prop in props) {
+                                ExcelExportAttribute attribute = prop.GetCustomAttribute<ExcelExportAttribute>();
+                                if (attribute != null & attribute.IsExportable) {
+                                    string value = ConvertPropertyToString(prop, submodel, cultureInfo);
+                                    Assert.AreEqual(row.GetCell(cellNumber).StringCellValue, value);
+                                    cellNumber++;
+                                }
+                            }
+                            rowNumber++;
+                            row = sheet.GetRow(rowNumber);
+                        }
+                        cellNumber = 0;
+                    } else cellNumber = 0;
+                }
+            }
+        }
+
         private static string ConvertPropertyToString<T>(PropertyInfo nonEnumerableProperty, T model, CultureInfo cultureInfo) {
             string propertyTypeName = nonEnumerableProperty.PropertyType.Name;
             string value = String.Empty;
@@ -477,8 +571,7 @@ namespace FormattedExcelExport.Tests {
             short[] triplet = objectColor.GetTriplet();
             if ((triplet[0] == color[0]) & (triplet[1] == color[1]) & (triplet[2] == color[2])) {
                 return true;
-            }
-            else return false;
+            } else return false;
         }
 
         private static void WriteToFile(MemoryStream ms, string fileName) {
