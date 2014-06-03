@@ -19,62 +19,6 @@ namespace FormattedExcelExport.Tests {
     [TestFixture]
     public class Test {
         [Test]
-        public void ExcelReflectionSimpleExport() {
-            List<TestDataEntities.ClientExampleModel> models = TestDataEntities.CreateSimpleTestDataModels();
-            MemoryStream memoryStream = ReflectionWriterSimple.Write(models, new XlsTableWriterSimple(), new CultureInfo("ru-Ru"));
-            string fileName = "TestReflectionSimple.xls";
-            WriteToFile(memoryStream, fileName);
-
-            ExcelReflectionSimpleExportTest(models, fileName);
-        }
-
-        [Test]
-        public void ExcelReflectionComplexExport() {
-            List<TestDataEntities.ClientExampleModel> models = TestDataEntities.CreateSimpleTestDataModels();
-            TableWriterStyle style = new TableWriterStyle();
-            MemoryStream memoryStream = ReflectionWriterComplex.Write(models, new XlsTableWriterComplex(style), new CultureInfo("ru-Ru"));
-            string fileName = "TestReflectionComplex.xls";
-            WriteToFile(memoryStream, fileName);
-
-            ExcelReflectionComplexExportTest(models, fileName);
-        }
-
-        [Test]
-        public void ExcelStyleReflectionSimpleExport() {
-            List<TestDataEntities.ClientExampleModel> models = TestDataEntities.CreateSimpleTestDataModels();
-            TableWriterStyle style = new TableWriterStyle();
-            MemoryStream memoryStream = ReflectionWriterSimple.Write(models, new XlsTableWriterSimple(style), new CultureInfo("ru-Ru"));
-            string fileName = "TestReflectionStyleSimple.xls";
-            WriteToFile(memoryStream, fileName);
-
-            HSSFWorkbook xlsFile;
-            using (FileStream file = new FileStream(fileName, FileMode.Open, FileAccess.Read)) {
-                xlsFile = new HSSFWorkbook(file);
-            }
-            ISheet sheet = xlsFile.GetSheetAt(0);
-
-            int rowNumber = 0;
-            IRow row = sheet.GetRow(rowNumber);
-            Assert.AreEqual(row.Height, 400);
-            for (int cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
-                IFont cellFont = row.GetCell(cellNumber).CellStyle.GetFont(xlsFile);
-                Assert.AreEqual(cellFont.FontName, "Arial");
-                Assert.AreEqual(cellFont.FontHeightInPoints, 10);
-                Assert.AreEqual(cellFont.Boldweight, (int)FontBoldWeight.Bold);
-            }
-
-            for (rowNumber = 1; rowNumber < sheet.LastRowNum; rowNumber++) {
-                row = sheet.GetRow(rowNumber);
-                for (int cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
-                    IFont cellFont = row.GetCell(cellNumber).CellStyle.GetFont(xlsFile);
-                    Assert.AreEqual(cellFont.FontName, "Arial");
-                    Assert.AreEqual(cellFont.FontHeightInPoints, 10);
-                    Assert.AreEqual(cellFont.Boldweight, (int)FontBoldWeight.Normal);
-                }
-            }
-        }
-
-        [Test]
         public void ExcelSimpleExport() {
             TestDataEntities.TestData simpleTestData = TestDataEntities.CreateSimpleTestData();
             TestDataEntities.ClientExampleModel firstTestDataRow = simpleTestData.Models.FirstOrDefault();
@@ -196,19 +140,13 @@ namespace FormattedExcelExport.Tests {
             IRow row = sheet.GetRow(rowNumber);
             Assert.AreEqual(row.Height, 400);
             for (int cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
-                IFont cellFont = row.GetCell(cellNumber).CellStyle.GetFont(xlsFile);
-                Assert.AreEqual(cellFont.FontName, "Arial");
-                Assert.AreEqual(cellFont.FontHeightInPoints, 10);
-                Assert.AreEqual(cellFont.Boldweight, (int)FontBoldWeight.Bold);
+                TestFont(xlsFile, sheet, rowNumber, cellNumber, "Arial", 10, FontBoldWeight.Bold);
             }
 
             for (rowNumber = 1; rowNumber < sheet.LastRowNum; rowNumber++) {
                 row = sheet.GetRow(rowNumber);
                 for (int cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
-                    IFont cellFont = row.GetCell(cellNumber).CellStyle.GetFont(xlsFile);
-                    Assert.AreEqual(cellFont.FontName, "Arial");
-                    Assert.AreEqual(cellFont.FontHeightInPoints, 10);
-                    Assert.AreEqual(cellFont.Boldweight, (int)FontBoldWeight.Normal);
+                    TestFont(xlsFile, sheet, rowNumber, cellNumber, "Arial", 10, FontBoldWeight.Normal);
                 }
             }
             Assert.IsTrue(EqualsSimpleColors((HSSFColor)sheet.GetRow(1).GetCell(2).CellStyle.FillForegroundColorColor, green));
@@ -336,23 +274,79 @@ namespace FormattedExcelExport.Tests {
                 IRow row = sheet.GetRow(rowNumber);
                 Assert.AreEqual(row.Height, 400);
                 for (int cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
-                    IFont cellFont = row.GetCell(cellNumber).CellStyle.GetFont(xlsFile);
-                    Assert.AreEqual(cellFont.FontName, "Arial");
-                    Assert.AreEqual(cellFont.FontHeightInPoints, 10);
-                    Assert.AreEqual(cellFont.Boldweight, (int)FontBoldWeight.Bold);
+                    TestFont(xlsFile, sheet, rowNumber, cellNumber, "Arial", 10, FontBoldWeight.Bold);
                 }
                 rowNumber++;
 
                 for (rowNumber = rowNumber; rowNumber < childsQuantity; rowNumber++) {
                     row = sheet.GetRow(rowNumber);
                     for (int cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
-                        IFont cellFont = row.GetCell(cellNumber).CellStyle.GetFont(xlsFile);
-                        Assert.AreEqual(cellFont.FontName, "Arial");
-                        Assert.AreEqual(cellFont.FontHeightInPoints, 10);
-                        Assert.AreEqual(cellFont.Boldweight, (int)FontBoldWeight.Normal);
+                        TestFont(xlsFile, sheet, rowNumber, cellNumber, "Arial", 10, FontBoldWeight.Normal);
                     }
                 }
             }
+        }
+
+        [Test]
+        public void ExcelReflectionSimpleExport() {
+            List<TestDataEntities.ClientExampleModel> models = TestDataEntities.CreateSimpleTestDataModels();
+            MemoryStream memoryStream = ReflectionWriterSimple.Write(models, new XlsTableWriterSimple(), new CultureInfo("ru-Ru"));
+            string fileName = "TestReflectionSimple.xls";
+            WriteToFile(memoryStream, fileName);
+
+            ExcelReflectionSimpleExportTest(models, fileName);
+        }
+
+        [Test]
+        public void ExcelStyleReflectionSimpleExport() {
+            List<TestDataEntities.ClientExampleModel> models = TestDataEntities.CreateSimpleTestDataModels();
+            TableWriterStyle style = new TableWriterStyle();
+            MemoryStream memoryStream = ReflectionWriterSimple.Write(models, new XlsTableWriterSimple(style), new CultureInfo("ru-Ru"));
+            string fileName = "TestReflectionStyleSimple.xls";
+            WriteToFile(memoryStream, fileName);
+
+            Assert.NotNull(models.FirstOrDefault());
+
+            HSSFWorkbook xlsFile;
+            using (FileStream file = new FileStream(fileName, FileMode.Open, FileAccess.Read)) {
+                xlsFile = new HSSFWorkbook(file);
+            }
+            ISheet sheet = xlsFile.GetSheetAt(0);
+
+            int rowNumber = 0;
+            IRow row = sheet.GetRow(rowNumber);
+            Assert.AreEqual(row.Height, 400);
+            for (int cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
+                TestFont(xlsFile, sheet, rowNumber, cellNumber, "Arial", 10, FontBoldWeight.Bold);
+            }
+
+            for (rowNumber = 1; rowNumber < sheet.LastRowNum; rowNumber++) {
+                row = sheet.GetRow(rowNumber);
+                for (int cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
+                    TestFont(xlsFile, sheet, rowNumber, cellNumber, "Arial", 10, FontBoldWeight.Normal);
+                }
+            }
+        }
+        [Test]
+        public void ExcelReflectionComplexExport() {
+            List<TestDataEntities.ClientExampleModel> models = TestDataEntities.CreateSimpleTestDataModels();
+            TableWriterStyle style = new TableWriterStyle();
+            MemoryStream memoryStream = ReflectionWriterComplex.Write(models, new XlsTableWriterComplex(style), new CultureInfo("ru-Ru"));
+            string fileName = "TestReflectionComplex.xls";
+            WriteToFile(memoryStream, fileName);
+
+            ExcelReflectionComplexExportTest(models, fileName);
+        }
+
+        [Test]
+        public void ExcelStyleReflectionComplexExport() {
+            List<TestDataEntities.ClientExampleModel> models = TestDataEntities.CreateSimpleTestDataModels();
+            TableWriterStyle style = new TableWriterStyle();
+            MemoryStream memoryStream = ReflectionWriterComplex.Write(models, new XlsTableWriterComplex(style), new CultureInfo("ru-Ru"));
+            string fileName = "TestReflectionStyleComplex.xls";
+            WriteToFile(memoryStream, fileName);
+
+            ExcelStyleReflectionComplexExportTest(models, fileName);
         }
 
         public void ExcelReflectionSimpleExportTest<T>(List<T> models, string fileName) {
@@ -533,6 +527,50 @@ namespace FormattedExcelExport.Tests {
             }
         }
 
+        public void ExcelStyleReflectionComplexExportTest<T>(List<T> models, string fileName) {
+            Assert.NotNull(models.FirstOrDefault());
+            HSSFWorkbook xlsFile;
+            using (FileStream file = new FileStream(fileName, FileMode.Open, FileAccess.Read)) {
+                xlsFile = new HSSFWorkbook(file);
+            }
+            ISheet sheet = xlsFile.GetSheetAt(0);
+
+            int rowNumber = 0;
+            IRow row = sheet.GetRow(rowNumber);
+            foreach (T model in models) {                
+                int cellNumber = 0;
+                Assert.AreEqual(row.Height, 400);
+                for (cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
+                    TestFont(xlsFile, sheet, rowNumber, cellNumber, "Arial", 10, FontBoldWeight.Bold);
+                }
+                rowNumber++;
+                row = sheet.GetRow(rowNumber);
+                IEnumerable<PropertyInfo> enumerableProperties = model.GetType().GetProperties()
+                .Where(x => x.PropertyType.IsGenericType && x.PropertyType.GetGenericTypeDefinition() == typeof(List<>));
+                for (cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
+                    TestFont(xlsFile, sheet, rowNumber, cellNumber, "Arial", 10, FontBoldWeight.Normal);
+                }
+                rowNumber++;
+                row = sheet.GetRow(rowNumber);
+                foreach (PropertyInfo enumerableProperty in enumerableProperties) {
+                    IList childs = (IList) enumerableProperty.GetValue(model);                    
+                    for (cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
+                        TestFont(xlsFile, sheet, rowNumber, cellNumber, "Arial", 10, FontBoldWeight.Normal);
+                    }
+                    rowNumber++;
+
+                    int rowNumberStart = rowNumber;
+                    for (rowNumber = rowNumberStart; rowNumber < rowNumberStart + childs.Count; rowNumber++) {
+                        row = sheet.GetRow(rowNumber);
+                        for (cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
+                            TestFont(xlsFile, sheet, rowNumber, cellNumber, "Arial", 10, FontBoldWeight.Normal);
+                        }
+                    }
+                    row = sheet.GetRow(rowNumber);
+                }
+            }
+        }
+
         private static string ConvertPropertyToString<T>(PropertyInfo nonEnumerableProperty, T model, CultureInfo cultureInfo) {
             string propertyTypeName = nonEnumerableProperty.PropertyType.Name;
             string value = String.Empty;
@@ -581,6 +619,13 @@ namespace FormattedExcelExport.Tests {
                 file.Write(bytes, 0, bytes.Length);
                 ms.Close();
             }
+        }
+
+        private static void TestFont(HSSFWorkbook xlsFile, ISheet sheet, int rowNumber, int cellNumber, string fontName, short fontSize, FontBoldWeight fontBoldWeight) {
+            IFont cellFont = sheet.GetRow(rowNumber).GetCell(cellNumber).CellStyle.GetFont(xlsFile);
+            Assert.AreEqual(cellFont.FontName, fontName);
+            Assert.AreEqual(cellFont.FontHeightInPoints, fontSize);
+            Assert.AreEqual(cellFont.Boldweight, (int)fontBoldWeight);
         }
 
         public enum FontBoldWeight {
