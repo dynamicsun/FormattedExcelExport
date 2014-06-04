@@ -387,7 +387,7 @@ namespace FormattedExcelExport.Tests {
         public void ExcelReflectionSimpleExport() {
             List<TestDataEntities.ClientExampleModel> models = TestDataEntities.CreateSimpleTestDataModels();
             MemoryStream memoryStream = ReflectionWriterSimple.Write(models, new XlsTableWriterSimple(), new CultureInfo("ru-Ru"));
-            string fileName = "TestReflectionSimple.xls";
+            const string fileName = "TestReflectionSimple.xls";
             WriteToFile(memoryStream, fileName);
 
             ExcelReflectionSimpleExportTest(models, fileName);
@@ -398,37 +398,17 @@ namespace FormattedExcelExport.Tests {
             List<TestDataEntities.ClientExampleModel> models = TestDataEntities.CreateSimpleTestDataModels();
             TableWriterStyle style = new TableWriterStyle();
             MemoryStream memoryStream = ReflectionWriterSimple.Write(models, new XlsTableWriterSimple(style), new CultureInfo("ru-Ru"));
-            string fileName = "TestReflectionStyleSimple.xls";
+            const string fileName = "TestReflectionStyleSimple.xls";
             WriteToFile(memoryStream, fileName);
-
-            Assert.NotNull(models.FirstOrDefault());
-
-            HSSFWorkbook xlsFile;
-            using (FileStream file = new FileStream(fileName, FileMode.Open, FileAccess.Read)) {
-                xlsFile = new HSSFWorkbook(file);
-            }
-            ISheet sheet = xlsFile.GetSheetAt(0);
-
-            int rowNumber = 0;
-            IRow row = sheet.GetRow(rowNumber);
-            Assert.AreEqual(row.Height, 400);
-            for (int cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
-                CustomAssert.IsEqualFont(xlsFile, sheet, rowNumber, cellNumber, "Arial", 10, (short)FontBoldWeight.Bold);
-            }
-
-            for (rowNumber = 1; rowNumber < sheet.LastRowNum; rowNumber++) {
-                row = sheet.GetRow(rowNumber);
-                for (int cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
-                    CustomAssert.IsEqualFont(xlsFile, sheet, rowNumber, cellNumber, "Arial", 10, (short)FontBoldWeight.Normal);
-                }
-            }
+         
+            ExcelStyleReflectionSimpleExportStyle(models, fileName);
         }
         [Test]
         public void ExcelReflectionComplexExport() {
             List<TestDataEntities.ClientExampleModel> models = TestDataEntities.CreateSimpleTestDataModels();
             TableWriterStyle style = new TableWriterStyle();
             MemoryStream memoryStream = ReflectionWriterComplex.Write(models, new XlsTableWriterComplex(style), new CultureInfo("ru-Ru"));
-            string fileName = "TestReflectionComplex.xls";
+            const string fileName = "TestReflectionComplex.xls";
             WriteToFile(memoryStream, fileName);
 
             ExcelReflectionComplexExportTest(models, fileName);
@@ -533,6 +513,31 @@ namespace FormattedExcelExport.Tests {
                     cellNumber += (enumerablePropertiesChildrensMaxQuantity[i] - submodels.Count) * listPeroperties.Count();
                 }
                 rowNumber++;
+            }
+        }
+
+        public void ExcelStyleReflectionSimpleExportStyle<T>(List<T> models, string fileName) {
+            T firstModel = models.FirstOrDefault();
+            Assert.NotNull(firstModel);
+
+            HSSFWorkbook xlsFile;
+            using (FileStream file = new FileStream(fileName, FileMode.Open, FileAccess.Read)) {
+                xlsFile = new HSSFWorkbook(file);
+            }
+            ISheet sheet = xlsFile.GetSheetAt(0);
+
+            int rowNumber = 0;
+            IRow row = sheet.GetRow(rowNumber);
+            Assert.AreEqual(row.Height, 400);
+            for (int cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
+                CustomAssert.IsEqualFont(xlsFile, sheet, rowNumber, cellNumber, "Arial", 10, (short)FontBoldWeight.Bold);
+            }
+
+            for (rowNumber = 1; rowNumber < sheet.LastRowNum; rowNumber++) {
+                row = sheet.GetRow(rowNumber);
+                for (int cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
+                    CustomAssert.IsEqualFont(xlsFile, sheet, rowNumber, cellNumber, "Arial", 10, (short)FontBoldWeight.Normal);
+                }
             }
         }
         public void ExcelReflectionComplexExportTest<T>(List<T> models, string fileName) {
