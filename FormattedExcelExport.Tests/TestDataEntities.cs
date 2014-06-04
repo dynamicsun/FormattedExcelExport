@@ -21,7 +21,6 @@ namespace FormattedExcelExport.Tests {
                 TableWriterStyle condStyle3 = new TableWriterStyle();
                 condStyle3.RegularChildCell.BackgroundColor = new AdHocCellStyle.Color(0, 0, 255);
                 
-
                 TableConfigurationBuilder<ClientExampleModel> confBuilder = new TableConfigurationBuilder<ClientExampleModel>("Клиент", new CultureInfo("ru-RU"));
                 confBuilder.RegisterColumn("Название", x => x.Title, new TableConfigurationBuilder<ClientExampleModel>.ConditionTheme(condStyle, x => x.Title == "Вторая компания"));
                 confBuilder.RegisterColumn("Дата регистрации", x => x.RegistrationDate);
@@ -123,6 +122,7 @@ namespace FormattedExcelExport.Tests {
             private readonly List<Contact> _contacts;
             private readonly List<Contract> _contracts;
             private readonly List<Product> _products;
+
             public ClientExampleModel(string title, DateTime registrationDate, string phone, string inn, string okato, decimal revenue, int employeeCount, bool isActive, List<Contact> contacts, List<Contract> contracts, List<Product> products) {
                 _title = title;
                 _registrationDate = registrationDate;
