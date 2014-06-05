@@ -497,7 +497,7 @@ namespace FormattedExcelExport.Tests {
                 public int Field2 {
                     get { return _field2; }
                 }
-                [ExcelExport(PropertyName = "Поле2")]
+                [ExcelExport(PropertyName = "Поле3")]
                 public bool  Field3 {
                     get { return _field3; }
                 }

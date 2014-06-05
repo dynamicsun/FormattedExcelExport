@@ -391,6 +391,15 @@ namespace FormattedExcelExport.Tests {
             WriteToFile(memoryStream, fileName);
 
             ExcelReflectionSimpleExportTest(models, fileName);
+
+            List<ReflectionTestDataEntities> test = new List<ReflectionTestDataEntities>();
+            Random rand = new Random();
+            for (int i = 2; i < rand.Next(10, 30); i++) {
+                test.Add(new ReflectionTestDataEntities());
+            }
+            memoryStream = ReflectionWriterSimple.Write(test, new XlsTableWriterSimple(), new CultureInfo("ru-Ru"));
+            WriteToFile(memoryStream, "RandomTestReflectionSimple.xls");
+            ExcelReflectionSimpleExportTest(test, "RandomTestReflectionSimple.xls");
         }
 
         [Test]
@@ -401,7 +410,16 @@ namespace FormattedExcelExport.Tests {
             const string fileName = "TestReflectionStyleSimple.xls";
             WriteToFile(memoryStream, fileName);
          
-            ExcelStyleReflectionSimpleExportStyle(models, fileName);
+            ExcelStyleReflectionSimpleExportTest(models, fileName);
+
+            List<ReflectionTestDataEntities> test = new List<ReflectionTestDataEntities>();
+            Random rand = new Random();
+            for (int i = 2; i < rand.Next(10, 30); i++) {
+                test.Add(new ReflectionTestDataEntities());
+            }
+            memoryStream = ReflectionWriterSimple.Write(test, new XlsTableWriterSimple(), new CultureInfo("ru-Ru"));
+            WriteToFile(memoryStream, "RandomStyleTestReflectionSimple.xls");
+            ExcelStyleReflectionSimpleExportTest(test, "RandomStyleTestReflectionSimple.xls");
         }
         [Test]
         public void ExcelReflectionComplexExport() {
@@ -412,6 +430,15 @@ namespace FormattedExcelExport.Tests {
             WriteToFile(memoryStream, fileName);
 
             ExcelReflectionComplexExportTest(models, fileName);
+
+            List<ReflectionTestDataEntities> test = new List<ReflectionTestDataEntities>();
+            Random rand = new Random();
+            for (int i = 2; i < rand.Next(10, 30); i++) {
+                test.Add(new ReflectionTestDataEntities());
+            }
+            memoryStream = ReflectionWriterComplex.Write(test, new XlsTableWriterComplex(style), new CultureInfo("ru-Ru"));
+            WriteToFile(memoryStream, "RandomTestReflectionComplex.xls");
+            ExcelReflectionComplexExportTest(test, "RandomTestReflectionComplex.xls");
         }
 
         [Test]
@@ -423,6 +450,15 @@ namespace FormattedExcelExport.Tests {
             WriteToFile(memoryStream, fileName);
 
             ExcelStyleReflectionComplexExportTest(models, fileName);
+
+            List<ReflectionTestDataEntities> test = new List<ReflectionTestDataEntities>();
+            Random rand = new Random();
+            for (int i = 2; i < rand.Next(10, 30); i++) {
+                test.Add(new ReflectionTestDataEntities());
+            }
+            memoryStream = ReflectionWriterComplex.Write(test, new XlsTableWriterComplex(style), new CultureInfo("ru-Ru"));
+            WriteToFile(memoryStream, "RandomStyleTestReflectionComplex.xls");
+            ExcelStyleReflectionComplexExportTest(test, "RandomStyleTestReflectionComplex.xls");
         }
 
         public void ExcelReflectionSimpleExportTest<T>(List<T> models, string fileName) {
@@ -516,7 +552,7 @@ namespace FormattedExcelExport.Tests {
             }
         }
 
-        public void ExcelStyleReflectionSimpleExportStyle<T>(List<T> models, string fileName) {
+        public void ExcelStyleReflectionSimpleExportTest<T>(List<T> models, string fileName) {
             T firstModel = models.FirstOrDefault();
             Assert.NotNull(firstModel);
 
