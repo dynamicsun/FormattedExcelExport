@@ -8,35 +8,53 @@ using NPOI.SS.UserModel;
 
 namespace FormattedExcelExport.TableWriters {
 	public sealed class XlsTableWriterComplex : XlsTableWriterBase, ITableWriterComplex {
+	    private int _rowIndex;
+	    private string[] _lastParentHeader;
+	    private string[] _lastChildHeader;
 		private byte _colorIndex;
+	    private ICellStyle _childHeaderCellStyle;
 
-		public XlsTableWriterComplex(TableWriterStyle style) : base(style) { }
-		public void WriteHeader(params string[] cells) {
+        public XlsTableWriterComplex(TableWriterStyle style) : base(style) {}
+
+	    public int RowIndex {
+	        get { return _rowIndex; }
+	        set {
+	            if (_rowIndex < MaxRowIndex) {
+	                _rowIndex = value;
+	            }
+	            else {
+	                WorkSheet = Workbook.CreateSheet();
+                    _rowIndex = 0;
+	                WriteHeader(_lastParentHeader);
+                    WriteChildHeader(_lastChildHeader);
+	            }
+	        }
+	    }
+
+	    public void WriteHeader(params string[] cells) {
 			IRow row = WorkSheet.CreateRow(RowIndex);
 			row.Height = Style.HeaderHeight;
-
-			ICellStyle cellStyle = ConvertToNpoiStyle(Style.HeaderCell);
-			cellStyle.VerticalAlignment = VerticalAlignment.Top;
+			
+			HeaderCellStyle.VerticalAlignment = VerticalAlignment.Top;
 
 			int columnIndex = 0;
 			foreach (string cell in cells) {
 				ICell newCell = row.CreateCell(columnIndex);
 				newCell.SetCellValue(cell);
-				newCell.CellStyle = cellStyle;
+				newCell.CellStyle = HeaderCellStyle;
 				columnIndex++;
 			}
+	        _lastParentHeader = cells;
 			RowIndex++;
 			_colorIndex = 0;
 		}
 		public void WriteRow(IEnumerable<KeyValuePair<string, TableWriterStyle>> cells, bool prependDelimeter = false) {
 			IRow row = WorkSheet.CreateRow(RowIndex);
-			ICellStyle cellStyle = ConvertToNpoiStyle(Style.RegularCell);
-
 			int columnIndex = 0;
 			if (prependDelimeter) {
 				ICell newCell = row.CreateCell(columnIndex);
 				newCell.SetCellValue("");
-				newCell.CellStyle = cellStyle;
+				newCell.CellStyle = CellStyle;
 
 				columnIndex++;
 			}
@@ -49,7 +67,7 @@ namespace FormattedExcelExport.TableWriters {
 					newCell.CellStyle = customCellStyle;
 				}
 				else {
-					newCell.CellStyle = cellStyle;
+					newCell.CellStyle = CellStyle;
 				}
 				columnIndex++;
 			}
@@ -59,7 +77,7 @@ namespace FormattedExcelExport.TableWriters {
 			IRow row = WorkSheet.CreateRow(RowIndex);
 			int columnIndex = 0;
 			List<string> cellsList = cells.ToList();
-			ICellStyle cellStyle = ConvertToNpoiStyle(Style.HeaderChildCell);
+			_childHeaderCellStyle = ConvertToNpoiStyle(Style.HeaderChildCell);
 
 			if (_colorIndex >= Style.ColorsCollection.Count)
 				_colorIndex = 0;
@@ -68,29 +86,28 @@ namespace FormattedExcelExport.TableWriters {
 			if (color != null) {
 				HSSFPalette palette = Workbook.GetCustomPalette();
 				HSSFColor similarColor = palette.FindSimilarColor(color.Red, color.Green, color.Blue);
-				cellStyle.FillForegroundColor = similarColor.GetIndex();
-				cellStyle.FillPattern = FillPattern.SolidForeground;
+				_childHeaderCellStyle.FillForegroundColor = similarColor.GetIndex();
+				_childHeaderCellStyle.FillPattern = FillPattern.SolidForeground;
 				_colorIndex++;
 			}
 
 			foreach (string cell in cellsList) {
 				ICell newCell = row.CreateCell(columnIndex);
 				newCell.SetCellValue(cell);
-				newCell.CellStyle = cellStyle;
+				newCell.CellStyle = _childHeaderCellStyle;
 				columnIndex++;
 			}
+		    _lastChildHeader = cells;
 			RowIndex++;
 		}
 		public void WriteChildRow(IEnumerable<KeyValuePair<string, TableWriterStyle>> cells, bool prependDelimeter = false) {
 			IRow row = WorkSheet.CreateRow(RowIndex);
 
-			ICellStyle cellStyle = ConvertToNpoiStyle(Style.RegularChildCell);
-
 			int columnIndex = 0;
 			if (prependDelimeter) {
 				ICell newCell = row.CreateCell(columnIndex);
 				newCell.SetCellValue("");
-				newCell.CellStyle = cellStyle;
+				newCell.CellStyle = CellStyle;
 
 				columnIndex++;
 			}
@@ -103,7 +120,7 @@ namespace FormattedExcelExport.TableWriters {
 					newCell.CellStyle = customCellStyle;
 				}
 				else {
-					newCell.CellStyle = cellStyle;
+					newCell.CellStyle = CellStyle;
 				}
 				columnIndex++;
 			}

@@ -9,6 +9,7 @@ namespace FormattedExcelExport.Tests {
     internal static class NotRelectionTestDataEntities {
         internal static TestData CreateSimpleTestData(bool style = false) {
             TableConfigurationBuilder<ClientExampleModel> dataStructure = CreateSimpleTestDataConfigurationBuilder(style);           
+            //var data = CreateSimpleTestDataModels();
             var data = CreateSimpleTestDataModels();
             return new TestData(dataStructure, data);
         }
@@ -109,6 +110,54 @@ namespace FormattedExcelExport.Tests {
                 return confBuilder;
             }
         }
+
+        internal static List<ClientExampleModel> CreateTestRowOverflowDataModels() {
+            List<ClientExampleModel> models = new List<ClientExampleModel>();
+            for (int i = 0; i < 100000; i++) {
+                models.Add(new ClientExampleModel(
+                    "Первая компания",
+                    DateTime.Now,
+                    "+7 333 4442 00",
+                    "9040043234562",
+                    "OPEEHBSSDD",
+                    2352666,
+                    336,
+                    true,
+                    1234,
+                    "kdkdkd",
+                    true,
+                    4321,
+                    "ddd",
+                    false,
+                    8979,
+                    new List<ClientExampleModel.Contact> {
+						new ClientExampleModel.Contact("Ольга", "olga@mail.ru"),
+						new ClientExampleModel.Contact("Иван", "ivan@mail.ru")
+					},
+                    new List<ClientExampleModel.Contract> {
+						new ClientExampleModel.Contract(new DateTime(1999, 1, 7), new DateTime(2009, 11, 9), false),
+						new ClientExampleModel.Contract(new DateTime(1989, 2, 4), DateTime.Now, true)
+					},
+                    new List<ClientExampleModel.Product> {
+						new ClientExampleModel.Product("Картофель", 20),
+						new ClientExampleModel.Product("Лук", 100)
+					},
+                    new List<ClientExampleModel.EnumProp1> {
+                        new ClientExampleModel.EnumProp1("dsdsd", 432, true),
+                        new ClientExampleModel.EnumProp1("dd", 36, true),
+                        new ClientExampleModel.EnumProp1("yap", 310, false),
+                    },
+                    new List<ClientExampleModel.EnumProp2> {
+                        new ClientExampleModel.EnumProp2("s", 1, true, "b", 3),
+                        new ClientExampleModel.EnumProp2("t", 2, false, "a", 5),
+                        new ClientExampleModel.EnumProp2("d", 3, true, "d", 6),
+                        new ClientExampleModel.EnumProp2("s", 6, true, "ds", 7),
+                        new ClientExampleModel.EnumProp2("yaoo", 7, false, "d", 5)
+                    }));
+            }
+            return models; 
+        }
+
         internal static List<ClientExampleModel> CreateSimpleTestDataModels() {
             return new List<ClientExampleModel> {
 				new ClientExampleModel(

@@ -7,9 +7,9 @@ using NPOI.XSSF.UserModel;
 
 namespace FormattedExcelExport.TableWriters {
 	public abstract class XlsxTableWriterBase {
-		protected int RowIndex;
+        protected const int MaxRowIndex = 1048575;
 		protected readonly XSSFWorkbook Workbook;
-		protected readonly ISheet WorkSheet;
+		protected ISheet WorkSheet;
 		protected readonly TableWriterStyle Style;
 
 		protected XlsxTableWriterBase(TableWriterStyle style) {
@@ -19,27 +19,29 @@ namespace FormattedExcelExport.TableWriters {
 		}
 
 		public void AutosizeColumns() {
-			var columnLengths = new List<int>();
+		    for (int sheetNumber = 0; sheetNumber < Workbook.NumberOfSheets; sheetNumber++) {
+		        var columnLengths = new List<int>();
+                WorkSheet = Workbook.GetSheetAt(sheetNumber);
+		        for (int columnNum = 0; columnNum < WorkSheet.GetRow(0).LastCellNum; columnNum++) {
+		            int columnMaximumLength = 0;
+		            for (int rowNum = 0; rowNum <= WorkSheet.LastRowNum; rowNum++) {
+		                IRow currentRow = WorkSheet.GetRow(rowNum);
 
-			for (int columnNum = 0; columnNum < WorkSheet.GetRow(0).LastCellNum; columnNum++) {
-				int columnMaximumLength = 0;
-				for (int rowNum = 0; rowNum <= WorkSheet.LastRowNum; rowNum++) {
-					IRow currentRow = WorkSheet.GetRow(rowNum);
+		                if (!currentRow.Cells.Any()) continue;
+		                ICell cell = currentRow.GetCell(columnNum);
+		                if (cell == null) continue;
 
-					if (!currentRow.Cells.Any()) continue;
-					ICell cell = currentRow.GetCell(columnNum);
-					if (cell == null) continue;
+		                if (cell.StringCellValue.Length > columnMaximumLength)
+		                    columnMaximumLength = cell.StringCellValue.Length;
+		            }
+		            columnLengths.Add(columnMaximumLength);
+		        }
 
-					if (cell.StringCellValue.Length > columnMaximumLength)
-						columnMaximumLength = cell.StringCellValue.Length;
-				}
-				columnLengths.Add(columnMaximumLength);
-			}
-
-			for (int i = 0; i < WorkSheet.GetRow(0).LastCellNum; i++) {
-				int width = columnLengths.ElementAt(i) * Style.FontFactor + Style.FontAbsoluteTerm;
-				WorkSheet.SetColumnWidth(i, width < Style.MaxColumnWidth ? width : Style.MaxColumnWidth);
-			}
+		        for (int i = 0; i < WorkSheet.GetRow(0).LastCellNum; i++) {
+		            int width = columnLengths.ElementAt(i)*Style.FontFactor + Style.FontAbsoluteTerm;
+		            WorkSheet.SetColumnWidth(i, width < Style.MaxColumnWidth ? width : Style.MaxColumnWidth);
+		        }
+		    }
 		}
 
 		protected ICellStyle ConvertToNpoiStyle(AdHocCellStyle adHocCellStyle) {

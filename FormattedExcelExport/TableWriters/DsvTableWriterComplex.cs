@@ -13,7 +13,7 @@ namespace FormattedExcelExport.TableWriters {
 			_delimeter = delimeter;
 		}
 
-		public void WriteHeader(params string[] cells) {
+	    public void WriteHeader(params string[] cells) {
 			WriteRow(false, cells);
 		}
 		public void WriteRow(IEnumerable<KeyValuePair<string, TableWriterStyle>> cells, bool prependDelimeter = false) {

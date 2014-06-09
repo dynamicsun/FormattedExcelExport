@@ -9,8 +9,22 @@ using NPOI.XSSF.UserModel;
 
 namespace FormattedExcelExport.TableWriters {
 	public sealed class XlsxTableWriterSimple : XlsxTableWriterBase, ITableWriterSimple {
-		public XlsxTableWriterSimple(TableWriterStyle style) : base(style) {
-		}
+		public XlsxTableWriterSimple(TableWriterStyle style) : base(style) {}
+        private int _rowIndex;
+        private List<string> _lastHeader;
+
+        public int RowIndex {
+            get { return _rowIndex; }
+            set {
+                if (_rowIndex < MaxRowIndex) {
+                    _rowIndex = value;
+                } else {
+                    WorkSheet = Workbook.CreateSheet();
+                    _rowIndex = 0;
+                    WriteHeader(_lastHeader);                    
+                }
+            }
+        }
 		public void WriteHeader(List<string> cells) {
 			IRow row = WorkSheet.CreateRow(RowIndex);
 			row.Height = Style.HeaderHeight;
@@ -30,6 +44,7 @@ namespace FormattedExcelExport.TableWriters {
 				
 				columnIndex++;
 			}
+		    _lastHeader = cells;
 			RowIndex++;
 		}
 		public void WriteRow(List<KeyValuePair<string, TableWriterStyle>> cells) {

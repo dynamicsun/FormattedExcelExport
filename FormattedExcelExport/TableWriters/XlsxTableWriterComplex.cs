@@ -8,10 +8,30 @@ using NPOI.XSSF.UserModel;
 
 namespace FormattedExcelExport.TableWriters {
 	public sealed class XlsxTableWriterComplex : XlsxTableWriterBase, ITableWriterComplex {
-		private byte _colorIndex;
-		public XlsxTableWriterComplex(TableWriterStyle style)
-			: base(style) {
-		}
+        public XlsxTableWriterComplex(TableWriterStyle style)
+			: base(style) {}
+        private int _rowIndex;
+        private string[] _lastParentHeader;
+        private string[] _lastChildHeader;
+        private byte _colorIndex;
+
+	    public int RowIndex {
+	        get { return _rowIndex; }
+	        set {
+	            if (_rowIndex < MaxRowIndex) {
+	                _rowIndex = value;
+	            }
+	            else {
+                    WorkSheet = Workbook.CreateSheet();
+                    _rowIndex = 0;
+                    WriteHeader(_lastParentHeader);
+                    WriteChildHeader(_lastChildHeader);                    
+	            }
+	        }
+	    }
+
+		
+		
 		public void WriteHeader(params string[] cells) {
 			IRow row = WorkSheet.CreateRow(RowIndex);
 			row.Height = Style.HeaderHeight;
@@ -31,6 +51,7 @@ namespace FormattedExcelExport.TableWriters {
 
 				columnIndex++;
 			}
+		    _lastParentHeader = cells;
 			RowIndex++;
 			_colorIndex = 0;
 		}
@@ -96,6 +117,7 @@ namespace FormattedExcelExport.TableWriters {
 
 				columnIndex++;
 			}
+		    _lastChildHeader = cells;
 			RowIndex++;
 		}
 		public void WriteChildRow(IEnumerable<KeyValuePair<string, TableWriterStyle>> cells, bool prependDelimeter = false) {
