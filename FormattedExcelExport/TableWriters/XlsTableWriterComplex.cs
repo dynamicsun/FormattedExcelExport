@@ -12,9 +12,22 @@ namespace FormattedExcelExport.TableWriters {
 	    private string[] _lastParentHeader;
 	    private string[] _lastChildHeader;
 		private byte _colorIndex;
-	    private ICellStyle _childHeaderCellStyle;
+	    private List<ICellStyle> _childHeaderCellStyleList;
 
-        public XlsTableWriterComplex(TableWriterStyle style) : base(style) {}
+	    public XlsTableWriterComplex(TableWriterStyle style) : base(style) {
+            _childHeaderCellStyleList = new List<ICellStyle>();
+	        for (int i = 0; i < Style.ColorsCollection.Count; i++) {
+	            AdHocCellStyle.Color color = Style.ColorsCollection.ElementAt(i);
+	            if (color != null) {
+	                HSSFPalette palette = Workbook.GetCustomPalette();
+	                HSSFColor similarColor = palette.FindSimilarColor(color.Red, color.Green, color.Blue);
+                    ICellStyle childHeaderCellStyle = ConvertToNpoiStyle(Style.HeaderChildCell);
+	                childHeaderCellStyle.FillForegroundColor = similarColor.GetIndex();
+	                childHeaderCellStyle.FillPattern = FillPattern.SolidForeground;
+                    _childHeaderCellStyleList.Add(childHeaderCellStyle);
+	            }
+	        }
+	    }
 
 	    public int RowIndex {
 	        get { return _rowIndex; }
@@ -77,26 +90,27 @@ namespace FormattedExcelExport.TableWriters {
 			IRow row = WorkSheet.CreateRow(RowIndex);
 			int columnIndex = 0;
 			List<string> cellsList = cells.ToList();
-			_childHeaderCellStyle = ConvertToNpoiStyle(Style.HeaderChildCell);
+			//_childHeaderCellStyle = ConvertToNpoiStyle(Style.HeaderChildCell);
 
 			if (_colorIndex >= Style.ColorsCollection.Count)
 				_colorIndex = 0;
 
-			AdHocCellStyle.Color color = Style.ColorsCollection.ElementAt(_colorIndex);
+			/*AdHocCellStyle.Color color = Style.ColorsCollection.ElementAt(_colorIndex);
 			if (color != null) {
 				HSSFPalette palette = Workbook.GetCustomPalette();
 				HSSFColor similarColor = palette.FindSimilarColor(color.Red, color.Green, color.Blue);
 				_childHeaderCellStyle.FillForegroundColor = similarColor.GetIndex();
 				_childHeaderCellStyle.FillPattern = FillPattern.SolidForeground;
 				_colorIndex++;
-			}
-
+			}*/
+            ICellStyle childHeaderCellStyle = _childHeaderCellStyleList[_colorIndex];
 			foreach (string cell in cellsList) {
 				ICell newCell = row.CreateCell(columnIndex);
 				newCell.SetCellValue(cell);
-				newCell.CellStyle = _childHeaderCellStyle;
+			    newCell.CellStyle = childHeaderCellStyle;
 				columnIndex++;
 			}
+            _colorIndex++;
 		    _lastChildHeader = cells;
 			RowIndex++;
 		}

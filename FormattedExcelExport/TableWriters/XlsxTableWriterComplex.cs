@@ -8,8 +8,8 @@ using NPOI.XSSF.UserModel;
 
 namespace FormattedExcelExport.TableWriters {
 	public sealed class XlsxTableWriterComplex : XlsxTableWriterBase, ITableWriterComplex {
-        public XlsxTableWriterComplex(TableWriterStyle style)
-			: base(style) {}
+	    public XlsxTableWriterComplex(TableWriterStyle style)
+	        : base(style) {}
         private int _rowIndex;
         private string[] _lastParentHeader;
         private string[] _lastChildHeader;
