@@ -618,6 +618,26 @@ namespace FormattedExcelExport.Tests {
 
         [Test]
         public void ExcelStyleSimpleXlsxExport() {
+            NotRelectionTestDataEntities.TestData simpleTestData = NotRelectionTestDataEntities.CreateSimpleTestData(true);
+            NotRelectionTestDataEntities.ClientExampleModel firstTestDataRow = simpleTestData.Models.FirstOrDefault();
+            Assert.NotNull(firstTestDataRow);
+            TableWriterStyle style = new TableWriterStyle();
+            TableWriterSimple.Write(new XlsxTableWriterSimple(style), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
+            NotRelectionTestDataEntities.ClientExampleModel.Contact firstContact = firstTestDataRow.Contacts.FirstOrDefault();
+            Assert.NotNull(firstContact);
+
+            NotRelectionTestDataEntities.ClientExampleModel.Contract firstContract = firstTestDataRow.Contracts.FirstOrDefault();
+            Assert.NotNull(firstContract);
+
+            NotRelectionTestDataEntities.ClientExampleModel.Product firstProduct = firstTestDataRow.Products.FirstOrDefault();
+            Assert.NotNull(firstProduct);
+
+            NotRelectionTestDataEntities.ClientExampleModel.EnumProp1 firstEnumProp1 = firstTestDataRow.EnumProps1.FirstOrDefault();
+            Assert.NotNull(firstEnumProp1);
+
+            NotRelectionTestDataEntities.ClientExampleModel.EnumProp2 firstEnumProp2 = firstTestDataRow.EnumProps2.FirstOrDefault();
+            Assert.NotNull(firstEnumProp2);
+
             XSSFWorkbook xlsFile;
             using (FileStream file = new FileStream("TestSimple.xlsx", FileMode.Open, FileAccess.Read)) {
                 xlsFile = new XSSFWorkbook(file);
@@ -779,6 +799,8 @@ namespace FormattedExcelExport.Tests {
             NotRelectionTestDataEntities.TestData simpleTestData = NotRelectionTestDataEntities.CreateSimpleTestData(true);
             NotRelectionTestDataEntities.ClientExampleModel firstTestDataRow = simpleTestData.Models.FirstOrDefault();
             Assert.NotNull(firstTestDataRow);
+            TableWriterStyle style = new TableWriterStyle();
+            TableWriterComplex.Write(new XlsxTableWriterComplex(style), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
 
             XSSFWorkbook xlsFile;
             using (FileStream file = new FileStream("TestComplex.xlsx", FileMode.Open, FileAccess.Read)) {
