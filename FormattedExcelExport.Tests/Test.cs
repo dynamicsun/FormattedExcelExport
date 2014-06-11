@@ -11,6 +11,7 @@ using FormattedExcelExport.Style;
 using NPOI.HSSF.UserModel;
 using NPOI.HSSF.Util;
 using NPOI.SS.UserModel;
+using NPOI.XSSF.UserModel;
 using NUnit.Framework;
 using System.IO;
 using FormattedExcelExport.TableWriters;
@@ -461,16 +462,403 @@ namespace FormattedExcelExport.Tests {
             ExcelStyleReflectionComplexExportTest(test, "RandomStyleTestReflectionComplex.xls");
         }
 
-        public void ExcelReflectionSimpleExportTest<T>(List<T> models, string fileName) {
+        [Test]
+        public void ExcelSimpleXlsxExport() {
+            NotRelectionTestDataEntities.TestData simpleTestData = NotRelectionTestDataEntities.CreateSimpleTestData(true);
+            NotRelectionTestDataEntities.ClientExampleModel firstTestDataRow = simpleTestData.Models.FirstOrDefault();
+            Assert.NotNull(firstTestDataRow);
+            TableWriterStyle style = new TableWriterStyle();
+            TableWriterSimple.Write(new XlsxTableWriterSimple(style), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
+            NotRelectionTestDataEntities.ClientExampleModel.Contact firstContact = firstTestDataRow.Contacts.FirstOrDefault();
+            Assert.NotNull(firstContact);
+
+            NotRelectionTestDataEntities.ClientExampleModel.Contract firstContract = firstTestDataRow.Contracts.FirstOrDefault();
+            Assert.NotNull(firstContract);
+
+            NotRelectionTestDataEntities.ClientExampleModel.Product firstProduct = firstTestDataRow.Products.FirstOrDefault();
+            Assert.NotNull(firstProduct);
+
+            NotRelectionTestDataEntities.ClientExampleModel.EnumProp1 firstEnumProp1 = firstTestDataRow.EnumProps1.FirstOrDefault();
+            Assert.NotNull(firstEnumProp1);
+
+            NotRelectionTestDataEntities.ClientExampleModel.EnumProp2 firstEnumProp2 = firstTestDataRow.EnumProps2.FirstOrDefault();
+            Assert.NotNull(firstEnumProp2);
+
+            int parentColumnsQuantity = simpleTestData.ConfigurationBuilder.Value.ColumnsMap.Count;
+            int contactsFieldsQuantity = firstContact.GetType().GetProperties().Count();
+            int contractsFieldsQuantity = firstContract.GetType().GetProperties().Count();
+            int productsFieldsQuantity = firstProduct.GetType().GetProperties().Count();
+            int enumProp1FieldsQuantity = firstEnumProp1.GetType().GetProperties().Count();
+
+            int testDataContactColumnsQuantity = simpleTestData.Models.Max(x => x.Contacts.Count) * contactsFieldsQuantity;
+            int testDataContractColumnsQuantity = simpleTestData.Models.Max(x => x.Contracts.Count) * contractsFieldsQuantity;
+            int testDataProductColumnsQuantity = simpleTestData.Models.Max(x => x.Products.Count) * productsFieldsQuantity;
+            int testDataEnumProp1ColumnsQuantity = simpleTestData.Models.Max(x => x.EnumProps1.Count) * enumProp1FieldsQuantity;
+
+            List<string> parentColumnsNames = simpleTestData.ConfigurationBuilder.Value.ColumnsMap.Keys.ToList();
+            List<List<string>> childsColumnsNames = new List<List<string>>();
+            foreach (ChildTableConfiguration childs in simpleTestData.ConfigurationBuilder.Value.ChildrenMap) {
+                childsColumnsNames.Add(childs.ColumnsMap.Keys.ToList());
+            }
+
+            XSSFWorkbook xlsFile;
+            using (FileStream file = new FileStream("TestSimple.xlsx", FileMode.Open, FileAccess.Read)) {
+                xlsFile = new XSSFWorkbook(file);
+            }
+            ISheet sheet = xlsFile.GetSheetAt(0);
+            int rowNumber = 0;
+            IRow row = sheet.GetRow(rowNumber);
+
+            int columnNumber;
+            for (columnNumber = 0; columnNumber < parentColumnsNames.Count; columnNumber++) {
+                Assert.AreEqual(row.GetCell(columnNumber).StringCellValue, parentColumnsNames[columnNumber]);
+            }
+
+            columnNumber = parentColumnsQuantity;
+            for (int childNumber = 0; childNumber < childsColumnsNames.Count; childNumber++) {
+                List<string> child = childsColumnsNames[childNumber];
+                int childColumnsQuantity = 0;
+                switch (childNumber) {
+                    case 0: {
+                            childColumnsQuantity = simpleTestData.Models.Max(x => x.Contacts.Count);
+                            break;
+                        }
+                    case 1: {
+                            childColumnsQuantity = simpleTestData.Models.Max(x => x.Contracts.Count);
+                            break;
+                        }
+                    case 2: {
+                            childColumnsQuantity = simpleTestData.Models.Max(x => x.Products.Count);
+                            break;
+                        }
+                    case 3: {
+                            childColumnsQuantity = simpleTestData.Models.Max(x => x.EnumProps1.Count);
+                            break;
+                        }
+                    case 4: {
+                            childColumnsQuantity = simpleTestData.Models.Max(x => x.EnumProps2.Count);
+                            break;
+                        }
+                }
+                for (int index = 1; index <= childColumnsQuantity; index++) {
+                    foreach (string childPropertyName in child) {
+                        Assert.AreEqual(row.GetCell(columnNumber).StringCellValue, childPropertyName + index);
+                        columnNumber++;
+                    }
+                }
+            }
+
+            for (rowNumber = 1; rowNumber <= sheet.LastRowNum; rowNumber++) {
+                row = sheet.GetRow(rowNumber);
+                Assert.NotNull(row);
+                NotRelectionTestDataEntities.ClientExampleModel currentTestDataRow = simpleTestData.Models[rowNumber - 1];
+                Assert.AreEqual(row.GetCell(0).StringCellValue, currentTestDataRow.Title);
+                Assert.AreEqual(row.GetCell(1).StringCellValue, currentTestDataRow.RegistrationDate.ToRussianFullString());
+                Assert.AreEqual(row.GetCell(2).StringCellValue, currentTestDataRow.Phone);
+                Assert.AreEqual(row.GetCell(3).StringCellValue, currentTestDataRow.Inn);
+                Assert.AreEqual(row.GetCell(4).StringCellValue, currentTestDataRow.Okato);
+
+                Assert.AreEqual(row.GetCell(5).StringCellValue, string.Format(new CultureInfo("ru-RU"), "{0:C}", currentTestDataRow.Revenue));
+                Assert.AreEqual(row.GetCell(6).StringCellValue, currentTestDataRow.EmployeeCount.ToString());
+                Assert.AreEqual(row.GetCell(7).StringCellValue, currentTestDataRow.IsActive.ToRussianString());
+                Assert.AreEqual(row.GetCell(8).StringCellValue, currentTestDataRow.Prop1.ToString());
+                Assert.AreEqual(row.GetCell(9).StringCellValue, currentTestDataRow.Prop2);
+
+                Assert.AreEqual(row.GetCell(10).StringCellValue, currentTestDataRow.Prop3.ToRussianString());
+                Assert.AreEqual(row.GetCell(11).StringCellValue, currentTestDataRow.Prop4.ToString());
+                Assert.AreEqual(row.GetCell(12).StringCellValue, currentTestDataRow.Prop5);
+                Assert.AreEqual(row.GetCell(13).StringCellValue, currentTestDataRow.Prop6.ToRussianString());
+                Assert.AreEqual(row.GetCell(14).StringCellValue, currentTestDataRow.Prop7.ToString());
+
+                for (int contactNumber = 0; contactNumber < currentTestDataRow.Contacts.Count; contactNumber++) {
+                    NotRelectionTestDataEntities.ClientExampleModel.Contact currentContactRow = currentTestDataRow.Contacts[contactNumber];
+                    Assert.AreEqual(row.GetCell(parentColumnsQuantity + (contactNumber * contactsFieldsQuantity)).StringCellValue, currentContactRow.Title);
+                    Assert.AreEqual(row.GetCell(parentColumnsQuantity + (contactNumber * contactsFieldsQuantity + 1)).StringCellValue, currentContactRow.Email);
+                }
+
+                for (int contractNumber = 0; contractNumber < currentTestDataRow.Contracts.Count; contractNumber++) {
+                    Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + (contractNumber * contractsFieldsQuantity)).StringCellValue,
+                        currentTestDataRow.Contracts[contractNumber].BeginDate.ToRussianFullString());
+                    Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + (contractNumber * contractsFieldsQuantity + 1)).StringCellValue,
+                        currentTestDataRow.Contracts[contractNumber].EndDate.ToRussianFullString());
+                    Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + (contractNumber * contractsFieldsQuantity + 2)).StringCellValue,
+                        currentTestDataRow.Contracts[contractNumber].Status.ToRussianString());
+                }
+
+                for (int productNumber = 0; productNumber < currentTestDataRow.Products.Count; productNumber++) {
+                    Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + (productNumber * 2)).StringCellValue,
+                        currentTestDataRow.Products[productNumber].Title);
+                    Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + (productNumber * 2 + 1)).StringCellValue,
+                        currentTestDataRow.Products[productNumber].Amount.ToString());
+                }
+
+                for (int enumProp1Number = 0; enumProp1Number < currentTestDataRow.EnumProps1.Count; enumProp1Number++) {
+                    Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + (enumProp1Number * 3)).StringCellValue,
+                        currentTestDataRow.EnumProps1[enumProp1Number].Field1);
+                    Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + (enumProp1Number * 3 + 1)).StringCellValue,
+                        currentTestDataRow.EnumProps1[enumProp1Number].Field2.ToString());
+                    Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + (enumProp1Number * 3 + 2)).StringCellValue,
+                        currentTestDataRow.EnumProps1[enumProp1Number].Field3.ToRussianString());
+                }
+
+                for (int enumProp2Number = 0; enumProp2Number < currentTestDataRow.EnumProps2.Count; enumProp2Number++) {
+                    Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + testDataEnumProp1ColumnsQuantity + (enumProp2Number * 5)).StringCellValue,
+                        currentTestDataRow.EnumProps2[enumProp2Number].Field4);
+                    Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + testDataEnumProp1ColumnsQuantity + (enumProp2Number * 5 + 1)).StringCellValue,
+                        currentTestDataRow.EnumProps2[enumProp2Number].Field5.ToString());
+                    Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + testDataEnumProp1ColumnsQuantity + (enumProp2Number * 5 + 2)).StringCellValue,
+                        currentTestDataRow.EnumProps2[enumProp2Number].Field6.ToRussianString());
+                    Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + testDataEnumProp1ColumnsQuantity + (enumProp2Number * 5 + 3)).StringCellValue,
+                        currentTestDataRow.EnumProps2[enumProp2Number].Field7);
+                    Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + testDataEnumProp1ColumnsQuantity + (enumProp2Number * 5 + 4)).StringCellValue,
+                        currentTestDataRow.EnumProps2[enumProp2Number].Field8.ToString());
+                }
+            }
+        }
+
+        [Test]
+        public void ExcelStyleSimpleXlsxExport() {
+            XSSFWorkbook xlsFile;
+            using (FileStream file = new FileStream("TestSimple.xlsx", FileMode.Open, FileAccess.Read)) {
+                xlsFile = new XSSFWorkbook(file);
+            }
+            ISheet sheet = xlsFile.GetSheetAt(0);
+
+            short[] red = { 255, 0, 0 };
+            short[] green = { 0, 255, 0 };
+            short[] blue = { 0, 0, 255 };
+
+            int rowNumber = 0;
+            IRow row = sheet.GetRow(rowNumber);
+            Assert.AreEqual(row.Height, 400);
+            for (int cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
+                CustomAssert.IsEqualFont(xlsFile, rowNumber, cellNumber, "Arial", 10, (short)FontBoldWeight.Bold);
+            }
+
+            for (rowNumber = 1; rowNumber < sheet.LastRowNum; rowNumber++) {
+                row = sheet.GetRow(rowNumber);
+                for (int cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
+                    CustomAssert.IsEqualFont(xlsFile, rowNumber, cellNumber, "Arial", 10, (short)FontBoldWeight.Normal);
+                }
+            }
+            CustomAssert.IsEqualExcelColor((XSSFColor)sheet.GetRow(1).GetCell(2).CellStyle.FillForegroundColorColor, green);
+            CustomAssert.IsEqualExcelColor((XSSFColor)sheet.GetRow(1).GetCell(15).CellStyle.FillForegroundColorColor, blue);
+            CustomAssert.IsEqualExcelColor((XSSFColor)sheet.GetRow(2).GetCell(0).CellStyle.FillForegroundColorColor, red);
+            CustomAssert.IsEqualExcelColor((XSSFColor)sheet.GetRow(2).GetCell(15).CellStyle.FillForegroundColorColor, blue);
+        }
+
+        [Test]
+        public void ExcelComplexXlsxExport() {
+            NotRelectionTestDataEntities.TestData simpleTestData = NotRelectionTestDataEntities.CreateSimpleTestData(true);
+            NotRelectionTestDataEntities.ClientExampleModel firstTestDataRow = simpleTestData.Models.FirstOrDefault();
+            Assert.NotNull(firstTestDataRow);
+            TableWriterStyle style = new TableWriterStyle();
+            TableWriterComplex.Write(new XlsxTableWriterComplex(style), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
+
+            XSSFWorkbook xlsFile;
+            using (FileStream file = new FileStream("TestComplex.xlsx", FileMode.Open, FileAccess.Read)) {
+                xlsFile = new XSSFWorkbook(file);
+            }
+            ISheet sheet = xlsFile.GetSheetAt(0);
+            List<string> parentColumnsNames = simpleTestData.ConfigurationBuilder.Value.ColumnsMap.Keys.ToList();
+
+            int modelsQuantity = simpleTestData.Models.Count;
+            int rowNumber = 0;
+            for (int modelNumber = 0; modelNumber < modelsQuantity; modelNumber++) {
+                NotRelectionTestDataEntities.ClientExampleModel currentTestDataRow = simpleTestData.Models[modelNumber];
+                IRow row = sheet.GetRow(rowNumber);
+                ICell cell = row.GetCell(0);
+                Assert.AreEqual(cell.StringCellValue, simpleTestData.ConfigurationBuilder.Value.Title);
+                for (int cellNumber = 1; cellNumber < row.LastCellNum; cellNumber++) {
+                    cell = row.GetCell(cellNumber);
+                    Assert.AreEqual(cell.StringCellValue, parentColumnsNames[cellNumber - 1]);
+                }
+                rowNumber++;
+                row = sheet.GetRow(rowNumber);
+
+                Assert.AreEqual(row.GetCell(1).StringCellValue, currentTestDataRow.Title);
+                Assert.AreEqual(row.GetCell(2).StringCellValue, currentTestDataRow.RegistrationDate.ToRussianFullString());
+                Assert.AreEqual(row.GetCell(3).StringCellValue, currentTestDataRow.Phone);
+                Assert.AreEqual(row.GetCell(4).StringCellValue, currentTestDataRow.Inn);
+                Assert.AreEqual(row.GetCell(5).StringCellValue, currentTestDataRow.Okato);
+                Assert.AreEqual(row.GetCell(6).StringCellValue, string.Format(new CultureInfo("ru-RU"), "{0:C}", currentTestDataRow.Revenue));
+                Assert.AreEqual(row.GetCell(7).StringCellValue, currentTestDataRow.EmployeeCount.ToString());
+                Assert.AreEqual(row.GetCell(8).StringCellValue, currentTestDataRow.IsActive.ToRussianString());
+                Assert.AreEqual(row.GetCell(9).StringCellValue, currentTestDataRow.Prop1.ToString());
+                Assert.AreEqual(row.GetCell(10).StringCellValue, currentTestDataRow.Prop2);
+
+                Assert.AreEqual(row.GetCell(11).StringCellValue, currentTestDataRow.Prop3.ToRussianString());
+                Assert.AreEqual(row.GetCell(12).StringCellValue, currentTestDataRow.Prop4.ToString());
+                Assert.AreEqual(row.GetCell(13).StringCellValue, currentTestDataRow.Prop5);
+                Assert.AreEqual(row.GetCell(14).StringCellValue, currentTestDataRow.Prop6.ToRussianString());
+                Assert.AreEqual(row.GetCell(15).StringCellValue, currentTestDataRow.Prop7.ToString());
+                rowNumber++;
+                row = sheet.GetRow(rowNumber);
+
+                int childsQuantity = simpleTestData.ConfigurationBuilder.Value.ChildrenMap.Count;
+
+                for (int childNumber = 0; childNumber < childsQuantity; childNumber++) {
+                    switch (childNumber) {
+                        case 0: {
+                                List<NotRelectionTestDataEntities.ClientExampleModel.Contact> child = currentTestDataRow.Contacts;
+                                TestChildHeader(row, childNumber, simpleTestData);
+                                rowNumber++;
+                                row = sheet.GetRow(rowNumber);
+                                foreach (NotRelectionTestDataEntities.ClientExampleModel.Contact childProperty in child) {
+                                    Assert.AreEqual(row.GetCell(1).StringCellValue, childProperty.Title);
+                                    Assert.AreEqual(row.GetCell(2).StringCellValue, childProperty.Email);
+                                    rowNumber++;
+                                    row = sheet.GetRow(rowNumber);
+                                }
+                                break;
+                            }
+                        case 1: {
+                                List<NotRelectionTestDataEntities.ClientExampleModel.Contract> child = currentTestDataRow.Contracts;
+                                TestChildHeader(row, childNumber, simpleTestData);
+                                rowNumber++;
+                                row = sheet.GetRow(rowNumber);
+                                foreach (NotRelectionTestDataEntities.ClientExampleModel.Contract childProperty in child) {
+                                    Assert.AreEqual(row.GetCell(1).StringCellValue, childProperty.BeginDate.ToRussianFullString());
+                                    Assert.AreEqual(row.GetCell(2).StringCellValue, childProperty.EndDate.ToRussianFullString());
+                                    Assert.AreEqual(row.GetCell(3).StringCellValue, childProperty.Status.ToRussianString());
+                                    rowNumber++;
+                                    row = sheet.GetRow(rowNumber);
+                                }
+                                break;
+                            }
+                        case 2: {
+                                List<NotRelectionTestDataEntities.ClientExampleModel.Product> child = currentTestDataRow.Products;
+                                TestChildHeader(row, childNumber, simpleTestData);
+                                rowNumber++;
+                                row = sheet.GetRow(rowNumber);
+                                foreach (NotRelectionTestDataEntities.ClientExampleModel.Product childProperty in child) {
+                                    Assert.AreEqual(row.GetCell(1).StringCellValue, childProperty.Title);
+                                    Assert.AreEqual(row.GetCell(2).StringCellValue, childProperty.Amount.ToString());
+                                    rowNumber++;
+                                    row = sheet.GetRow(rowNumber);
+                                }
+                                break;
+                            }
+                        case 3: {
+                                List<NotRelectionTestDataEntities.ClientExampleModel.EnumProp1> child = currentTestDataRow.EnumProps1;
+                                TestChildHeader(row, childNumber, simpleTestData);
+                                rowNumber++;
+                                row = sheet.GetRow(rowNumber);
+                                foreach (NotRelectionTestDataEntities.ClientExampleModel.EnumProp1 childProperty in child) {
+                                    Assert.AreEqual(row.GetCell(1).StringCellValue, childProperty.Field1);
+                                    Assert.AreEqual(row.GetCell(2).StringCellValue, childProperty.Field2.ToString());
+                                    Assert.AreEqual(row.GetCell(3).StringCellValue, childProperty.Field3.ToRussianString());
+                                    rowNumber++;
+                                    row = sheet.GetRow(rowNumber);
+                                }
+                                break;
+                            }
+                        case 4: {
+                                List<NotRelectionTestDataEntities.ClientExampleModel.EnumProp2> child = currentTestDataRow.EnumProps2;
+                                TestChildHeader(row, childNumber, simpleTestData);
+                                rowNumber++;
+                                row = sheet.GetRow(rowNumber);
+                                foreach (NotRelectionTestDataEntities.ClientExampleModel.EnumProp2 childProperty in child) {
+                                    Assert.AreEqual(row.GetCell(1).StringCellValue, childProperty.Field4);
+                                    Assert.AreEqual(row.GetCell(2).StringCellValue, childProperty.Field5.ToString());
+                                    Assert.AreEqual(row.GetCell(3).StringCellValue, childProperty.Field6.ToRussianString());
+                                    Assert.AreEqual(row.GetCell(4).StringCellValue, childProperty.Field7);
+                                    Assert.AreEqual(row.GetCell(5).StringCellValue, childProperty.Field8.ToString());
+                                    rowNumber++;
+                                    row = sheet.GetRow(rowNumber);
+                                }
+                                break;
+                            }
+                    }
+                }
+            }
+        }
+
+        [Test]
+        public void ExcelStyleComplexXlsxExport() {
+            NotRelectionTestDataEntities.TestData simpleTestData = NotRelectionTestDataEntities.CreateSimpleTestData(true);
+            NotRelectionTestDataEntities.ClientExampleModel firstTestDataRow = simpleTestData.Models.FirstOrDefault();
+            Assert.NotNull(firstTestDataRow);
+
+            XSSFWorkbook xlsFile;
+            using (FileStream file = new FileStream("TestComplex.xlsx", FileMode.Open, FileAccess.Read)) {
+                xlsFile = new XSSFWorkbook(file);
+            }
+            ISheet sheet = xlsFile.GetSheetAt(0);
+
+            short[] red = { 255, 0, 0 };
+            short[] green = { 0, 255, 0 };
+            short[] blue = { 0, 0, 255 };
+
+            CustomAssert.IsEqualExcelColor((XSSFColor)sheet.GetRow(1).GetCell(3).CellStyle.FillForegroundColorColor, green);
+            CustomAssert.IsEqualExcelColor((XSSFColor)sheet.GetRow(3).GetCell(1).CellStyle.FillForegroundColorColor, blue);
+            CustomAssert.IsEqualExcelColor((XSSFColor)sheet.GetRow(22).GetCell(1).CellStyle.FillForegroundColorColor, red);
+            CustomAssert.IsEqualExcelColor((XSSFColor)sheet.GetRow(24).GetCell(1).CellStyle.FillForegroundColorColor, blue);
+
+            int modelsQuantity = simpleTestData.Models.Count;
+            int rowNumber = 0;
+            int childsQuantity = 0;
+            for (int modelNumber = 0; modelNumber < modelsQuantity; modelNumber++) {
+                childsQuantity += 7 + simpleTestData.Models[modelNumber].Contacts.Count + simpleTestData.Models[modelNumber].Contracts.Count + simpleTestData.Models[modelNumber].Products.Count + simpleTestData.Models[modelNumber].EnumProps1.Count + simpleTestData.Models[modelNumber].EnumProps2.Count;
+                IRow row = sheet.GetRow(rowNumber);
+                Assert.AreEqual(row.Height, 400);
+                for (int cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
+                    CustomAssert.IsEqualFont(xlsFile, rowNumber, cellNumber, "Arial", 10, (short)FontBoldWeight.Bold);
+                }
+                rowNumber++;
+
+                for (; rowNumber < childsQuantity; rowNumber++) {
+                    row = sheet.GetRow(rowNumber);
+                    for (int cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
+                        CustomAssert.IsEqualFont(xlsFile, rowNumber, cellNumber, "Arial", 10, (short)FontBoldWeight.Normal);
+                    }
+                }
+            }
+        }
+
+        [Test]
+        public void ExcelReflectionSimpleXlsxExport() {
+            List<ReflectionTestDataEntities> test = new List<ReflectionTestDataEntities>();
+            TableWriterStyle style = new TableWriterStyle();
+            Random rand = new Random();
+            for (int i = 2; i < rand.Next(10, 30); i++) {
+                test.Add(new ReflectionTestDataEntities());
+            }
+            ReflectionWriterSimple.Write(test, new XlsxTableWriterSimple(style), new CultureInfo("ru-Ru"));
+            ExcelReflectionSimpleExportTest(test, "TestSimple.xlsx", true);
+
+            ExcelStyleReflectionSimpleExportTest(test, "TestSimple.xlsx", true);
+        }
+
+        [Test]
+        public void ExcelReflectionComplexXlsxExport() {
+            List<ReflectionTestDataEntities> test = new List<ReflectionTestDataEntities>();
+            TableWriterStyle style = new TableWriterStyle();
+            Random rand = new Random();
+            for (int i = 2; i < rand.Next(10, 30); i++) {
+                test.Add(new ReflectionTestDataEntities());
+            }
+            ReflectionWriterComplex.Write(test, new XlsxTableWriterComplex(style), new CultureInfo("ru-Ru"));
+            ExcelReflectionComplexExportTest(test, "TestComplex.xlsx", true);
+
+            ExcelStyleReflectionComplexExportTest(test, "TestComplex.xlsx", true);
+        }
+
+        public void ExcelReflectionSimpleExportTest<T>(List<T> models, string fileName, bool isXlsx = false) {
             T firstModel = models.FirstOrDefault();
             Assert.NotNull(firstModel);
             List<Type> generalTypes = GeneralTypes;
             List<PropertyInfo> nonEnumerableProperties = firstModel.GetType().GetProperties().Where(x => generalTypes.Contains(x.PropertyType)).ToList();
             List<PropertyInfo> enumerableProperties = firstModel.GetType().GetProperties().Where(x => x.PropertyType.IsGenericType && x.PropertyType.GetGenericTypeDefinition() == typeof(List<>)).ToList();
 
-            HSSFWorkbook xlsFile;
+            IWorkbook xlsFile;
             using (FileStream file = new FileStream(fileName, FileMode.Open, FileAccess.Read)) {
-                xlsFile = new HSSFWorkbook(file);
+                if (isXlsx) {
+                    xlsFile = new XSSFWorkbook(file);
+                }
+                else {
+                    xlsFile = new HSSFWorkbook(file);
+                }
             }
             ISheet sheet = xlsFile.GetSheetAt(0);
             int rowNumber = 0;
@@ -552,13 +940,18 @@ namespace FormattedExcelExport.Tests {
             }
         }
 
-        public void ExcelStyleReflectionSimpleExportTest<T>(List<T> models, string fileName) {
+        public void ExcelStyleReflectionSimpleExportTest<T>(List<T> models, string fileName, bool isXlsx = false) {
             T firstModel = models.FirstOrDefault();
             Assert.NotNull(firstModel);
 
-            HSSFWorkbook xlsFile;
+            IWorkbook xlsFile;
             using (FileStream file = new FileStream(fileName, FileMode.Open, FileAccess.Read)) {
-                xlsFile = new HSSFWorkbook(file);
+                if (isXlsx) {
+                    xlsFile = new XSSFWorkbook(file);
+                }
+                else {
+                    xlsFile = new HSSFWorkbook(file);
+                }
             }
             ISheet sheet = xlsFile.GetSheetAt(0);
 
@@ -566,26 +959,41 @@ namespace FormattedExcelExport.Tests {
             IRow row = sheet.GetRow(rowNumber);
             Assert.AreEqual(row.Height, 400);
             for (int cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
-                CustomAssert.IsEqualFont(xlsFile, sheet, rowNumber, cellNumber, "Arial", 10, (short)FontBoldWeight.Bold);
+                if (isXlsx) {
+                    CustomAssert.IsEqualFont((XSSFWorkbook)xlsFile, rowNumber, cellNumber, "Arial", 10, (short)FontBoldWeight.Bold);
+                }
+                else {
+                    CustomAssert.IsEqualFont(xlsFile, sheet, rowNumber, cellNumber, "Arial", 10, (short) FontBoldWeight.Bold);
+                }
             }
 
             for (rowNumber = 1; rowNumber < sheet.LastRowNum; rowNumber++) {
                 row = sheet.GetRow(rowNumber);
                 for (int cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
-                    CustomAssert.IsEqualFont(xlsFile, sheet, rowNumber, cellNumber, "Arial", 10, (short)FontBoldWeight.Normal);
+                    if (isXlsx) {
+                        CustomAssert.IsEqualFont((XSSFWorkbook) xlsFile, rowNumber, cellNumber, "Arial", 10, (short)FontBoldWeight.Normal);
+                    }
+                    else {
+                        CustomAssert.IsEqualFont(xlsFile, sheet, rowNumber, cellNumber, "Arial", 10, (short) FontBoldWeight.Normal);
+                    }
                 }
             }
         }
-        public void ExcelReflectionComplexExportTest<T>(List<T> models, string fileName) {
+        public void ExcelReflectionComplexExportTest<T>(List<T> models, string fileName, bool isXlsx = false) {
             T firstModel = models.FirstOrDefault();
             Assert.NotNull(firstModel);
             List<Type> generalTypes = GeneralTypes;
             List<PropertyInfo> nonEnumerableProperties = firstModel.GetType().GetProperties().Where(x => generalTypes.Contains(x.PropertyType)).ToList();
             List<PropertyInfo> enumerableProperties = firstModel.GetType().GetProperties().Where(x => x.PropertyType.IsGenericType && x.PropertyType.GetGenericTypeDefinition() == typeof(List<>)).ToList();
 
-            HSSFWorkbook xlsFile;
+            IWorkbook xlsFile;
             using (FileStream file = new FileStream(fileName, FileMode.Open, FileAccess.Read)) {
-                xlsFile = new HSSFWorkbook(file);
+                if (isXlsx) {
+                    xlsFile = new XSSFWorkbook(file);
+                }
+                else {
+                    xlsFile = new HSSFWorkbook(file);
+                }
             }
             ISheet sheet = xlsFile.GetSheetAt(0);
             int rowNumber = 0;
@@ -657,11 +1065,16 @@ namespace FormattedExcelExport.Tests {
             }
         }
 
-        public void ExcelStyleReflectionComplexExportTest<T>(List<T> models, string fileName) {
+        public void ExcelStyleReflectionComplexExportTest<T>(List<T> models, string fileName, bool isXlsx = false) {
             Assert.NotNull(models.FirstOrDefault());
-            HSSFWorkbook xlsFile;
+            IWorkbook xlsFile;
             using (FileStream file = new FileStream(fileName, FileMode.Open, FileAccess.Read)) {
-                xlsFile = new HSSFWorkbook(file);
+                if (isXlsx) {
+                    xlsFile = new XSSFWorkbook(file);
+                }
+                else {
+                    xlsFile = new HSSFWorkbook(file);
+                }
             }
             ISheet sheet = xlsFile.GetSheetAt(0);
 
@@ -671,20 +1084,33 @@ namespace FormattedExcelExport.Tests {
                 int cellNumber;
                 Assert.AreEqual(row.Height, 400);
                 for (cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
-                    CustomAssert.IsEqualFont(xlsFile, sheet, rowNumber, cellNumber, "Arial", 10, (short)FontBoldWeight.Bold);
+                    if (isXlsx) {
+                        CustomAssert.IsEqualFont((XSSFWorkbook)xlsFile, rowNumber, cellNumber, "Arial", 10, (short)FontBoldWeight.Bold);
+                    } else {
+                        CustomAssert.IsEqualFont(xlsFile, sheet, rowNumber, cellNumber, "Arial", 10, (short)FontBoldWeight.Bold);
+                    }
+                    
                 }
                 rowNumber++;
                 row = sheet.GetRow(rowNumber);
                 List<PropertyInfo> enumerableProperties = model.GetType().GetProperties().Where(x => x.PropertyType.IsGenericType && x.PropertyType.GetGenericTypeDefinition() == typeof(List<>)).ToList();
                 for (cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
-                    CustomAssert.IsEqualFont(xlsFile, sheet, rowNumber, cellNumber, "Arial", 10, (short)FontBoldWeight.Normal);
+                    if (isXlsx) {
+                        CustomAssert.IsEqualFont((XSSFWorkbook)xlsFile, rowNumber, cellNumber, "Arial", 10, (short)FontBoldWeight.Normal);
+                    } else {
+                        CustomAssert.IsEqualFont(xlsFile, sheet, rowNumber, cellNumber, "Arial", 10, (short)FontBoldWeight.Normal);
+                    }
                 }
                 rowNumber++;
                 row = sheet.GetRow(rowNumber);
                 foreach (PropertyInfo enumerableProperty in enumerableProperties) {
                     IList childs = (IList)enumerableProperty.GetValue(model);
                     for (cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
-                        CustomAssert.IsEqualFont(xlsFile, sheet, rowNumber, cellNumber, "Arial", 10, (short)FontBoldWeight.Normal);
+                        if (isXlsx) {
+                            CustomAssert.IsEqualFont((XSSFWorkbook)xlsFile, rowNumber, cellNumber, "Arial", 10, (short)FontBoldWeight.Normal);
+                        } else {
+                            CustomAssert.IsEqualFont(xlsFile, sheet, rowNumber, cellNumber, "Arial", 10, (short)FontBoldWeight.Normal);
+                        }
                     }
                     rowNumber++;
 
@@ -692,7 +1118,11 @@ namespace FormattedExcelExport.Tests {
                     for (rowNumber = rowNumberStart; rowNumber < rowNumberStart + childs.Count; rowNumber++) {
                         row = sheet.GetRow(rowNumber);
                         for (cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
-                            CustomAssert.IsEqualFont(xlsFile, sheet, rowNumber, cellNumber, "Arial", 10, (short)FontBoldWeight.Normal);
+                            if (isXlsx) {
+                                CustomAssert.IsEqualFont((XSSFWorkbook)xlsFile, rowNumber, cellNumber, "Arial", 10, (short)FontBoldWeight.Normal);
+                            } else {
+                                CustomAssert.IsEqualFont(xlsFile, sheet, rowNumber, cellNumber, "Arial", 10, (short)FontBoldWeight.Normal);
+                            }
                         }
                     }
                     row = sheet.GetRow(rowNumber);
