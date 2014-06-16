@@ -38,8 +38,12 @@ namespace FormattedExcelExport.TableWriters {
 	            else {
 	                WorkSheet = Workbook.CreateSheet();
                     _rowIndex = 0;
+	                string[] lastChildHeaderBuffer = _lastChildHeader;
 	                WriteHeader(_lastParentHeader);
-                    WriteChildHeader(_lastChildHeader);
+	                _lastChildHeader = lastChildHeaderBuffer;
+	                if (_lastChildHeader != null) {
+	                    WriteChildHeader(_lastChildHeader);
+	                }
 	            }
 	        }
 	    }
@@ -58,6 +62,7 @@ namespace FormattedExcelExport.TableWriters {
 				columnIndex++;
 			}
 	        _lastParentHeader = cells;
+	        _lastChildHeader = null;
 			RowIndex++;
 			_colorIndex = 0;
 		}
