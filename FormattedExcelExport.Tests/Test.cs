@@ -183,7 +183,7 @@ namespace FormattedExcelExport.Tests {
                 modelNumber++;
             }
         }
-/*
+
         [Test]
         public void ExcelComplexExportRowOverflow() {
             NotRelectionTestDataEntities.TestData simpleTestData = NotRelectionTestDataEntities.CreateSimpleTestRowOverflowData();
@@ -322,7 +322,7 @@ namespace FormattedExcelExport.Tests {
                 }
             }
         }
-        */
+        
         public void RowNumberIncrement(List<string> lastParentHeader, List<string> lastChildHeader, IWorkbook workbook, ref int rowNumber, ref ISheet sheet, ref int sheetNumber) {
             if (rowNumber >= 65535) {
                 sheetNumber++;
