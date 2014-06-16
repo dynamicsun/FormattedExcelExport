@@ -118,7 +118,7 @@ namespace FormattedExcelExport.Tests {
 
         internal static List<ClientExampleModel> CreateTestRowOverflowDataModels() {
             List<ClientExampleModel> models = new List<ClientExampleModel>();
-            for (int i = 0; i < 65000; i++) {
+            for (int i = 0; i < 2000; i++) {
                 models.Add(new ClientExampleModel(
                     "Первая компания",
                     DateTime.Now,

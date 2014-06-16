@@ -183,6 +183,169 @@ namespace FormattedExcelExport.Tests {
                 modelNumber++;
             }
         }
+/*
+        [Test]
+        public void ExcelComplexExportRowOverflow() {
+            NotRelectionTestDataEntities.TestData simpleTestData = NotRelectionTestDataEntities.CreateSimpleTestRowOverflowData();
+            NotRelectionTestDataEntities.ClientExampleModel firstTestDataRow = simpleTestData.Models.FirstOrDefault();
+            Assert.NotNull(firstTestDataRow);
+            TableWriterStyle style = new TableWriterStyle();
+            MemoryStream memoryStream = TableWriterComplex.Write(new XlsTableWriterComplex(style), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
+            WriteToFile(memoryStream, "TestComplexOverflow.xls");
+            
+            HSSFWorkbook xlsFile;
+            using (FileStream file = new FileStream("TestComplexOverflow.xls", FileMode.Open, FileAccess.Read)) {
+                xlsFile = new HSSFWorkbook(file);
+            }
+            ISheet sheet;
+            List<string> parentColumnsNames = simpleTestData.ConfigurationBuilder.Value.ColumnsMap.Keys.ToList();
+
+            List<string> lastParentHeader;
+            List<string> lastChildHeader;
+            int sheetNumber = 0;
+            int modelsQuantity = simpleTestData.Models.Count;
+            int rowNumber = 0;
+            
+            sheet = xlsFile.GetSheetAt(sheetNumber);
+
+            for (int modelNumber = 0; modelNumber < modelsQuantity; modelNumber++) {
+                lastParentHeader = new List<string>();
+                lastChildHeader = new List<string>();
+                NotRelectionTestDataEntities.ClientExampleModel currentTestDataRow = simpleTestData.Models[modelNumber];
+                IRow row = sheet.GetRow(rowNumber);
+                ICell cell = row.GetCell(0);
+                Assert.AreEqual(cell.StringCellValue, simpleTestData.ConfigurationBuilder.Value.Title);
+                for (int cellNumber = 1; cellNumber < row.LastCellNum; cellNumber++) {
+                    cell = row.GetCell(cellNumber);
+                    Assert.AreEqual(cell.StringCellValue, parentColumnsNames[cellNumber - 1]);
+                    lastParentHeader.Add(parentColumnsNames[cellNumber - 1]);
+                }
+                RowNumberIncrement(lastParentHeader, lastChildHeader, xlsFile, ref rowNumber, ref sheet, ref sheetNumber); ;
+                row = sheet.GetRow(rowNumber);
+
+                Assert.AreEqual(row.GetCell(1).StringCellValue, currentTestDataRow.Title);
+                Assert.AreEqual(row.GetCell(2).StringCellValue, currentTestDataRow.RegistrationDate.ToRussianFullString());
+                Assert.AreEqual(row.GetCell(3).StringCellValue, currentTestDataRow.Phone);
+                Assert.AreEqual(row.GetCell(4).StringCellValue, currentTestDataRow.Inn);
+                Assert.AreEqual(row.GetCell(5).StringCellValue, currentTestDataRow.Okato);
+                Assert.AreEqual(row.GetCell(6).StringCellValue, string.Format(new CultureInfo("ru-RU"), "{0:C}", currentTestDataRow.Revenue));
+                Assert.AreEqual(row.GetCell(7).StringCellValue, currentTestDataRow.EmployeeCount.ToString());
+                Assert.AreEqual(row.GetCell(8).StringCellValue, currentTestDataRow.IsActive.ToRussianString());
+                Assert.AreEqual(row.GetCell(9).StringCellValue, currentTestDataRow.Prop1.ToString());
+                Assert.AreEqual(row.GetCell(10).StringCellValue, currentTestDataRow.Prop2);
+                Assert.AreEqual(row.GetCell(11).StringCellValue, currentTestDataRow.Prop3.ToRussianString());
+                Assert.AreEqual(row.GetCell(12).StringCellValue, currentTestDataRow.Prop4.ToString());
+                Assert.AreEqual(row.GetCell(13).StringCellValue, currentTestDataRow.Prop5);
+                Assert.AreEqual(row.GetCell(14).StringCellValue, currentTestDataRow.Prop6.ToRussianString());
+                Assert.AreEqual(row.GetCell(15).StringCellValue, currentTestDataRow.Prop7.ToString());
+                lastChildHeader = null;
+
+                RowNumberIncrement(lastParentHeader, lastChildHeader, xlsFile, ref rowNumber, ref sheet, ref sheetNumber);
+                ;
+                row = sheet.GetRow(rowNumber);
+
+                int childsQuantity = simpleTestData.ConfigurationBuilder.Value.ChildrenMap.Count;
+
+                for (int childNumber = 0; childNumber < childsQuantity; childNumber++) {
+                    switch (childNumber) {
+                        case 0: {
+                                List<NotRelectionTestDataEntities.ClientExampleModel.Contact> child = currentTestDataRow.Contacts;
+                                lastChildHeader = TestChildHeader(row, childNumber, simpleTestData);
+                                RowNumberIncrement(lastParentHeader, lastChildHeader, xlsFile, ref rowNumber, ref sheet, ref sheetNumber);
+                                row = sheet.GetRow(rowNumber);
+                                foreach (NotRelectionTestDataEntities.ClientExampleModel.Contact childProperty in child) {
+                                    Assert.AreEqual(row.GetCell(1).StringCellValue, childProperty.Title);
+                                    Assert.AreEqual(row.GetCell(2).StringCellValue, childProperty.Email);
+                                    RowNumberIncrement(lastParentHeader, lastChildHeader, xlsFile, ref rowNumber, ref sheet, ref sheetNumber); ;
+                                    row = sheet.GetRow(rowNumber);
+                                }
+                                break;
+                            }
+                        case 1: {
+                                List<NotRelectionTestDataEntities.ClientExampleModel.Contract> child = currentTestDataRow.Contracts;                               
+                                lastChildHeader = TestChildHeader(row, childNumber, simpleTestData);
+                                RowNumberIncrement(lastParentHeader, lastChildHeader, xlsFile, ref rowNumber, ref sheet, ref sheetNumber); 
+                                row = sheet.GetRow(rowNumber);
+                                foreach (NotRelectionTestDataEntities.ClientExampleModel.Contract childProperty in child) {
+                                    Assert.AreEqual(row.GetCell(1).StringCellValue, childProperty.BeginDate.ToRussianFullString());
+                                    Assert.AreEqual(row.GetCell(2).StringCellValue, childProperty.EndDate.ToRussianFullString());
+                                    Assert.AreEqual(row.GetCell(3).StringCellValue, childProperty.Status.ToRussianString());
+                                    RowNumberIncrement(lastParentHeader, lastChildHeader, xlsFile, ref rowNumber, ref sheet, ref sheetNumber); ;
+                                    row = sheet.GetRow(rowNumber);
+                                }
+                                break;
+                            }
+                        case 2: {
+                                List<NotRelectionTestDataEntities.ClientExampleModel.Product> child = currentTestDataRow.Products;                                
+                                lastChildHeader = TestChildHeader(row, childNumber, simpleTestData);
+                                RowNumberIncrement(lastParentHeader, lastChildHeader, xlsFile, ref rowNumber, ref sheet, ref sheetNumber);
+                                row = sheet.GetRow(rowNumber);
+                                foreach (NotRelectionTestDataEntities.ClientExampleModel.Product childProperty in child) {
+                                    Assert.AreEqual(row.GetCell(1).StringCellValue, childProperty.Title);
+                                    Assert.AreEqual(row.GetCell(2).StringCellValue, childProperty.Amount.ToString());
+                                    RowNumberIncrement(lastParentHeader, lastChildHeader, xlsFile, ref rowNumber, ref sheet, ref sheetNumber); ;
+                                    row = sheet.GetRow(rowNumber);
+                                }
+                                break;
+                            }
+                        case 3: {
+                                List<NotRelectionTestDataEntities.ClientExampleModel.EnumProp1> child = currentTestDataRow.EnumProps1;                               
+                                lastChildHeader = TestChildHeader(row, childNumber, simpleTestData);
+                                RowNumberIncrement(lastParentHeader, lastChildHeader, xlsFile, ref rowNumber, ref sheet, ref sheetNumber); 
+                                row = sheet.GetRow(rowNumber);
+                                foreach (NotRelectionTestDataEntities.ClientExampleModel.EnumProp1 childProperty in child) {
+                                    Assert.AreEqual(row.GetCell(1).StringCellValue, childProperty.Field1);
+                                    Assert.AreEqual(row.GetCell(2).StringCellValue, childProperty.Field2.ToString());
+                                    Assert.AreEqual(row.GetCell(3).StringCellValue, childProperty.Field3.ToRussianString());
+                                    RowNumberIncrement(lastParentHeader, lastChildHeader, xlsFile, ref rowNumber, ref sheet, ref sheetNumber); ;
+                                    row = sheet.GetRow(rowNumber);
+                                }
+                                break;
+                            }
+                        case 4: {
+                                List<NotRelectionTestDataEntities.ClientExampleModel.EnumProp2> child = currentTestDataRow.EnumProps2;                                
+                                lastChildHeader = TestChildHeader(row, childNumber, simpleTestData);
+                                RowNumberIncrement(lastParentHeader, lastChildHeader, xlsFile, ref rowNumber, ref sheet, ref sheetNumber); 
+                                row = sheet.GetRow(rowNumber);
+                                foreach (NotRelectionTestDataEntities.ClientExampleModel.EnumProp2 childProperty in child) {
+                                    Assert.AreEqual(row.GetCell(1).StringCellValue, childProperty.Field4);
+                                    Assert.AreEqual(row.GetCell(2).StringCellValue, childProperty.Field5.ToString());
+                                    Assert.AreEqual(row.GetCell(3).StringCellValue, childProperty.Field6.ToRussianString());
+                                    Assert.AreEqual(row.GetCell(4).StringCellValue, childProperty.Field7);
+                                    Assert.AreEqual(row.GetCell(5).StringCellValue, childProperty.Field8.ToString());
+                                    RowNumberIncrement(lastParentHeader, lastChildHeader, xlsFile, ref rowNumber, ref sheet, ref sheetNumber); ;
+                                    row = sheet.GetRow(rowNumber);
+                                }
+                                break;
+                            }
+                    }
+                }
+            }
+        }
+        */
+        public void RowNumberIncrement(List<string> lastParentHeader, List<string> lastChildHeader, IWorkbook workbook, ref int rowNumber, ref ISheet sheet, ref int sheetNumber) {
+            if (rowNumber >= 65535) {
+                sheetNumber++;
+                sheet = workbook.GetSheetAt(sheetNumber);
+                IRow row = sheet.GetRow(0);
+                for (int columnNumber = 1; columnNumber < row.LastCellNum; columnNumber++) {
+                    Assert.AreEqual(row.GetCell(columnNumber).StringCellValue, lastParentHeader[columnNumber - 1]);
+                }
+                row = sheet.GetRow(1);
+                if (lastChildHeader != null) {
+                    for (int columnNumber = 1; columnNumber < row.LastCellNum; columnNumber++) {
+                        Assert.AreEqual(row.GetCell(columnNumber).StringCellValue, lastChildHeader[columnNumber - 1]);
+                    }
+                    rowNumber = 2;
+                }
+                else {
+                    rowNumber = 1;
+                }
+            }
+            else {
+                rowNumber++;
+            }
+        }
 
         [Test]
         public void ExcelSimpleExport() {
@@ -1339,7 +1502,7 @@ namespace FormattedExcelExport.Tests {
             }
             return value;
         }
-        private static void TestChildHeader(IRow row, int childNumber, NotRelectionTestDataEntities.TestData simpleTestData) {
+        private static List<string> TestChildHeader(IRow row, int childNumber, NotRelectionTestDataEntities.TestData simpleTestData) {
             string childName = simpleTestData.ConfigurationBuilder.Value.ChildrenMap[childNumber].Title;
             List<string> childColumnsNames = simpleTestData.ConfigurationBuilder.Value.ChildrenMap[childNumber].ColumnsMap.Keys.ToList();
 
@@ -1348,6 +1511,8 @@ namespace FormattedExcelExport.Tests {
                 int numberProperty = cellNumber - 1;
                 Assert.AreEqual(row.GetCell(cellNumber).StringCellValue, childColumnsNames[numberProperty]);
             }
+
+            return childColumnsNames;
         }
         private static void WriteToFile(MemoryStream ms, string fileName) {
             using (FileStream file = new FileStream(fileName, FileMode.Create, FileAccess.Write)) {
