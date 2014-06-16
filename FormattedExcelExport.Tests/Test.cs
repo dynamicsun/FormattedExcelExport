@@ -20,6 +20,171 @@ namespace FormattedExcelExport.Tests {
     [TestFixture]
     public class Test {
         [Test]
+        public void ExcelSimpleExportRowOverflow() {
+            NotRelectionTestDataEntities.TestData simpleTestData = NotRelectionTestDataEntities.CreateSimpleTestRowOverflowData();
+            NotRelectionTestDataEntities.ClientExampleModel firstTestDataRow = simpleTestData.Models.FirstOrDefault();
+            Assert.NotNull(firstTestDataRow);
+            MemoryStream memoryStream = TableWriterSimple.Write(new XlsTableWriterSimple(), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
+            WriteToFile(memoryStream, "TestSimpleOverflow.xls");
+
+            const int maxRow = 65536;
+
+            NotRelectionTestDataEntities.ClientExampleModel.Contact firstContact = firstTestDataRow.Contacts.FirstOrDefault();
+            Assert.NotNull(firstContact);
+
+            NotRelectionTestDataEntities.ClientExampleModel.Contract firstContract = firstTestDataRow.Contracts.FirstOrDefault();
+            Assert.NotNull(firstContract);
+
+            NotRelectionTestDataEntities.ClientExampleModel.Product firstProduct = firstTestDataRow.Products.FirstOrDefault();
+            Assert.NotNull(firstProduct);
+
+            NotRelectionTestDataEntities.ClientExampleModel.EnumProp1 firstEnumProp1 = firstTestDataRow.EnumProps1.FirstOrDefault();
+            Assert.NotNull(firstEnumProp1);
+
+            NotRelectionTestDataEntities.ClientExampleModel.EnumProp2 firstEnumProp2 = firstTestDataRow.EnumProps2.FirstOrDefault();
+            Assert.NotNull(firstEnumProp2);
+
+            int parentColumnsQuantity = simpleTestData.ConfigurationBuilder.Value.ColumnsMap.Count;
+            int contactsFieldsQuantity = firstContact.GetType().GetProperties().Count();
+            int contractsFieldsQuantity = firstContract.GetType().GetProperties().Count();
+            int productsFieldsQuantity = firstProduct.GetType().GetProperties().Count();
+            int enumProp1FieldsQuantity = firstEnumProp1.GetType().GetProperties().Count();
+
+            int testDataContactColumnsQuantity = simpleTestData.Models.Max(x => x.Contacts.Count) * contactsFieldsQuantity;
+            int testDataContractColumnsQuantity = simpleTestData.Models.Max(x => x.Contracts.Count) * contractsFieldsQuantity;
+            int testDataProductColumnsQuantity = simpleTestData.Models.Max(x => x.Products.Count) * productsFieldsQuantity;
+            int testDataEnumProp1ColumnsQuantity = simpleTestData.Models.Max(x => x.EnumProps1.Count) * enumProp1FieldsQuantity;
+
+            List<string> parentColumnsNames = simpleTestData.ConfigurationBuilder.Value.ColumnsMap.Keys.ToList();
+            List<List<string>> childsColumnsNames = new List<List<string>>();
+            foreach (ChildTableConfiguration childs in simpleTestData.ConfigurationBuilder.Value.ChildrenMap) {
+                childsColumnsNames.Add(childs.ColumnsMap.Keys.ToList());
+            }
+
+            HSSFWorkbook xlsFile;
+            using (FileStream file = new FileStream("TestSimpleOverflow.xls", FileMode.Open, FileAccess.Read)) {
+                xlsFile = new HSSFWorkbook(file);
+            }
+
+            List<string> header = new List<string>();
+
+            for (int index = 0; index < parentColumnsNames.Count; index++) {
+                header.Add(parentColumnsNames[index]);
+            }
+
+            for (int childNumber = 0; childNumber < childsColumnsNames.Count; childNumber++) {
+                List<string> child = childsColumnsNames[childNumber];
+                int childColumnsQuantity = 0;
+                switch (childNumber) {
+                    case 0: {
+                            childColumnsQuantity = simpleTestData.Models.Max(x => x.Contacts.Count);
+                            break;
+                        }
+                    case 1: {
+                            childColumnsQuantity = simpleTestData.Models.Max(x => x.Contracts.Count);
+                            break;
+                        }
+                    case 2: {
+                            childColumnsQuantity = simpleTestData.Models.Max(x => x.Products.Count);
+                            break;
+                        }
+                    case 3: {
+                            childColumnsQuantity = simpleTestData.Models.Max(x => x.EnumProps1.Count);
+                            break;
+                        }
+                    case 4: {
+                            childColumnsQuantity = simpleTestData.Models.Max(x => x.EnumProps2.Count);
+                            break;
+                        }
+                }
+                for (int index = 1; index <= childColumnsQuantity; index++) {
+                    foreach (string childPropertyName in child) {
+                        header.Add(childPropertyName + index);
+                    }
+                }
+            }
+
+            ISheet sheet;
+            IRow row;
+            int modelNumber = 0;
+            for (int sheetNumber = 0; sheetNumber < xlsFile.NumberOfSheets; sheetNumber++) {
+                sheet = xlsFile.GetSheetAt(sheetNumber);
+                row = sheet.GetRow(0);
+                for (int columnNumber = 0; columnNumber < row.LastCellNum; columnNumber++) {
+                    Assert.AreEqual(row.GetCell(columnNumber).StringCellValue, header[columnNumber]);
+                }
+                for (int rowNumber = 1; rowNumber < sheet.LastRowNum; rowNumber++) {
+                    row = sheet.GetRow(rowNumber);
+                    Assert.NotNull(row);
+                    NotRelectionTestDataEntities.ClientExampleModel currentTestDataRow = simpleTestData.Models[modelNumber];
+                    Assert.AreEqual(row.GetCell(0).StringCellValue, currentTestDataRow.Title);
+                    Assert.AreEqual(row.GetCell(1).StringCellValue, currentTestDataRow.RegistrationDate.ToRussianFullString());
+                    Assert.AreEqual(row.GetCell(2).StringCellValue, currentTestDataRow.Phone);
+                    Assert.AreEqual(row.GetCell(3).StringCellValue, currentTestDataRow.Inn);
+                    Assert.AreEqual(row.GetCell(4).StringCellValue, currentTestDataRow.Okato);
+
+                    Assert.AreEqual(row.GetCell(5).StringCellValue, string.Format(new CultureInfo("ru-RU"), "{0:C}", currentTestDataRow.Revenue));
+                    Assert.AreEqual(row.GetCell(6).StringCellValue, currentTestDataRow.EmployeeCount.ToString());
+                    Assert.AreEqual(row.GetCell(7).StringCellValue, currentTestDataRow.IsActive.ToRussianString());
+                    Assert.AreEqual(row.GetCell(8).StringCellValue, currentTestDataRow.Prop1.ToString());
+                    Assert.AreEqual(row.GetCell(9).StringCellValue, currentTestDataRow.Prop2);
+
+                    Assert.AreEqual(row.GetCell(10).StringCellValue, currentTestDataRow.Prop3.ToRussianString());
+                    Assert.AreEqual(row.GetCell(11).StringCellValue, currentTestDataRow.Prop4.ToString());
+                    Assert.AreEqual(row.GetCell(12).StringCellValue, currentTestDataRow.Prop5);
+                    Assert.AreEqual(row.GetCell(13).StringCellValue, currentTestDataRow.Prop6.ToRussianString());
+                    Assert.AreEqual(row.GetCell(14).StringCellValue, currentTestDataRow.Prop7.ToString());
+
+                    for (int contactNumber = 0; contactNumber < currentTestDataRow.Contacts.Count; contactNumber++) {
+                        NotRelectionTestDataEntities.ClientExampleModel.Contact currentContactRow = currentTestDataRow.Contacts[contactNumber];
+                        Assert.AreEqual(row.GetCell(parentColumnsQuantity + (contactNumber * contactsFieldsQuantity)).StringCellValue, currentContactRow.Title);
+                        Assert.AreEqual(row.GetCell(parentColumnsQuantity + (contactNumber * contactsFieldsQuantity + 1)).StringCellValue, currentContactRow.Email);
+                    }
+
+                    for (int contractNumber = 0; contractNumber < currentTestDataRow.Contracts.Count; contractNumber++) {
+                        Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + (contractNumber * contractsFieldsQuantity)).StringCellValue,
+                            currentTestDataRow.Contracts[contractNumber].BeginDate.ToRussianFullString());
+                        Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + (contractNumber * contractsFieldsQuantity + 1)).StringCellValue,
+                            currentTestDataRow.Contracts[contractNumber].EndDate.ToRussianFullString());
+                        Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + (contractNumber * contractsFieldsQuantity + 2)).StringCellValue,
+                            currentTestDataRow.Contracts[contractNumber].Status.ToRussianString());
+                    }
+
+                    for (int productNumber = 0; productNumber < currentTestDataRow.Products.Count; productNumber++) {
+                        Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + (productNumber * 2)).StringCellValue,
+                            currentTestDataRow.Products[productNumber].Title);
+                        Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + (productNumber * 2 + 1)).StringCellValue,
+                            currentTestDataRow.Products[productNumber].Amount.ToString());
+                    }
+
+                    for (int enumProp1Number = 0; enumProp1Number < currentTestDataRow.EnumProps1.Count; enumProp1Number++) {
+                        Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + (enumProp1Number * 3)).StringCellValue,
+                            currentTestDataRow.EnumProps1[enumProp1Number].Field1);
+                        Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + (enumProp1Number * 3 + 1)).StringCellValue,
+                            currentTestDataRow.EnumProps1[enumProp1Number].Field2.ToString());
+                        Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + (enumProp1Number * 3 + 2)).StringCellValue,
+                            currentTestDataRow.EnumProps1[enumProp1Number].Field3.ToRussianString());
+                    }
+
+                    for (int enumProp2Number = 0; enumProp2Number < currentTestDataRow.EnumProps2.Count; enumProp2Number++) {
+                        Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + testDataEnumProp1ColumnsQuantity + (enumProp2Number * 5)).StringCellValue,
+                            currentTestDataRow.EnumProps2[enumProp2Number].Field4);
+                        Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + testDataEnumProp1ColumnsQuantity + (enumProp2Number * 5 + 1)).StringCellValue,
+                            currentTestDataRow.EnumProps2[enumProp2Number].Field5.ToString());
+                        Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + testDataEnumProp1ColumnsQuantity + (enumProp2Number * 5 + 2)).StringCellValue,
+                            currentTestDataRow.EnumProps2[enumProp2Number].Field6.ToRussianString());
+                        Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + testDataEnumProp1ColumnsQuantity + (enumProp2Number * 5 + 3)).StringCellValue,
+                            currentTestDataRow.EnumProps2[enumProp2Number].Field7);
+                        Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + testDataEnumProp1ColumnsQuantity + (enumProp2Number * 5 + 4)).StringCellValue,
+                            currentTestDataRow.EnumProps2[enumProp2Number].Field8.ToString());
+                    }
+                    modelNumber++;
+                }
+                modelNumber++;
+            }
+        }
+
+        [Test]
         public void ExcelSimpleExport() {
             NotRelectionTestDataEntities.TestData simpleTestData = NotRelectionTestDataEntities.CreateSimpleTestData();
             NotRelectionTestDataEntities.ClientExampleModel firstTestDataRow = simpleTestData.Models.FirstOrDefault();

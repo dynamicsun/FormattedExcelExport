@@ -9,8 +9,13 @@ namespace FormattedExcelExport.Tests {
     internal static class NotRelectionTestDataEntities {
         internal static TestData CreateSimpleTestData(bool style = false) {
             TableConfigurationBuilder<ClientExampleModel> dataStructure = CreateSimpleTestDataConfigurationBuilder(style);
-            //var data = CreateTestRowOverflowDataModels();
             var data = CreateSimpleTestDataModels();
+            return new TestData(dataStructure, data);
+        }
+
+        internal static TestData CreateSimpleTestRowOverflowData(bool style = false) {
+            TableConfigurationBuilder<ClientExampleModel> dataStructure = CreateSimpleTestDataConfigurationBuilder(style);
+            var data = CreateTestRowOverflowDataModels();
             return new TestData(dataStructure, data);
         }
         private static TableConfigurationBuilder<ClientExampleModel> CreateSimpleTestDataConfigurationBuilder(bool style = false) {
@@ -113,7 +118,7 @@ namespace FormattedExcelExport.Tests {
 
         internal static List<ClientExampleModel> CreateTestRowOverflowDataModels() {
             List<ClientExampleModel> models = new List<ClientExampleModel>();
-            for (int i = 0; i < 2000; i++) {
+            for (int i = 0; i < 65000; i++) {
                 models.Add(new ClientExampleModel(
                     "Первая компания",
                     DateTime.Now,
@@ -153,6 +158,81 @@ namespace FormattedExcelExport.Tests {
                         new ClientExampleModel.EnumProp2("d", 3, true, "d", 6),
                         new ClientExampleModel.EnumProp2("s", 6, true, "ds", 7),
                         new ClientExampleModel.EnumProp2("yaoo", 7, false, "d", 5)
+                    }));
+                models.Add(new ClientExampleModel(
+                    "Вторая компания",
+                    DateTime.Now,
+                    "+7 222 1124 44",
+                    "5953043385461",
+                    "JsKSLPKKHSS",
+                    599988,
+                    59,
+                    false,
+                    1234,
+                    "kdkdkd",
+                    true,
+                    4321,
+                    "ddd",
+                    false,
+                    8979,
+                    new List<ClientExampleModel.Contact> {
+                        new ClientExampleModel.Contact("Олег", "oleg@mail.ru"),
+                        new ClientExampleModel.Contact("Анна", ""),
+                        new ClientExampleModel.Contact("Николай", "nikolay@mail.ru")
+                    },
+                    new List<ClientExampleModel.Contract> {
+                        new ClientExampleModel.Contract(new DateTime(1999, 1, 7), new DateTime(2007, 3, 22), true),
+                        new ClientExampleModel.Contract(new DateTime(1989, 2, 4), new DateTime(2012, 11, 20), false)
+                    },
+                    new List<ClientExampleModel.Product>(),
+                    new List<ClientExampleModel.EnumProp1> {
+                        new ClientExampleModel.EnumProp1("dsdsd", 432, true),
+                        new ClientExampleModel.EnumProp1("dd", 34, false),
+                        new ClientExampleModel.EnumProp1("yap", 3010, false),
+                    },
+                    new List<ClientExampleModel.EnumProp2> {
+                        new ClientExampleModel.EnumProp2("ss", 1, true, "bb", 43),
+                        new ClientExampleModel.EnumProp2("tr", 2, false, "aa", 45),
+                        new ClientExampleModel.EnumProp2("ds", 3, true, "dd", 46),
+                        new ClientExampleModel.EnumProp2("ds", 4, true, "dsds", 47),
+                        new ClientExampleModel.EnumProp2("yahoo", 5, false, "d", 45)
+                    }));
+                models.Add(new ClientExampleModel(
+                    "Третья компания",
+                    DateTime.Now,
+                    "+7 222 1124 44",
+                    "5953043385461",
+                    "JsKSLPKKHSS",
+                    599988,
+                    59,
+                    false,
+                    1234,
+                    "kdkdkd",
+                    true,
+                    4321,
+                    "ddd",
+                    false,
+                    8979,
+                    new List<ClientExampleModel.Contact> {
+						new ClientExampleModel.Contact("Олег", "oleg@mail.ru"),
+                        new ClientExampleModel.Contact("Даниил", "daniil@mail.ru"),
+						new ClientExampleModel.Contact("Анна", "anna@anna.anna")
+					},
+                    new List<ClientExampleModel.Contract> {
+						new ClientExampleModel.Contract(new DateTime(1999, 1, 7), new DateTime(2007, 3, 22), true)
+					},
+                    new List<ClientExampleModel.Product>(),
+                    new List<ClientExampleModel.EnumProp1> {
+                        new ClientExampleModel.EnumProp1("dsdsd", 432, true),
+                        new ClientExampleModel.EnumProp1("dd", 34, false),
+                        new ClientExampleModel.EnumProp1("yap", 3010, false),
+                    },
+                    new List<ClientExampleModel.EnumProp2> {
+                        new ClientExampleModel.EnumProp2("sdsdsds", 14, false, "fdfbb", 43),
+                        new ClientExampleModel.EnumProp2("tsdsdr", 22, false, "aafdf", 45),
+                        new ClientExampleModel.EnumProp2("dsdsds", 35, true, "ddfsd", 46),
+                        new ClientExampleModel.EnumProp2("ddagdfs", 46, true, "dsdfsds", 47),
+                        new ClientExampleModel.EnumProp2("yahovdfo", 65, false, "dfsdf", 45)
                     }));
             }
             return models; 
