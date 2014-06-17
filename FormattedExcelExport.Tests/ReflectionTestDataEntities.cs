@@ -7,20 +7,19 @@ using FormattedExcelExport.Reflection;
 namespace FormattedExcelExport.Tests {
     [ExcelExportClassName(Name = "Тестовые данные")]
     class ReflectionTestDataEntities {
-        private  List<EnumProp1> _enumField1;
-        private  List<EnumProp2> _enumField2;
-        private  List<EnumProp3> _enumField3;
-        private  List<EnumProp4> _enumField4;
-        private  List<EnumProp5> _enumField5;
+        private readonly List<EnumProp1> _enumField1;
+        private readonly List<EnumProp2> _enumField2;
+        private readonly List<EnumProp3> _enumField3;
+        private readonly List<EnumProp4> _enumField4;
+        private readonly List<EnumProp5> _enumField5;
 
         public ReflectionTestDataEntities() {
             List<Type> generalTypes = GeneralTypes;
             List<PropertyInfo> nonEnumerableProperties = GetType().GetProperties().Where(x => generalTypes.Contains(x.PropertyType)).ToList();
             Random rand = new Random();
-            Object value;
-            
-            foreach (PropertyInfo nonEnumerableProperty in nonEnumerableProperties) {
-                switch (nonEnumerableProperty.PropertyType.Name) {
+	        foreach (PropertyInfo nonEnumerableProperty in nonEnumerableProperties) {
+	            Object value;
+	            switch (nonEnumerableProperty.PropertyType.Name) {
                     case "String":
                         value = Guid.NewGuid().ToString();
                         nonEnumerableProperty.SetValue(this, Convert.ChangeType(value, nonEnumerableProperty.PropertyType));
@@ -35,7 +34,7 @@ namespace FormattedExcelExport.Tests {
                         break;
                 }
             }
-            _enumField1 = new List<EnumProp1>();
+	        _enumField1 = new List<EnumProp1>();
             for (int i = 0; i < rand.Next(4); i++) {
                 _enumField1.Add(new EnumProp1());
             }
@@ -174,10 +173,9 @@ namespace FormattedExcelExport.Tests {
                 List<Type> generalTypes = GeneralTypes;
                 List<PropertyInfo> nonEnumerableProperties = GetType().GetProperties().Where(x => generalTypes.Contains(x.PropertyType)).ToList();
                 Random rand = new Random();
-                Object value;
-
-                foreach (PropertyInfo nonEnumerableProperty in nonEnumerableProperties) {
-                    switch (nonEnumerableProperty.PropertyType.Name) {
+	            foreach (PropertyInfo nonEnumerableProperty in nonEnumerableProperties) {
+	                Object value;
+	                switch (nonEnumerableProperty.PropertyType.Name) {
                         case "String":
                             value = Guid.NewGuid().ToString();
                             nonEnumerableProperty.SetValue(this, Convert.ChangeType(value, nonEnumerableProperty.PropertyType));
@@ -219,10 +217,9 @@ namespace FormattedExcelExport.Tests {
                 List<Type> generalTypes = GeneralTypes;
                 List<PropertyInfo> nonEnumerableProperties = GetType().GetProperties().Where(x => generalTypes.Contains(x.PropertyType)).ToList();
                 Random rand = new Random();
-                Object value;
-
-                foreach (PropertyInfo nonEnumerableProperty in nonEnumerableProperties) {
-                    switch (nonEnumerableProperty.PropertyType.Name) {
+	            foreach (PropertyInfo nonEnumerableProperty in nonEnumerableProperties) {
+	                Object value;
+	                switch (nonEnumerableProperty.PropertyType.Name) {
                         case "String":
                             value = Guid.NewGuid().ToString();
                             nonEnumerableProperty.SetValue(this, Convert.ChangeType(value, nonEnumerableProperty.PropertyType));
@@ -276,10 +273,9 @@ namespace FormattedExcelExport.Tests {
                 List<Type> generalTypes = GeneralTypes;
                 List<PropertyInfo> nonEnumerableProperties = GetType().GetProperties().Where(x => generalTypes.Contains(x.PropertyType)).ToList();
                 Random rand = new Random();
-                Object value;
-
-                foreach (PropertyInfo nonEnumerableProperty in nonEnumerableProperties) {
-                    switch (nonEnumerableProperty.PropertyType.Name) {
+	            foreach (PropertyInfo nonEnumerableProperty in nonEnumerableProperties) {
+	                Object value;
+	                switch (nonEnumerableProperty.PropertyType.Name) {
                         case "String":
                             value = Guid.NewGuid().ToString();
                             nonEnumerableProperty.SetValue(this, Convert.ChangeType(value, nonEnumerableProperty.PropertyType));
@@ -333,10 +329,9 @@ namespace FormattedExcelExport.Tests {
                 List<Type> generalTypes = GeneralTypes;
                 List<PropertyInfo> nonEnumerableProperties = GetType().GetProperties().Where(x => generalTypes.Contains(x.PropertyType)).ToList();
                 Random rand = new Random();
-                Object value;
-
-                foreach (PropertyInfo nonEnumerableProperty in nonEnumerableProperties) {
-                    switch (nonEnumerableProperty.PropertyType.Name) {
+	            foreach (PropertyInfo nonEnumerableProperty in nonEnumerableProperties) {
+	                Object value;
+	                switch (nonEnumerableProperty.PropertyType.Name) {
                         case "String":
                             value = Guid.NewGuid().ToString();
                             nonEnumerableProperty.SetValue(this, Convert.ChangeType(value, nonEnumerableProperty.PropertyType));
@@ -384,10 +379,9 @@ namespace FormattedExcelExport.Tests {
                 List<Type> generalTypes = GeneralTypes;
                 List<PropertyInfo> nonEnumerableProperties = GetType().GetProperties().Where(x => generalTypes.Contains(x.PropertyType)).ToList();
                 Random rand = new Random();
-                Object value;
-
-                foreach (PropertyInfo nonEnumerableProperty in nonEnumerableProperties) {
-                    switch (nonEnumerableProperty.PropertyType.Name) {
+	            foreach (PropertyInfo nonEnumerableProperty in nonEnumerableProperties) {
+	                Object value;
+	                switch (nonEnumerableProperty.PropertyType.Name) {
                         case "String":
                             value = Guid.NewGuid().ToString();
                             nonEnumerableProperty.SetValue(this, Convert.ChangeType(value, nonEnumerableProperty.PropertyType));
