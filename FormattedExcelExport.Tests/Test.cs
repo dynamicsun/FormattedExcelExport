@@ -949,7 +949,7 @@ namespace FormattedExcelExport.Tests {
 		}
 		[Test]
 		public void ExcelComplexXlsxExport() {
-			NotRelectionTestDataEntities.TestData simpleTestData = NotRelectionTestDataEntities.CreateSimpleTestData(true);
+			NotRelectionTestDataEntities.TestData simpleTestData = NotRelectionTestDataEntities.CreateSimpleTestRowOverflowData(true);
 			NotRelectionTestDataEntities.ClientExampleModel firstTestDataRow = simpleTestData.Models.FirstOrDefault();
 			Assert.NotNull(firstTestDataRow);
 			TableWriterStyle style = new TableWriterStyle();

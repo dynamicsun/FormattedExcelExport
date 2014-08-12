@@ -8,12 +8,26 @@ using NPOI.XSSF.UserModel;
 
 namespace FormattedExcelExport.TableWriters {
 	public sealed class XlsxTableWriterComplex : XlsxTableWriterBase, ITableWriterComplex {
-	    public XlsxTableWriterComplex(TableWriterStyle style)
-	        : base(style) {}
         private int _rowIndex;
         private string[] _lastParentHeader;
         private string[] _lastChildHeader;
         private byte _colorIndex;
+        private List<ICellStyle> _childHeaderCellStyleList;
+
+	    public XlsxTableWriterComplex(TableWriterStyle style)
+	        : base(style) {
+	        /*_childHeaderCellStyleList = new List<ICellStyle>();
+            for (int i = 0; i < Style.ColorsCollection.Count; i++) {
+                AdHocCellStyle.Color color = Style.ColorsCollection.ElementAt(i);
+                if (color != null) {
+                    
+                    XSSFCellStyle childHeaderCellStyle = (XSSFCellStyle) ConvertToNpoiStyle(Style.HeaderChildCell);
+                    childHeaderCellStyle.SetFillForegroundColor(new XSSFColor(new[] { color.Red, color.Green, color.Blue }));
+                    childHeaderCellStyle.FillPattern = FillPattern.SolidForeground;
+                    _childHeaderCellStyleList.Add(childHeaderCellStyle);
+                }
+            }*/
+	    }
 
 	    public int RowIndex {
 	        get { return _rowIndex; }
@@ -103,12 +117,12 @@ namespace FormattedExcelExport.TableWriters {
 
 			AdHocCellStyle.Color color = Style.ColorsCollection.ElementAt(_colorIndex);
 			_colorIndex++;
-
+            //ICellStyle childHeaderCellStyle = _childHeaderCellStyleList[_colorIndex];
 			foreach (string cell in cellsList) {
 				ICell newCell = row.CreateCell(columnIndex);
 				newCell.SetCellValue(cell);
 				newCell.CellStyle = cellStyle;
-
+			    //newCell.CellStyle = childHeaderCellStyle;
 				if (color != null) {
 					XSSFCellStyle cs = (XSSFCellStyle)newCell.CellStyle;
 					cs.SetFillForegroundColor(new XSSFColor(new[] { color.Red, color.Green, color.Blue }));
@@ -117,6 +131,7 @@ namespace FormattedExcelExport.TableWriters {
 
 				columnIndex++;
 			}
+		    //_colorIndex++;
 		    _lastChildHeader = cells;
 			RowIndex++;
 		}
