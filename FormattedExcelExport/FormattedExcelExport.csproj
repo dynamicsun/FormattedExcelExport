@@ -32,6 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="EPPlus">
+      <HintPath>..\packages\EPPlus.3.1.3.3\lib\net35\EPPlus.dll</HintPath>
+    </Reference>
     <Reference Include="ICSharpCode.SharpZipLib">
       <HintPath>..\packages\NPOI.2.0.6\lib\net40\ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
@@ -69,8 +72,11 @@
     <Compile Include="Configuaration\TableConfiguration.cs" />
     <Compile Include="TableWriters\TableWriterSimple.cs" />
     <Compile Include="Style\TableWriterStyle.cs" />
+    <Compile Include="TableWriters\XlsxTableWriterBaseOld.cs" />
     <Compile Include="TableWriters\XlsxTableWriterBase.cs" />
+    <Compile Include="TableWriters\XlsxTableWriterComplexOld.cs" />
     <Compile Include="TableWriters\XlsxTableWriterComplex.cs" />
+    <Compile Include="TableWriters\XlsxTableWriterSimpleOld.cs" />
     <Compile Include="TableWriters\XlsxTableWriterSimple.cs" />
   </ItemGroup>
   <ItemGroup>

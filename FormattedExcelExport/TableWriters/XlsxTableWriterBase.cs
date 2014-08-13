@@ -1,66 +1,82 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using FormattedExcelExport.Style;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
-
+using OfficeOpenXml;
+using OfficeOpenXml.Style;
 
 namespace FormattedExcelExport.TableWriters {
-	public abstract class XlsxTableWriterBase {
+    public abstract class XlsxTableWriterBase {
         protected const int MaxRowIndex = 1048575;
-		protected readonly XSSFWorkbook Workbook;
-		protected ISheet WorkSheet;
-		protected readonly TableWriterStyle Style;
+        protected readonly ExcelPackage Package;
+        protected ExcelWorksheet WorkSheet;
+        protected readonly TableWriterStyle Style;
+        protected int SheetNumber;
 
-		protected XlsxTableWriterBase(TableWriterStyle style) {
-			Workbook = new XSSFWorkbook();
-			Style = style;
-			WorkSheet = Workbook.CreateSheet();
-		}
+        protected XlsxTableWriterBase(TableWriterStyle style) {
+            Package = new ExcelPackage();
+            Style = style;
+            SheetNumber = 0;
+            WorkSheet = Package.Workbook.Worksheets.Add("Sheet " + SheetNumber);
+        }
 
-		public void AutosizeColumns() {
-		    for (int sheetNumber = 0; sheetNumber < Workbook.NumberOfSheets; sheetNumber++) {
-		        var columnLengths = new List<int>();
-                WorkSheet = Workbook.GetSheetAt(sheetNumber);
-		        for (int columnNum = 0; columnNum < WorkSheet.GetRow(0).LastCellNum; columnNum++) {
-		            int columnMaximumLength = 0;
-		            for (int rowNum = 0; rowNum <= WorkSheet.LastRowNum; rowNum++) {
-		                IRow currentRow = WorkSheet.GetRow(rowNum);
+        public void AutosizeColumns() {
+            
+        }
 
-		                if (!currentRow.Cells.Any()) continue;
-		                ICell cell = currentRow.GetCell(columnNum);
-		                if (cell == null) continue;
+        //protected ExcelStyle ConvertToEPPlusStyle(AdHocCellStyle adHocCellStyle) {
+        //    ExcelFont cellFont = WorkSheet.Cells[1, 1].Style.Font;
 
-		                if (cell.StringCellValue.Length > columnMaximumLength)
-		                    columnMaximumLength = cell.StringCellValue.Length;
-		            }
-		            columnLengths.Add(columnMaximumLength);
-		        }
+        //    cellFont.Name = adHocCellStyle.FontName;
+        //    cellFont.Italic = adHocCellStyle.Italic;
+        //    if (adHocCellStyle.Underline) {
+        //        cellFont.UnderLineType = ExcelUnderLineType.Single;
+        //    }
+        //    if ((short)adHocCellStyle.BoldWeight == 700) {
+        //        cellFont.Bold = true;
+        //    }
+        //    cellFont.Color.SetColor(Color.FromArgb(adHocCellStyle.FontColor.Red, adHocCellStyle.FontColor.Green, adHocCellStyle.FontColor.Blue));
 
-		        for (int i = 0; i < WorkSheet.GetRow(0).LastCellNum; i++) {
-		            int width = columnLengths.ElementAt(i)*Style.FontFactor + Style.FontAbsoluteTerm;
-		            WorkSheet.SetColumnWidth(i, width < Style.MaxColumnWidth ? width : Style.MaxColumnWidth);
-		        }
-		    }
-		}
+        //    ExcelStyle cellStyle = WorkSheet.Cells[1, 1].Style;
+        //    cellStyle.Font = cellFont;
+        //    return cellStyle;
+        //}
 
-		protected ICellStyle ConvertToNpoiStyle(AdHocCellStyle adHocCellStyle) {
-			IFont cellFont = Workbook.CreateFont();
+        protected Font ConvertCellStyle(AdHocCellStyle adHocCellStyle) {
+            Font font = null;
+            if (adHocCellStyle.Italic && adHocCellStyle.BoldWeight == AdHocCellStyle.FontBoldWeight.Normal && !adHocCellStyle.Underline) {
+                font = new Font(adHocCellStyle.FontName, adHocCellStyle.FontHeightInPoints, FontStyle.Italic);
+            }
+            if (!adHocCellStyle.Italic && adHocCellStyle.BoldWeight == AdHocCellStyle.FontBoldWeight.Bold && !adHocCellStyle.Underline) {
+                font = new Font(adHocCellStyle.FontName, adHocCellStyle.FontHeightInPoints, FontStyle.Bold);
+            }
+            if (!adHocCellStyle.Italic && adHocCellStyle.BoldWeight == AdHocCellStyle.FontBoldWeight.Normal && adHocCellStyle.Underline) {
+                font = new Font(adHocCellStyle.FontName, adHocCellStyle.FontHeightInPoints, FontStyle.Underline);
+            }
 
-			cellFont.FontName = adHocCellStyle.FontName;
-			cellFont.FontHeightInPoints = adHocCellStyle.FontHeightInPoints;
-			cellFont.IsItalic = adHocCellStyle.Italic;
-			if (adHocCellStyle.Underline) {
-				cellFont.Underline = FontUnderlineType.Single;
-			}
-			cellFont.Boldweight = (short)adHocCellStyle.BoldWeight;
-			((XSSFFont)cellFont).SetColor(new XSSFColor(new[] { adHocCellStyle.FontColor.Red, adHocCellStyle.FontColor.Green, adHocCellStyle.FontColor.Blue }));
+            if (adHocCellStyle.Italic && adHocCellStyle.BoldWeight == AdHocCellStyle.FontBoldWeight.Normal && adHocCellStyle.Underline) {
+                font = new Font(adHocCellStyle.FontName, adHocCellStyle.FontHeightInPoints, FontStyle.Italic & FontStyle.Underline);
+            }
+            if (adHocCellStyle.Italic && adHocCellStyle.BoldWeight == AdHocCellStyle.FontBoldWeight.Bold && !adHocCellStyle.Underline) {
+                font = new Font(adHocCellStyle.FontName, adHocCellStyle.FontHeightInPoints, FontStyle.Italic & FontStyle.Bold);
+            }
+            if (!adHocCellStyle.Italic && adHocCellStyle.BoldWeight == AdHocCellStyle.FontBoldWeight.Bold && adHocCellStyle.Underline) {
+                font = new Font(adHocCellStyle.FontName, adHocCellStyle.FontHeightInPoints, FontStyle.Bold & FontStyle.Underline);
+            }
 
-			ICellStyle cellStyle = Workbook.CreateCellStyle();
-			cellStyle.SetFont(cellFont);
+            if (adHocCellStyle.Italic && adHocCellStyle.BoldWeight == AdHocCellStyle.FontBoldWeight.Bold && adHocCellStyle.Underline) {
+                font = new Font(adHocCellStyle.FontName, adHocCellStyle.FontHeightInPoints, FontStyle.Italic & FontStyle.Bold & FontStyle.Underline);
+            }
 
-			return cellStyle;
-		}
-	}
+            if (!adHocCellStyle.Italic && adHocCellStyle.BoldWeight == AdHocCellStyle.FontBoldWeight.Normal && !adHocCellStyle.Underline) {
+                font = new Font(adHocCellStyle.FontName, adHocCellStyle.FontHeightInPoints);
+            }
+            return font;
+        }
+    }
 }
