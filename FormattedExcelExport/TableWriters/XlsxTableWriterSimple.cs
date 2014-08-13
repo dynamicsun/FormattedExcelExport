@@ -37,12 +37,13 @@ namespace FormattedExcelExport.TableWriters {
                 newCell.Style.Font.Color.SetColor(Color.FromArgb(Style.HeaderCell.FontColor.Red, Style.HeaderCell.FontColor.Green, Style.HeaderCell.FontColor.Blue));
                 newCell.Style.Fill.PatternType = ExcelFillStyle.Solid;
                 newCell.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(Style.HeaderCell.BackgroundColor.Red, Style.HeaderCell.BackgroundColor.Green, Style.HeaderCell.BackgroundColor.Blue));
-                newCell.Style.VerticalAlignment = ExcelVerticalAlignment.Bottom;
+                newCell.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
                 columnIndex++;
             }
             _lastHeader = cells;
             RowIndex++;
         }
+
         public void WriteRow(List<KeyValuePair<string, TableWriterStyle>> cells) {
             int columnIndex = 1;
             Font font = ConvertCellStyle(Style.RegularCell);
@@ -67,8 +68,7 @@ namespace FormattedExcelExport.TableWriters {
                 else {
                     newCell.Style.Font.SetFromFont(font);
                     newCell.Style.Font.Color.SetColor(Color.FromArgb(Style.RegularCell.FontColor.Red, Style.RegularCell.FontColor.Green, Style.RegularCell.FontColor.Blue));
-                    newCell.Style.Fill.PatternType = ExcelFillStyle.Solid;
-                    newCell.Style.Fill.BackgroundColor.SetColor(Color.White);
+                    newCell.Style.Fill.PatternType = ExcelFillStyle.None;
                     newCell.Style.VerticalAlignment = ExcelVerticalAlignment.Bottom;
                 }
                 columnIndex++;
