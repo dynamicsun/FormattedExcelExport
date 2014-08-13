@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using FormattedExcelExport.Style;
-using NPOI.SS.UserModel;
-using NPOI.XSSF.UserModel;
 using OfficeOpenXml;
-using OfficeOpenXml.Style;
 
 namespace FormattedExcelExport.TableWriters {
     public abstract class XlsxTableWriterBase {
@@ -46,32 +40,6 @@ namespace FormattedExcelExport.TableWriters {
                 }
             }
         }
-
-        //public void AutosizeColumns() {
-        //    for (int sheetNumber = 0; sheetNumber < Workbook.NumberOfSheets; sheetNumber++) {
-        //        var columnLengths = new List<int>();
-        //        WorkSheet = Workbook.GetSheetAt(sheetNumber);
-        //        for (int columnNum = 0; columnNum < WorkSheet.GetRow(0).LastCellNum; columnNum++) {
-        //            int columnMaximumLength = 0;
-        //            for (int rowNum = 0; rowNum <= WorkSheet.LastRowNum; rowNum++) {
-        //                IRow currentRow = WorkSheet.GetRow(rowNum);
-
-        //                if (!currentRow.Cells.Any()) continue;
-        //                ICell cell = currentRow.GetCell(columnNum);
-        //                if (cell == null) continue;
-
-        //                if (cell.StringCellValue.Length > columnMaximumLength)
-        //                    columnMaximumLength = cell.StringCellValue.Length;
-        //            }
-        //            columnLengths.Add(columnMaximumLength);
-        //        }
-
-        //        for (int i = 0; i < WorkSheet.GetRow(0).LastCellNum; i++) {
-        //            int width = columnLengths.ElementAt(i) * Style.FontFactor + Style.FontAbsoluteTerm;
-        //            WorkSheet.SetColumnWidth(i, width < Style.MaxColumnWidth ? width : Style.MaxColumnWidth);
-        //        }
-        //    }
-        //}
 
         protected Font ConvertCellStyle(AdHocCellStyle adHocCellStyle) {
             Font font = null;

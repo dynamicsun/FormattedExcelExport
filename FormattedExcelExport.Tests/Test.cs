@@ -750,15 +750,25 @@ namespace FormattedExcelExport.Tests {
 			ExcelStyleReflectionComplexExportTest(test, "RandomStyleTestReflectionComplex.xls");
 		}
 
-	    [Test]
-	    public void EPPlusTest() {
-            NotRelectionTestDataEntities.TestData simpleTestData = NotRelectionTestDataEntities.CreateSimpleTestRowOverflowData(true);
-            TableWriterStyle style = new TableWriterStyle();
-	        //
-            MemoryStream ms = TableWriterSimple.Write(new XlsxTableWriterSimple(style), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
-			//
-            WriteToFile(ms, "EPPlusTest.xlsx");
-	    }
+        //[Test]
+        //public void EPPlusTest() {
+        //    NotRelectionTestDataEntities.TestData simpleTestData = NotRelectionTestDataEntities.CreateSimpleTestRowOverflowData(true);
+        //    TableWriterStyle style = new TableWriterStyle();
+        //    //
+        //    MemoryStream ms = TableWriterSimple.Write(new XlsxTableWriterSimple(style), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
+        //    //
+        //    WriteToFile(ms, "EPPlusTest.xlsx");
+        //}
+
+        //[Test]
+        //public void EPPlusTestComplex() {
+        //    NotRelectionTestDataEntities.TestData simpleTestData = NotRelectionTestDataEntities.CreateSimpleTestRowOverflowData(true);
+        //    TableWriterStyle style = new TableWriterStyle();
+        //    //
+        //    MemoryStream ms = TableWriterComplex.Write(new XlsxTableWriterComplex(style), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
+        //    //
+        //    WriteToFile(ms, "EPPlusTestComplex.xlsx");
+        //}
 
 		[Test]
 		public void ExcelSimpleXlsxExport() {

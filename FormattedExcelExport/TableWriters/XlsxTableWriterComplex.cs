@@ -1,187 +1,161 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using FormattedExcelExport.Style;
-using NPOI.SS.UserModel;
-using NPOI.XSSF.UserModel;
-
+using OfficeOpenXml;
+using OfficeOpenXml.Style;
 
 namespace FormattedExcelExport.TableWriters {
-	public sealed class XlsxTableWriterComplex : XlsxTableWriterBase, ITableWriterComplex {
-        private int _rowIndex;
+    public sealed class XlsxTableWriterComplex : XlsxTableWriterBase, ITableWriterComplex {
+        private int _rowIndex = 1;
         private string[] _lastParentHeader;
         private string[] _lastChildHeader;
         private byte _colorIndex;
-        private List<ICellStyle> _childHeaderCellStyleList;
+        //private List<ICellStyle> _childHeaderCellStyleList;
 
-	    public XlsxTableWriterComplex(TableWriterStyle style)
-	        : base(style) {
-	        /*_childHeaderCellStyleList = new List<ICellStyle>();
-            for (int i = 0; i < Style.ColorsCollection.Count; i++) {
-                AdHocCellStyle.Color color = Style.ColorsCollection.ElementAt(i);
-                if (color != null) {
-                    
-                    XSSFCellStyle childHeaderCellStyle = (XSSFCellStyle) ConvertToNpoiStyle(Style.HeaderChildCell);
-                    childHeaderCellStyle.SetFillForegroundColor(new XSSFColor(new[] { color.Red, color.Green, color.Blue }));
-                    childHeaderCellStyle.FillPattern = FillPattern.SolidForeground;
-                    _childHeaderCellStyleList.Add(childHeaderCellStyle);
-                }
-            }*/
-	    }
-
-	    public int RowIndex {
-	        get { return _rowIndex; }
-	        set {
-	            if (_rowIndex < MaxRowIndex) {
-	                _rowIndex = value;
-	            }
-	            else {
-                    WorkSheet = Workbook.CreateSheet();
-                    _rowIndex = 0;
+        public int RowIndex {
+            get { return _rowIndex; }
+            set {
+                if (_rowIndex < MaxRowIndex) {
+                    _rowIndex = value;
+                } else {
+                    SheetNumber = SheetNumber + 1;
+                    WorkSheet = Package.Workbook.Worksheets.Add("Sheet " + SheetNumber);
+                    _rowIndex = 1;
                     WriteHeader(_lastParentHeader);
-                    WriteChildHeader(_lastChildHeader);                    
-	            }
-	        }
-	    }
+                    WriteChildHeader(_lastChildHeader);
+                }
+            }
+        }
 
-		
-		
-		public void WriteHeader(params string[] cells) {
-			IRow row = WorkSheet.CreateRow(RowIndex);
-			row.Height = Style.HeaderHeight;
+        public XlsxTableWriterComplex(TableWriterStyle style) : base(style) {
+        }
 
-			ICellStyle cellStyle = ConvertToNpoiStyle(Style.HeaderCell);
-			cellStyle.FillPattern = FillPattern.SolidForeground;
-			cellStyle.VerticalAlignment = VerticalAlignment.Center;
+        public void WriteHeader(params string[] cells) {
+            ExcelRow row = WorkSheet.Row(RowIndex);
+            row.Height = Style.HeaderHeight / 20;
+            Font font = ConvertCellStyle(Style.HeaderCell);
+            int columnIndex = 1;
+            foreach (string cell in cells) {
+                ExcelRange newCell = WorkSheet.Cells[RowIndex, columnIndex];
+                newCell.Value = cell;
+                newCell.Style.Font.SetFromFont(font);
+                newCell.Style.Font.Color.SetColor(Color.FromArgb(Style.HeaderCell.FontColor.Red, Style.HeaderCell.FontColor.Green, Style.HeaderCell.FontColor.Blue));
+                newCell.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                newCell.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(Style.HeaderCell.BackgroundColor.Red, Style.HeaderCell.BackgroundColor.Green, Style.HeaderCell.BackgroundColor.Blue));
+                newCell.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                columnIndex++;
+            }
+            _lastParentHeader = cells;
+            RowIndex++;
+            _colorIndex = 0;
+        }
 
-			int columnIndex = 0;
-			foreach (string cell in cells) {
-				ICell newCell = row.CreateCell(columnIndex);
-				newCell.SetCellValue(cell);
-				newCell.CellStyle = cellStyle;
+        public void WriteRow(IEnumerable<KeyValuePair<string, TableWriterStyle>> cells, bool prependDelimeter = false) {
+            int columnIndex = 1;
+            Font font = ConvertCellStyle(Style.RegularCell);
+            if (prependDelimeter) {
+                ExcelRange newCell = WorkSheet.Cells[RowIndex, columnIndex];
+                newCell.Value = "";
+                if (Style.RegularCell.BackgroundColor != null) {
+                    newCell.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                    newCell.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(Style.RegularCell.BackgroundColor.Red, Style.RegularCell.BackgroundColor.Green, Style.RegularCell.BackgroundColor.Blue));
+                }
+                columnIndex++;
+            }
+            foreach (KeyValuePair<string, TableWriterStyle> cell in cells) {
+                ExcelRange newCell = WorkSheet.Cells[RowIndex, columnIndex];
+                if (cell.Key != null)
+                    newCell.Value = cell.Key;
+                if (cell.Value != null) {
+                    font = ConvertCellStyle(cell.Value.RegularCell);
+                    newCell.Style.Font.SetFromFont(font);
+                    newCell.Style.Font.Color.SetColor(Color.FromArgb(Style.HeaderCell.FontColor.Red, Style.HeaderCell.FontColor.Green, Style.HeaderCell.FontColor.Blue));
+                    if (cell.Value.RegularCell.BackgroundColor != null) {
+                        newCell.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                        newCell.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(cell.Value.RegularCell.BackgroundColor.Red, cell.Value.RegularCell.BackgroundColor.Green, cell.Value.RegularCell.BackgroundColor.Blue));
+                    }
+                    newCell.Style.VerticalAlignment = ExcelVerticalAlignment.Bottom;
+                } else {
+                    newCell.Style.Font.SetFromFont(font);
+                    newCell.Style.Font.Color.SetColor(Color.FromArgb(Style.RegularCell.FontColor.Red, Style.RegularCell.FontColor.Green, Style.RegularCell.FontColor.Blue));
+                    newCell.Style.Fill.PatternType = ExcelFillStyle.None;
+                    newCell.Style.VerticalAlignment = ExcelVerticalAlignment.Bottom;
+                }
+                columnIndex++;
+            }
+            RowIndex++;
+        }
 
-				XSSFCellStyle cs = (XSSFCellStyle)newCell.CellStyle;
-				cs.SetFillForegroundColor(new XSSFColor(new[] { Style.HeaderCell.BackgroundColor.Red, Style.HeaderCell.BackgroundColor.Green, Style.HeaderCell.BackgroundColor.Blue }));
+        public void WriteChildHeader(params string[] cells) {
+            ExcelRow row = WorkSheet.Row(RowIndex);
+            //row.Height = Style.HeaderHeight / 20;
+            Font font = ConvertCellStyle(Style.HeaderChildCell);
+            int columnIndex = 1;
 
-				columnIndex++;
-			}
-		    _lastParentHeader = cells;
-			RowIndex++;
-			_colorIndex = 0;
-		}
-		public void WriteRow(IEnumerable<KeyValuePair<string, TableWriterStyle>> cells, bool prependDelimeter = false) {
-			IRow row = WorkSheet.CreateRow(RowIndex);
-			ICellStyle cellStyle = ConvertToNpoiStyle(Style.RegularCell);
+            if (_colorIndex >= Style.ColorsCollection.Count) _colorIndex = 0;
+            AdHocCellStyle.Color color = Style.ColorsCollection.ElementAt(_colorIndex);
+            _colorIndex++;
 
-			int columnIndex = 0;
-			if (prependDelimeter) {
-				ICell newCell = row.CreateCell(columnIndex);
-				newCell.SetCellValue("");
-				newCell.CellStyle = cellStyle;
+            foreach (string cell in cells) {
+                ExcelRange newCell = WorkSheet.Cells[RowIndex, columnIndex];
+                newCell.Value = cell;
+                newCell.Style.Font.SetFromFont(font);
+                newCell.Style.Font.Color.SetColor(Color.FromArgb(Style.HeaderChildCell.FontColor.Red, Style.HeaderChildCell.FontColor.Green, Style.HeaderChildCell.FontColor.Blue));
+                newCell.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                newCell.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(color.Red, color.Green, color.Blue));
+                newCell.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                columnIndex++;
+            }
+            _lastChildHeader = cells;
+            RowIndex++;
+        }
 
-				if (Style.RegularCell.BackgroundColor != null) {
-					XSSFCellStyle cs = (XSSFCellStyle)newCell.CellStyle;
-					cs.SetFillForegroundColor(new XSSFColor(new[] { Style.RegularCell.BackgroundColor.Red, Style.RegularCell.BackgroundColor.Green, Style.RegularCell.BackgroundColor.Blue }));
-					cellStyle.FillPattern = FillPattern.SolidForeground;
-				}
-				columnIndex++;
-			}
-			foreach (KeyValuePair<string, TableWriterStyle> cell in cells) {
-				ICell newCell = row.CreateCell(columnIndex);
-				newCell.SetCellValue(cell.Key);
+        public void WriteChildRow(IEnumerable<KeyValuePair<string, TableWriterStyle>> cells, bool prependDelimeter = false) {
+            int columnIndex = 1;
+            Font font = ConvertCellStyle(Style.RegularChildCell);
+            if (prependDelimeter) {
+                ExcelRange newCell = WorkSheet.Cells[RowIndex, columnIndex];
+                newCell.Value = "";
+                if (Style.RegularChildCell.BackgroundColor != null) {
+                    newCell.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                    newCell.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(Style.RegularChildCell.BackgroundColor.Red, Style.RegularChildCell.BackgroundColor.Green, Style.RegularChildCell.BackgroundColor.Blue));
+                }
+                columnIndex++;
+            }
+            foreach (KeyValuePair<string, TableWriterStyle> cell in cells) {
+                ExcelRange newCell = WorkSheet.Cells[RowIndex, columnIndex];
+                if (cell.Key != null)
+                    newCell.Value = cell.Key;
+                if (cell.Value != null) {
+                    font = ConvertCellStyle(cell.Value.RegularChildCell);
+                    newCell.Style.Font.SetFromFont(font);
+                    newCell.Style.Font.Color.SetColor(Color.FromArgb(Style.HeaderCell.FontColor.Red, Style.HeaderCell.FontColor.Green, Style.HeaderCell.FontColor.Blue));
+                    if (cell.Value.RegularChildCell.BackgroundColor != null) {
+                        newCell.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                        newCell.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(cell.Value.RegularChildCell.BackgroundColor.Red, cell.Value.RegularChildCell.BackgroundColor.Green, cell.Value.RegularChildCell.BackgroundColor.Blue));
+                    }
+                    newCell.Style.VerticalAlignment = ExcelVerticalAlignment.Bottom;
+                } else {
+                    newCell.Style.Font.SetFromFont(font);
+                    newCell.Style.Font.Color.SetColor(Color.FromArgb(Style.RegularChildCell.FontColor.Red, Style.RegularChildCell.FontColor.Green, Style.RegularChildCell.FontColor.Blue));
+                    newCell.Style.Fill.PatternType = ExcelFillStyle.None;
+                    newCell.Style.VerticalAlignment = ExcelVerticalAlignment.Bottom;
+                }
+                columnIndex++;
+            }
+            RowIndex++;
+        }
 
-				if (cell.Value != null) {
-					ICellStyle customCellStyle = ConvertToNpoiStyle(cell.Value.RegularCell);
-					newCell.CellStyle = customCellStyle;
-					if (cell.Value.RegularCell.BackgroundColor != null) {
-						XSSFCellStyle cs = (XSSFCellStyle)newCell.CellStyle;
-						cs.SetFillForegroundColor(new XSSFColor(new[] { cell.Value.RegularCell.BackgroundColor.Red, cell.Value.RegularCell.BackgroundColor.Green, cell.Value.RegularCell.BackgroundColor.Blue }));
-						cs.FillPattern = FillPattern.SolidForeground;
-					}
-				}
-				else {
-					newCell.CellStyle = cellStyle;
-				}
-				columnIndex++;
-			}
-			RowIndex++;
-		}
-		public void WriteChildHeader(params string[] cells) {
-			IRow row = WorkSheet.CreateRow(RowIndex);
-			int columnIndex = 0;
-			List<string> cellsList = cells.ToList();
-			ICellStyle cellStyle = ConvertToNpoiStyle(Style.HeaderChildCell);
-
-			if (_colorIndex >= Style.ColorsCollection.Count)
-				_colorIndex = 0;
-
-			AdHocCellStyle.Color color = Style.ColorsCollection.ElementAt(_colorIndex);
-			_colorIndex++;
-            //ICellStyle childHeaderCellStyle = _childHeaderCellStyleList[_colorIndex];
-			foreach (string cell in cellsList) {
-				ICell newCell = row.CreateCell(columnIndex);
-				newCell.SetCellValue(cell);
-				newCell.CellStyle = cellStyle;
-			    //newCell.CellStyle = childHeaderCellStyle;
-				if (color != null) {
-					XSSFCellStyle cs = (XSSFCellStyle)newCell.CellStyle;
-					cs.SetFillForegroundColor(new XSSFColor(new[] { color.Red, color.Green, color.Blue }));
-					cs.FillPattern = FillPattern.SolidForeground;
-				}
-
-				columnIndex++;
-			}
-		    //_colorIndex++;
-		    _lastChildHeader = cells;
-			RowIndex++;
-		}
-		public void WriteChildRow(IEnumerable<KeyValuePair<string, TableWriterStyle>> cells, bool prependDelimeter = false) {
-			IRow row = WorkSheet.CreateRow(RowIndex);
-
-			ICellStyle cellStyle = ConvertToNpoiStyle(Style.RegularChildCell);
-
-			int columnIndex = 0;
-			if (prependDelimeter) {
-				ICell newCell = row.CreateCell(columnIndex);
-				newCell.SetCellValue("");
-				newCell.CellStyle = cellStyle;
-
-				columnIndex++;
-			}
-
-			foreach (KeyValuePair<string, TableWriterStyle> cell in cells) {
-				ICell newCell = row.CreateCell(columnIndex);
-				newCell.SetCellValue(cell.Key);
-
-				if (cell.Value != null) {
-					ICellStyle customCellStyle = ConvertToNpoiStyle(cell.Value.RegularChildCell);
-					newCell.CellStyle = customCellStyle;
-
-					if (cell.Value.RegularChildCell.BackgroundColor != null) {
-						XSSFCellStyle cs = (XSSFCellStyle)newCell.CellStyle;
-						cs.SetFillForegroundColor(new XSSFColor(new[] { cell.Value.RegularChildCell.BackgroundColor.Red, cell.Value.RegularChildCell.BackgroundColor.Green, cell.Value.RegularChildCell.BackgroundColor.Blue }));
-						cs.FillPattern = FillPattern.SolidForeground;
-					}
-				}
-				else {
-					newCell.CellStyle = cellStyle;
-				}
-				columnIndex++;
-			}
-			RowIndex++;
-		}
-
-		public MemoryStream GetStream() {
-			MemoryStream memoryStream = new MemoryStream();
-//			Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
-
-			FileStream sw = File.Create("TestComplex.xlsx");
-			Workbook.Write(sw);
-
-
-			//			Workbook.Write(memoryStream);
-			//			memoryStream.Position = 0;
-			return memoryStream;
-		}
-	}
+        public MemoryStream GetStream() {
+            MemoryStream memoryStream = new MemoryStream();
+            Package.SaveAs(memoryStream);
+            memoryStream.Position = 0;
+            return memoryStream;
+        }
+    }
 }
