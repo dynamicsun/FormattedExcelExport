@@ -72,11 +72,8 @@
     <Compile Include="Configuaration\TableConfiguration.cs" />
     <Compile Include="TableWriters\TableWriterSimple.cs" />
     <Compile Include="Style\TableWriterStyle.cs" />
-    <Compile Include="TableWriters\XlsxTableWriterBaseOld.cs" />
     <Compile Include="TableWriters\XlsxTableWriterBase.cs" />
-    <Compile Include="TableWriters\XlsxTableWriterComplexOld.cs" />
     <Compile Include="TableWriters\XlsxTableWriterComplex.cs" />
-    <Compile Include="TableWriters\XlsxTableWriterSimpleOld.cs" />
     <Compile Include="TableWriters\XlsxTableWriterSimple.cs" />
   </ItemGroup>
   <ItemGroup>

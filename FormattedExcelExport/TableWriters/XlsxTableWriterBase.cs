@@ -22,9 +22,9 @@ namespace FormattedExcelExport.TableWriters {
         public void AutosizeColumns() {
             foreach (var sheet in Package.Workbook.Worksheets) {
                 List<int> columnLengths = new List<int>();
-                for (int columnNum = 1; columnNum < sheet.Dimension.End.Column; columnNum++) {
+                for (int columnNum = 1; columnNum <= sheet.Dimension.End.Column; columnNum++) {
                     int columnMaxixumLength = 0;
-                    for (int rowNum = 1; rowNum < sheet.Dimension.End.Row; rowNum++) {
+                    for (int rowNum = 1; rowNum <= sheet.Dimension.End.Row; rowNum++) {
                         if (WorkSheet.Cells[rowNum, columnNum] == null) continue;
 
                         if (WorkSheet.Cells[rowNum, columnNum].Value != null && WorkSheet.Cells[rowNum, columnNum].Value.ToString().Length > columnMaxixumLength) {
@@ -34,7 +34,7 @@ namespace FormattedExcelExport.TableWriters {
                     columnLengths.Add(columnMaxixumLength);
                 }
 
-                for (int i = 1; i < sheet.Dimension.End.Column - 1; i++) {
+                for (int i = 1; i <= sheet.Dimension.End.Column; i++) {
                     int width = (columnLengths.ElementAt(i - 1) * Style.FontFactor + Style.FontAbsoluteTerm) / 256;
                     sheet.Column(i).Width = width < Style.MaxColumnWidth ? width : Style.MaxColumnWidth;
                 }

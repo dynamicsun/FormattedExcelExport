@@ -762,7 +762,7 @@ namespace FormattedExcelExport.Tests {
 
         //[Test]
         //public void EPPlusTestComplex() {
-        //    NotRelectionTestDataEntities.TestData simpleTestData = NotRelectionTestDataEntities.CreateSimpleTestRowOverflowData(true);
+        //    NotRelectionTestDataEntities.TestData simpleTestData = NotRelectionTestDataEntities.CreateSimpleTestData(true);
         //    TableWriterStyle style = new TableWriterStyle();
         //    //
         //    MemoryStream ms = TableWriterComplex.Write(new XlsxTableWriterComplex(style), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
@@ -776,7 +776,7 @@ namespace FormattedExcelExport.Tests {
 			NotRelectionTestDataEntities.ClientExampleModel firstTestDataRow = simpleTestData.Models.FirstOrDefault();
 			Assert.NotNull(firstTestDataRow);
 			TableWriterStyle style = new TableWriterStyle();
-			TableWriterSimple.Write(new XlsxTableWriterSimpleOld(style), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
+			TableWriterSimple.Write(new XlsxTableWriterSimple(style), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
             
             NotRelectionTestDataEntities.ClientExampleModel.Contact firstContact = firstTestDataRow.Contacts.FirstOrDefault();
 			Assert.NotNull(firstContact);
@@ -925,7 +925,7 @@ namespace FormattedExcelExport.Tests {
 			NotRelectionTestDataEntities.ClientExampleModel firstTestDataRow = simpleTestData.Models.FirstOrDefault();
 			Assert.NotNull(firstTestDataRow);
 			TableWriterStyle style = new TableWriterStyle();
-			TableWriterSimple.Write(new XlsxTableWriterSimpleOld(style), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
+			TableWriterSimple.Write(new XlsxTableWriterSimple(style), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
 			NotRelectionTestDataEntities.ClientExampleModel.Contact firstContact = firstTestDataRow.Contacts.FirstOrDefault();
 			Assert.NotNull(firstContact);
 
@@ -975,7 +975,7 @@ namespace FormattedExcelExport.Tests {
 			NotRelectionTestDataEntities.ClientExampleModel firstTestDataRow = simpleTestData.Models.FirstOrDefault();
 			Assert.NotNull(firstTestDataRow);
 			TableWriterStyle style = new TableWriterStyle();
-			TableWriterComplex.Write(new XlsxTableWriterComplexOld(style), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
+			TableWriterComplex.Write(new XlsxTableWriterComplex(style), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
 
 			XSSFWorkbook xlsFile;
 			using (FileStream file = new FileStream("TestComplex.xlsx", FileMode.Open, FileAccess.Read)) {
@@ -1101,7 +1101,7 @@ namespace FormattedExcelExport.Tests {
 			NotRelectionTestDataEntities.ClientExampleModel firstTestDataRow = simpleTestData.Models.FirstOrDefault();
 			Assert.NotNull(firstTestDataRow);
 			TableWriterStyle style = new TableWriterStyle();
-			TableWriterComplex.Write(new XlsxTableWriterComplexOld(style), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
+			TableWriterComplex.Write(new XlsxTableWriterComplex(style), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
 
 			XSSFWorkbook xlsFile;
 			using (FileStream file = new FileStream("TestComplex.xlsx", FileMode.Open, FileAccess.Read)) {
@@ -1146,7 +1146,7 @@ namespace FormattedExcelExport.Tests {
 			for (int i = 2; i < rand.Next(10, 30); i++) {
 				test.Add(new ReflectionTestDataEntities());
 			}
-			ReflectionWriterSimple.Write(test, new XlsxTableWriterSimpleOld(style), new CultureInfo("ru-Ru"));
+			ReflectionWriterSimple.Write(test, new XlsxTableWriterSimple(style), new CultureInfo("ru-Ru"));
 			ExcelReflectionSimpleExportTest(test, "TestSimple.xlsx", true);
 
 			ExcelStyleReflectionSimpleExportTest(test, "TestSimple.xlsx", true);
@@ -1159,7 +1159,7 @@ namespace FormattedExcelExport.Tests {
 			for (int i = 2; i < rand.Next(10, 30); i++) {
 				test.Add(new ReflectionTestDataEntities());
 			}
-			ReflectionWriterComplex.Write(test, new XlsxTableWriterComplexOld(style), new CultureInfo("ru-Ru"));
+			ReflectionWriterComplex.Write(test, new XlsxTableWriterComplex(style), new CultureInfo("ru-Ru"));
 			ExcelReflectionComplexExportTest(test, "TestComplex.xlsx", true);
 
 			ExcelStyleReflectionComplexExportTest(test, "TestComplex.xlsx", true);
