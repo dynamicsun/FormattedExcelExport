@@ -115,7 +115,7 @@ namespace FormattedExcelExport.Reflection {
 						row.Add(((DateTime) propertyInfo.GetValue(model)).ToString(cultureInfo.DateTimeFormat.LongDatePattern));
 						break;
 					case "Decimal":
-						row.Add(string.Format(cultureInfo, "{0:C}", propertyInfo.GetValue(model)));
+						row.Add(string.Format(cultureInfo, "{0}", propertyInfo.GetValue(model)));
 						break;
 					case "Int32":
 						row.Add(propertyInfo.GetValue(model).ToString());
@@ -127,7 +127,7 @@ namespace FormattedExcelExport.Reflection {
 						if(propertyInfo.PropertyType.FullName.Contains("DateTime"))
 							row.Add(((DateTime)propertyInfo.GetValue(model)).ToString(cultureInfo.DateTimeFormat.LongDatePattern));
 						if (propertyInfo.PropertyType.FullName.Contains("Decimal"))
-							row.Add(string.Format(cultureInfo, "{0:C}", propertyInfo.GetValue(model)));
+							row.Add(string.Format(cultureInfo, "{0}", propertyInfo.GetValue(model)));
 						if (propertyInfo.PropertyType.FullName.Contains("Int32"))
 							row.Add(propertyInfo.GetValue(model).ToString());
 						if (propertyInfo.PropertyType.FullName.Contains("Boolean"))
