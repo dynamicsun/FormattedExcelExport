@@ -59,11 +59,17 @@ namespace FormattedExcelExport.Example {
             ms = ReflectionWriterSimple.Write(models, new XlsTableWriterSimple(new TableWriterStyle()), new CultureInfo("ru-Ru"));
             WriteToFile(ms, "TestReflectionSimple.xls");
 
+			ms = ReflectionWriterSimple.Write(models, new XlsxTableWriterSimple(new TableWriterStyle()), new CultureInfo("ru-Ru"));
+			WriteToFile(ms, "TestReflectionSimple.xlsx");
+
             ms = ReflectionWriterComplex.Write(models, new DsvTableWriterComplex(), new CultureInfo("ru-Ru"));
             WriteToFile(ms, "TestReflectionSimple.txt");
 
             ms = ReflectionWriterComplex.Write(models, new XlsTableWriterComplex(new TableWriterStyle()), new CultureInfo("ru-Ru"));
             WriteToFile(ms, "TestReflectionComplex.xls");
+
+			ms = ReflectionWriterComplex.Write(models, new XlsxTableWriterComplex(new TableWriterStyle()), new CultureInfo("ru-Ru"));
+			WriteToFile(ms, "TestReflectionComplex.xlsx");
         }
 
         private static void WriteToFile(MemoryStream ms, string fileName) {
