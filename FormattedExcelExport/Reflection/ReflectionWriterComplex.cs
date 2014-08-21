@@ -46,7 +46,11 @@ namespace FormattedExcelExport.Reflection {
 					Type listType = propertyType.GetGenericArguments()[0];
 
 					IEnumerable<PropertyInfo> props = listType.GetProperties()
-					.Where(x => x.PropertyType == typeof(string) || x.PropertyType == typeof(DateTime) || x.PropertyType == typeof(decimal) || x.PropertyType == typeof(int) || x.PropertyType == typeof(bool));
+					.Where(x => x.PropertyType == typeof(string)
+						|| x.PropertyType == typeof(DateTime) || x.PropertyType == typeof(DateTime?)
+						|| x.PropertyType == typeof(decimal) || x.PropertyType == typeof(decimal?)
+						|| x.PropertyType == typeof(int) || x.PropertyType == typeof(int?)
+						|| x.PropertyType == typeof(bool) || x.PropertyType == typeof(bool?));
 
 
 					ExcelExportClassNameAttribute nestedClassAttribute = listType.GetCustomAttribute<ExcelExportClassNameAttribute>();
