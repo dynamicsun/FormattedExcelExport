@@ -13,7 +13,11 @@ namespace FormattedExcelExport.Reflection {
 	public static class ReflectionWriterSimple {
 		public static MemoryStream Write<T>(IEnumerable<T> models, ITableWriterSimple tableWriter, CultureInfo cultureInfo) {
 			IEnumerable<PropertyInfo> nonEnumerableProperties = typeof(T).GetProperties()
-				.Where(x => x.PropertyType == typeof(string) || x.PropertyType == typeof(DateTime) || x.PropertyType == typeof(decimal) || x.PropertyType == typeof(int) || x.PropertyType == typeof(bool));
+				.Where(x => x.PropertyType == typeof(string)
+					|| x.PropertyType == typeof(DateTime) || x.PropertyType == typeof(DateTime?)
+					|| x.PropertyType == typeof(decimal) || x.PropertyType == typeof(decimal?)
+					|| x.PropertyType == typeof(int) || x.PropertyType == typeof(int?)
+					|| x.PropertyType == typeof(bool) || x.PropertyType == typeof(bool?));
 
 			var exportedProperties = new List<PropertyInfo>();
 			var header = new List<string>();
@@ -78,7 +82,11 @@ namespace FormattedExcelExport.Reflection {
 					Type listType = propertyType.GetGenericArguments()[0];
 					
 					IEnumerable<PropertyInfo> props = listType.GetProperties()
-					.Where(x => x.PropertyType == typeof(string) || x.PropertyType == typeof(DateTime) || x.PropertyType == typeof(decimal) || x.PropertyType == typeof(int) || x.PropertyType == typeof(bool));
+					.Where(x => x.PropertyType == typeof(string)
+						|| x.PropertyType == typeof(DateTime) || x.PropertyType == typeof(DateTime?)
+						|| x.PropertyType == typeof(decimal) || x.PropertyType == typeof(decimal?)
+						|| x.PropertyType == typeof(int) || x.PropertyType == typeof(int?)
+						|| x.PropertyType == typeof(bool) || x.PropertyType == typeof(bool?));
 
 					foreach (var submodel in submodels) {
 						GetValue(cultureInfo, props, row, submodel);
@@ -114,6 +122,16 @@ namespace FormattedExcelExport.Reflection {
 						break;
 					case "Boolean":
 						row.Add(((bool) propertyInfo.GetValue(model)) ? "Да" : "Нет");
+						break;
+					case "Nullable`1":
+						if(propertyInfo.PropertyType.FullName.Contains("DateTime"))
+							row.Add(((DateTime)propertyInfo.GetValue(model)).ToString(cultureInfo.DateTimeFormat.LongDatePattern));
+						if (propertyInfo.PropertyType.FullName.Contains("Decimal"))
+							row.Add(string.Format(cultureInfo, "{0:C}", propertyInfo.GetValue(model)));
+						if (propertyInfo.PropertyType.FullName.Contains("Int32"))
+							row.Add(propertyInfo.GetValue(model).ToString());
+						if (propertyInfo.PropertyType.FullName.Contains("Boolean"))
+							row.Add(((bool)propertyInfo.GetValue(model)) ? "Да" : "Нет");
 						break;
 				}
 			}

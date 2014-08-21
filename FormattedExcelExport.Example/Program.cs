@@ -131,13 +131,13 @@ namespace FormattedExcelExport.Example {
             private readonly string _phone;
             private readonly string _inn;
             private readonly string _okato;
-            private readonly decimal _revenue;
+            private readonly decimal? _revenue;
             private readonly int _employeeCount;
             private readonly bool _isActive;
             private readonly List<Contact> _contacts;
             private readonly List<Contract> _contracts;
             private readonly List<Product> _products;
-            public ClientExampleModel(string title, DateTime registrationDate, string phone, string inn, string okato, decimal revenue, int employeeCount, bool isActive, List<Contact> contacts, List<Contract> contracts, List<Product> products) {
+            public ClientExampleModel(string title, DateTime registrationDate, string phone, string inn, string okato, decimal? revenue, int employeeCount, bool isActive, List<Contact> contacts, List<Contract> contracts, List<Product> products) {
                 _title = title;
                 _registrationDate = registrationDate;
                 _phone = phone;
@@ -183,7 +183,7 @@ namespace FormattedExcelExport.Example {
                 get { return _inn; }
             }
             [ExcelExport(PropertyName = "Прибыль за прошлый год")]
-            public decimal Revenue {
+            public decimal? Revenue {
                 get { return _revenue; }
             }
             [ExcelExport(IsExportable = false)]
