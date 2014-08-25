@@ -20,11 +20,13 @@ namespace FormattedExcelExport.Tests {
 	public class Test {
 		[Test]
 		public void ExcelSimpleExportRowOverflow() {
+		    const string filename = "TestSimpleOverflow.xls";
+            DeleteTestFile(filename);
 			NotRelectionTestDataEntities.TestData simpleTestData = NotRelectionTestDataEntities.CreateSimpleTestRowOverflowData();
 			NotRelectionTestDataEntities.ClientExampleModel firstTestDataRow = simpleTestData.Models.FirstOrDefault();
 			Assert.NotNull(firstTestDataRow);
 			MemoryStream memoryStream = TableWriterSimple.Write(new XlsTableWriterSimple(), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
-			WriteToFile(memoryStream, "TestSimpleOverflow.xls");
+			WriteToFile(memoryStream, filename);
 			NotRelectionTestDataEntities.ClientExampleModel.Contact firstContact = firstTestDataRow.Contacts.FirstOrDefault();
 			Assert.NotNull(firstContact);
 
@@ -54,7 +56,7 @@ namespace FormattedExcelExport.Tests {
 			List<string> parentColumnsNames = simpleTestData.ConfigurationBuilder.Value.ColumnsMap.Keys.ToList();
 			List<List<string>> childsColumnsNames = simpleTestData.ConfigurationBuilder.Value.ChildrenMap.Select(childs => childs.ColumnsMap.Keys.ToList()).ToList();
 			HSSFWorkbook xlsFile;
-			using (FileStream file = new FileStream("TestSimpleOverflow.xls", FileMode.Open, FileAccess.Read)) {
+			using (FileStream file = new FileStream(filename, FileMode.Open, FileAccess.Read)) {
 				xlsFile = new HSSFWorkbook(file);
 			}
 
@@ -167,15 +169,17 @@ namespace FormattedExcelExport.Tests {
 		}
 		[Test]
 		public void ExcelComplexExportRowOverflow() {
+		    const string filename = "TestComplexOverflow.xls";
+            DeleteTestFile(filename);
 			NotRelectionTestDataEntities.TestData simpleTestData = NotRelectionTestDataEntities.CreateSimpleTestRowOverflowData();
 			NotRelectionTestDataEntities.ClientExampleModel firstTestDataRow = simpleTestData.Models.FirstOrDefault();
 			Assert.NotNull(firstTestDataRow);
 			TableWriterStyle style = new TableWriterStyle();
 			MemoryStream memoryStream = TableWriterComplex.Write(new XlsTableWriterComplex(style), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
-			WriteToFile(memoryStream, "TestComplexOverflow.xls");
+			WriteToFile(memoryStream, filename);
 
 			HSSFWorkbook xlsFile;
-			using (FileStream file = new FileStream("TestComplexOverflow.xls", FileMode.Open, FileAccess.Read)) {
+			using (FileStream file = new FileStream(filename, FileMode.Open, FileAccess.Read)) {
 				xlsFile = new HSSFWorkbook(file);
 			}
 			List<string> parentColumnsNames = simpleTestData.ConfigurationBuilder.Value.ColumnsMap.Keys.ToList();
@@ -319,11 +323,13 @@ namespace FormattedExcelExport.Tests {
 		}
 		[Test]
 		public void ExcelSimpleExport() {
+		    const string filename = "TestSimple.xls";
+            DeleteTestFile(filename);
 			NotRelectionTestDataEntities.TestData simpleTestData = NotRelectionTestDataEntities.CreateSimpleTestData();
 			NotRelectionTestDataEntities.ClientExampleModel firstTestDataRow = simpleTestData.Models.FirstOrDefault();
 			Assert.NotNull(firstTestDataRow);
 			MemoryStream memoryStream = TableWriterSimple.Write(new XlsTableWriterSimple(), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
-			WriteToFile(memoryStream, "TestSimple.xls");
+			WriteToFile(memoryStream, filename);
 
 			NotRelectionTestDataEntities.ClientExampleModel.Contact firstContact = firstTestDataRow.Contacts.FirstOrDefault();
 			Assert.NotNull(firstContact);
@@ -354,7 +360,7 @@ namespace FormattedExcelExport.Tests {
 			List<string> parentColumnsNames = simpleTestData.ConfigurationBuilder.Value.ColumnsMap.Keys.ToList();
 			List<List<string>> childsColumnsNames = simpleTestData.ConfigurationBuilder.Value.ChildrenMap.Select(childs => childs.ColumnsMap.Keys.ToList()).ToList();
 			HSSFWorkbook xlsFile;
-			using (FileStream file = new FileStream("TestSimple.xls", FileMode.Open, FileAccess.Read)) {
+			using (FileStream file = new FileStream(filename, FileMode.Open, FileAccess.Read)) {
 				xlsFile = new HSSFWorkbook(file);
 			}
 			ISheet sheet = xlsFile.GetSheetAt(0);
@@ -469,14 +475,16 @@ namespace FormattedExcelExport.Tests {
 		}
 		[Test]
 		public void ExcelStyleSimpleExport() {
+		    const string filename = "TestStyleSimple.xls";
+            DeleteTestFile(filename);
 			NotRelectionTestDataEntities.TestData simpleTestData = NotRelectionTestDataEntities.CreateSimpleTestData(true);
 			NotRelectionTestDataEntities.ClientExampleModel firstTestDataRow = simpleTestData.Models.FirstOrDefault();
 			Assert.NotNull(firstTestDataRow);
 			TableWriterStyle style = new TableWriterStyle();
 			MemoryStream memoryStream = TableWriterSimple.Write(new XlsTableWriterSimple(style), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
-			WriteToFile(memoryStream, "TestStyleSimple.xls");
+			WriteToFile(memoryStream, filename);
 			HSSFWorkbook xlsFile;
-			using (FileStream file = new FileStream("TestStyleSimple.xls", FileMode.Open, FileAccess.Read)) {
+			using (FileStream file = new FileStream(filename, FileMode.Open, FileAccess.Read)) {
 				xlsFile = new HSSFWorkbook(file);
 			}
 			ISheet sheet = xlsFile.GetSheetAt(0);
@@ -505,15 +513,17 @@ namespace FormattedExcelExport.Tests {
 		}
 		[Test]
 		public void ExcelComplexExport() {
+		    const string filename = "TestComplex.xls";
+            DeleteTestFile(filename);
 			NotRelectionTestDataEntities.TestData simpleTestData = NotRelectionTestDataEntities.CreateSimpleTestData();
 			NotRelectionTestDataEntities.ClientExampleModel firstTestDataRow = simpleTestData.Models.FirstOrDefault();
 			Assert.NotNull(firstTestDataRow);
 			TableWriterStyle style = new TableWriterStyle();
 			MemoryStream memoryStream = TableWriterComplex.Write(new XlsTableWriterComplex(style), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
-			WriteToFile(memoryStream, "TestComplex.xls");
+			WriteToFile(memoryStream, filename);
 
 			HSSFWorkbook xlsFile;
-			using (FileStream file = new FileStream("TestComplex.xls", FileMode.Open, FileAccess.Read)) {
+			using (FileStream file = new FileStream(filename, FileMode.Open, FileAccess.Read)) {
 				xlsFile = new HSSFWorkbook(file);
 			}
 			ISheet sheet = xlsFile.GetSheetAt(0);
@@ -632,15 +642,17 @@ namespace FormattedExcelExport.Tests {
 		}
 		[Test]
 		public void ExcelStyleComplexExport() {
+		    const string filename = "TestStyleComplex.xls";
+            DeleteTestFile(filename);
 			NotRelectionTestDataEntities.TestData simpleTestData = NotRelectionTestDataEntities.CreateSimpleTestData(true);
 			NotRelectionTestDataEntities.ClientExampleModel firstTestDataRow = simpleTestData.Models.FirstOrDefault();
 			Assert.NotNull(firstTestDataRow);
 			TableWriterStyle style = new TableWriterStyle();
 			MemoryStream memoryStream = TableWriterComplex.Write(new XlsTableWriterComplex(style), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
-			WriteToFile(memoryStream, "TestStyleComplex.xls");
+			WriteToFile(memoryStream, filename);
 
 			HSSFWorkbook xlsFile;
-			using (FileStream file = new FileStream("TestStyleComplex.xls", FileMode.Open, FileAccess.Read)) {
+			using (FileStream file = new FileStream(filename, FileMode.Open, FileAccess.Read)) {
 				xlsFile = new HSSFWorkbook(file);
 			}
 			ISheet sheet = xlsFile.GetSheetAt(0);
@@ -678,10 +690,11 @@ namespace FormattedExcelExport.Tests {
 		public void ExcelReflectionSimpleExport() {
 			List<TestDataEntities.ClientExampleModel> models = TestDataEntities.CreateSimpleTestDataModels();
 			MemoryStream memoryStream = ReflectionWriterSimple.Write(models, new XlsTableWriterSimple(), new CultureInfo("ru-Ru"));
-			const string fileName = "TestReflectionSimple.xls";
-			WriteToFile(memoryStream, fileName);
+			string filename = "TestReflectionSimple.xls";
+            DeleteTestFile(filename);
+			WriteToFile(memoryStream, filename);
 
-			ExcelReflectionSimpleExportTest(models, fileName);
+			ExcelReflectionSimpleExportTest(models, filename);
 
 			List<ReflectionTestDataEntities> test = new List<ReflectionTestDataEntities>();
 			Random rand = new Random();
@@ -689,18 +702,21 @@ namespace FormattedExcelExport.Tests {
 				test.Add(new ReflectionTestDataEntities());
 			}
 			memoryStream = ReflectionWriterSimple.Write(test, new XlsTableWriterSimple(), new CultureInfo("ru-Ru"));
-			WriteToFile(memoryStream, "RandomTestReflectionSimple.xls");
-			ExcelReflectionSimpleExportTest(test, "RandomTestReflectionSimple.xls");
+		    filename = "RandomTestReflectionSimple.xls";
+            DeleteTestFile(filename);
+			WriteToFile(memoryStream, filename);
+			ExcelReflectionSimpleExportTest(test, filename);
 		}
 		[Test]
 		public void ExcelStyleReflectionSimpleExport() {
 			List<TestDataEntities.ClientExampleModel> models = TestDataEntities.CreateSimpleTestDataModels();
 			TableWriterStyle style = new TableWriterStyle();
 			MemoryStream memoryStream = ReflectionWriterSimple.Write(models, new XlsTableWriterSimple(style), new CultureInfo("ru-Ru"));
-			const string fileName = "TestReflectionStyleSimple.xls";
-			WriteToFile(memoryStream, fileName);
+			string filename = "TestReflectionStyleSimple.xls";
+            DeleteTestFile(filename);
+			WriteToFile(memoryStream, filename);
 
-			ExcelStyleReflectionSimpleExportTest(models, fileName);
+			ExcelStyleReflectionSimpleExportTest(models, filename);
 
 			List<ReflectionTestDataEntities> test = new List<ReflectionTestDataEntities>();
 			Random rand = new Random();
@@ -708,18 +724,21 @@ namespace FormattedExcelExport.Tests {
 				test.Add(new ReflectionTestDataEntities());
 			}
 			memoryStream = ReflectionWriterSimple.Write(test, new XlsTableWriterSimple(), new CultureInfo("ru-Ru"));
-			WriteToFile(memoryStream, "RandomStyleTestReflectionSimple.xls");
-			ExcelStyleReflectionSimpleExportTest(test, "RandomStyleTestReflectionSimple.xls");
+		    filename = "RandomStyleTestReflectionSimple.xls";
+            DeleteTestFile(filename);
+			WriteToFile(memoryStream, filename);
+			ExcelStyleReflectionSimpleExportTest(test, filename);
 		}
 		[Test]
 		public void ExcelReflectionComplexExport() {
 			List<TestDataEntities.ClientExampleModel> models = TestDataEntities.CreateSimpleTestDataModels();
 			TableWriterStyle style = new TableWriterStyle();
 			MemoryStream memoryStream = ReflectionWriterComplex.Write(models, new XlsTableWriterComplex(style), new CultureInfo("ru-Ru"));
-			const string fileName = "TestReflectionComplex.xls";
-			WriteToFile(memoryStream, fileName);
+			string filename = "TestReflectionComplex.xls";
+            DeleteTestFile(filename);
+			WriteToFile(memoryStream, filename);
 
-			ExcelReflectionComplexExportTest(models, fileName);
+			ExcelReflectionComplexExportTest(models, filename);
 
 			List<ReflectionTestDataEntities> test = new List<ReflectionTestDataEntities>();
 			Random rand = new Random();
@@ -727,18 +746,21 @@ namespace FormattedExcelExport.Tests {
 				test.Add(new ReflectionTestDataEntities());
 			}
 			memoryStream = ReflectionWriterComplex.Write(test, new XlsTableWriterComplex(style), new CultureInfo("ru-Ru"));
-			WriteToFile(memoryStream, "RandomTestReflectionComplex.xls");
-			ExcelReflectionComplexExportTest(test, "RandomTestReflectionComplex.xls");
+		    filename = "RandomTestReflectionComplex.xls";
+            DeleteTestFile(filename);
+			WriteToFile(memoryStream, filename);
+			ExcelReflectionComplexExportTest(test, filename);
 		}
 		[Test]
 		public void ExcelStyleReflectionComplexExport() {
 			List<TestDataEntities.ClientExampleModel> models = TestDataEntities.CreateSimpleTestDataModels();
 			TableWriterStyle style = new TableWriterStyle();
 			MemoryStream memoryStream = ReflectionWriterComplex.Write(models, new XlsTableWriterComplex(style), new CultureInfo("ru-Ru"));
-			const string fileName = "TestReflectionStyleComplex.xls";
-			WriteToFile(memoryStream, fileName);
+			string filename = "TestReflectionStyleComplex.xls";
+            DeleteTestFile(filename);
+			WriteToFile(memoryStream, filename);
 
-			ExcelStyleReflectionComplexExportTest(models, fileName);
+			ExcelStyleReflectionComplexExportTest(models, filename);
 
 			List<ReflectionTestDataEntities> test = new List<ReflectionTestDataEntities>();
 			Random rand = new Random();
@@ -746,38 +768,22 @@ namespace FormattedExcelExport.Tests {
 				test.Add(new ReflectionTestDataEntities());
 			}
 			memoryStream = ReflectionWriterComplex.Write(test, new XlsTableWriterComplex(style), new CultureInfo("ru-Ru"));
-			WriteToFile(memoryStream, "RandomStyleTestReflectionComplex.xls");
-			ExcelStyleReflectionComplexExportTest(test, "RandomStyleTestReflectionComplex.xls");
+		    filename = "RandomStyleTestReflectionComplex.xls";
+            DeleteTestFile(filename);
+			WriteToFile(memoryStream, filename);
+			ExcelStyleReflectionComplexExportTest(test, filename);
 		}
-
-        //[Test]
-        //public void EPPlusTest() {
-        //    NotRelectionTestDataEntities.TestData simpleTestData = NotRelectionTestDataEntities.CreateSimpleTestRowOverflowData(true);
-        //    TableWriterStyle style = new TableWriterStyle();
-        //    //
-        //    MemoryStream ms = TableWriterSimple.Write(new XlsxTableWriterSimple(style), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
-        //    //
-        //    WriteToFile(ms, "EPPlusTest.xlsx");
-        //}
-
-        //[Test]
-        //public void EPPlusTestComplex() {
-        //    NotRelectionTestDataEntities.TestData simpleTestData = NotRelectionTestDataEntities.CreateSimpleTestData(true);
-        //    TableWriterStyle style = new TableWriterStyle();
-        //    //
-        //    MemoryStream ms = TableWriterComplex.Write(new XlsxTableWriterComplex(style), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
-        //    //
-        //    WriteToFile(ms, "EPPlusTestComplex.xlsx");
-        //}
 
 		[Test]
 		public void ExcelSimpleXlsxExport() {
+		    const string filename = "TestSimple.xlsx";
+            DeleteTestFile(filename);
 			NotRelectionTestDataEntities.TestData simpleTestData = NotRelectionTestDataEntities.CreateSimpleTestData(true);
 			NotRelectionTestDataEntities.ClientExampleModel firstTestDataRow = simpleTestData.Models.FirstOrDefault();
 			Assert.NotNull(firstTestDataRow);
 			TableWriterStyle style = new TableWriterStyle();
-			TableWriterSimple.Write(new XlsxTableWriterSimple(style), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
-            
+			MemoryStream ms = TableWriterSimple.Write(new XlsxTableWriterSimple(style), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
+            WriteToFile(ms, filename);
             NotRelectionTestDataEntities.ClientExampleModel.Contact firstContact = firstTestDataRow.Contacts.FirstOrDefault();
 			Assert.NotNull(firstContact);
 
@@ -807,7 +813,7 @@ namespace FormattedExcelExport.Tests {
 			List<string> parentColumnsNames = simpleTestData.ConfigurationBuilder.Value.ColumnsMap.Keys.ToList();
 			List<List<string>> childsColumnsNames = simpleTestData.ConfigurationBuilder.Value.ChildrenMap.Select(childs => childs.ColumnsMap.Keys.ToList()).ToList();
 			XSSFWorkbook xlsFile;
-			using (FileStream file = new FileStream("TestSimple.xlsx", FileMode.Open, FileAccess.Read)) {
+			using (FileStream file = new FileStream(filename, FileMode.Open, FileAccess.Read)) {
 				xlsFile = new XSSFWorkbook(file);
 			}
 			ISheet sheet = xlsFile.GetSheetAt(0);
@@ -921,11 +927,14 @@ namespace FormattedExcelExport.Tests {
 		}
 		[Test]
 		public void ExcelStyleSimpleXlsxExport() {
+		    const string filename = "TestSimple.xlsx";
+            DeleteTestFile(filename);
 			NotRelectionTestDataEntities.TestData simpleTestData = NotRelectionTestDataEntities.CreateSimpleTestData(true);
 			NotRelectionTestDataEntities.ClientExampleModel firstTestDataRow = simpleTestData.Models.FirstOrDefault();
 			Assert.NotNull(firstTestDataRow);
 			TableWriterStyle style = new TableWriterStyle();
-			TableWriterSimple.Write(new XlsxTableWriterSimple(style), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
+			MemoryStream ms = TableWriterSimple.Write(new XlsxTableWriterSimple(style), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
+            WriteToFile(ms, filename);
 			NotRelectionTestDataEntities.ClientExampleModel.Contact firstContact = firstTestDataRow.Contacts.FirstOrDefault();
 			Assert.NotNull(firstContact);
 
@@ -942,7 +951,7 @@ namespace FormattedExcelExport.Tests {
 			Assert.NotNull(firstEnumProp2);
 
 			XSSFWorkbook xlsFile;
-			using (FileStream file = new FileStream("TestSimple.xlsx", FileMode.Open, FileAccess.Read)) {
+			using (FileStream file = new FileStream(filename, FileMode.Open, FileAccess.Read)) {
 				xlsFile = new XSSFWorkbook(file);
 			}
 			ISheet sheet = xlsFile.GetSheetAt(0);
@@ -971,14 +980,16 @@ namespace FormattedExcelExport.Tests {
 		}
 		[Test]
 		public void ExcelComplexXlsxExport() {
+		    const string filename = "TestComplex.xlsx";
+            DeleteTestFile(filename);
 			NotRelectionTestDataEntities.TestData simpleTestData = NotRelectionTestDataEntities.CreateSimpleTestRowOverflowData(true);
 			NotRelectionTestDataEntities.ClientExampleModel firstTestDataRow = simpleTestData.Models.FirstOrDefault();
 			Assert.NotNull(firstTestDataRow);
 			TableWriterStyle style = new TableWriterStyle();
-			TableWriterComplex.Write(new XlsxTableWriterComplex(style), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
-
+			MemoryStream ms = TableWriterComplex.Write(new XlsxTableWriterComplex(style), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
+            WriteToFile(ms, filename);
 			XSSFWorkbook xlsFile;
-			using (FileStream file = new FileStream("TestComplex.xlsx", FileMode.Open, FileAccess.Read)) {
+			using (FileStream file = new FileStream(filename, FileMode.Open, FileAccess.Read)) {
 				xlsFile = new XSSFWorkbook(file);
 			}
 			ISheet sheet = xlsFile.GetSheetAt(0);
@@ -1097,14 +1108,16 @@ namespace FormattedExcelExport.Tests {
 		}
 		[Test]
 		public void ExcelStyleComplexXlsxExport() {
+		    const string filename = "TestComplex.xlsx";
+            DeleteTestFile(filename);
 			NotRelectionTestDataEntities.TestData simpleTestData = NotRelectionTestDataEntities.CreateSimpleTestData(true);
 			NotRelectionTestDataEntities.ClientExampleModel firstTestDataRow = simpleTestData.Models.FirstOrDefault();
 			Assert.NotNull(firstTestDataRow);
 			TableWriterStyle style = new TableWriterStyle();
-			TableWriterComplex.Write(new XlsxTableWriterComplex(style), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
-
+			MemoryStream ms = TableWriterComplex.Write(new XlsxTableWriterComplex(style), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
+            WriteToFile(ms, filename);
 			XSSFWorkbook xlsFile;
-			using (FileStream file = new FileStream("TestComplex.xlsx", FileMode.Open, FileAccess.Read)) {
+			using (FileStream file = new FileStream(filename, FileMode.Open, FileAccess.Read)) {
 				xlsFile = new XSSFWorkbook(file);
 			}
 			ISheet sheet = xlsFile.GetSheetAt(0);
@@ -1140,31 +1153,37 @@ namespace FormattedExcelExport.Tests {
 		}
 		[Test]
 		public void ExcelReflectionSimpleXlsxExport() {
+		    const string filename = "TestSimpleReflection.xlsx";
+            DeleteTestFile(filename);
 			List<ReflectionTestDataEntities> test = new List<ReflectionTestDataEntities>();
 			TableWriterStyle style = new TableWriterStyle();
 			Random rand = new Random();
 			for (int i = 2; i < rand.Next(10, 30); i++) {
 				test.Add(new ReflectionTestDataEntities());
 			}
-			ReflectionWriterSimple.Write(test, new XlsxTableWriterSimple(style), new CultureInfo("ru-Ru"));
-			ExcelReflectionSimpleExportTest(test, "TestSimple.xlsx", true);
+			MemoryStream ms = ReflectionWriterSimple.Write(test, new XlsxTableWriterSimple(style), new CultureInfo("ru-Ru"));
+            WriteToFile(ms, filename);
+			ExcelReflectionSimpleExportTest(test, filename, true);
 
-			ExcelStyleReflectionSimpleExportTest(test, "TestSimple.xlsx", true);
+			ExcelStyleReflectionSimpleExportTest(test, filename, true);
 		}
 		[Test]
 		public void ExcelReflectionComplexXlsxExport() {
+		    const string filename = "TestComplex.xlsx";
+            DeleteTestFile(filename);
 			List<ReflectionTestDataEntities> test = new List<ReflectionTestDataEntities>();
 			TableWriterStyle style = new TableWriterStyle();
 			Random rand = new Random();
 			for (int i = 2; i < rand.Next(10, 30); i++) {
 				test.Add(new ReflectionTestDataEntities());
 			}
-			ReflectionWriterComplex.Write(test, new XlsxTableWriterComplex(style), new CultureInfo("ru-Ru"));
-			ExcelReflectionComplexExportTest(test, "TestComplex.xlsx", true);
+			MemoryStream ms = ReflectionWriterComplex.Write(test, new XlsxTableWriterComplex(style), new CultureInfo("ru-Ru"));
+            WriteToFile(ms, filename);
+			ExcelReflectionComplexExportTest(test, filename, true);
 
-			ExcelStyleReflectionComplexExportTest(test, "TestComplex.xlsx", true);
+			ExcelStyleReflectionComplexExportTest(test, filename, true);
 		}
-		private static void ExcelReflectionSimpleExportTest<T>(List<T> models, string fileName, bool isXlsx = false) {
+		private static void ExcelReflectionSimpleExportTest<T>(List<T> models, string filename, bool isXlsx = false) {
 			T firstModel = models.FirstOrDefault();
 			Assert.NotNull(firstModel);
 			List<Type> generalTypes = GeneralTypes;
@@ -1172,7 +1191,7 @@ namespace FormattedExcelExport.Tests {
 			List<PropertyInfo> enumerableProperties = firstModel.GetType().GetProperties().Where(x => x.PropertyType.IsGenericType && x.PropertyType.GetGenericTypeDefinition() == typeof(List<>)).ToList();
 
 			IWorkbook xlsFile;
-			using (FileStream file = new FileStream(fileName, FileMode.Open, FileAccess.Read)) {
+			using (FileStream file = new FileStream(filename, FileMode.Open, FileAccess.Read)) {
 				if (isXlsx) {
 					xlsFile = new XSSFWorkbook(file);
 				} else {
@@ -1256,12 +1275,12 @@ namespace FormattedExcelExport.Tests {
 				rowNumber++;
 			}
 		}
-		private static void ExcelStyleReflectionSimpleExportTest<T>(IEnumerable<T> models, string fileName, bool isXlsx = false) {
+		private static void ExcelStyleReflectionSimpleExportTest<T>(IEnumerable<T> models, string filename, bool isXlsx = false) {
 			T firstModel = models.FirstOrDefault();
 			Assert.NotNull(firstModel);
 
 			IWorkbook xlsFile;
-			using (FileStream file = new FileStream(fileName, FileMode.Open, FileAccess.Read)) {
+			using (FileStream file = new FileStream(filename, FileMode.Open, FileAccess.Read)) {
 				if (isXlsx) {
 					xlsFile = new XSSFWorkbook(file);
 				} else {
@@ -1292,7 +1311,7 @@ namespace FormattedExcelExport.Tests {
 				}
 			}
 		}
-		private static void ExcelReflectionComplexExportTest<T>(List<T> models, string fileName, bool isXlsx = false) {
+		private static void ExcelReflectionComplexExportTest<T>(List<T> models, string filename, bool isXlsx = false) {
 			T firstModel = models.FirstOrDefault();
 			Assert.NotNull(firstModel);
 			List<Type> generalTypes = GeneralTypes;
@@ -1300,7 +1319,7 @@ namespace FormattedExcelExport.Tests {
 			List<PropertyInfo> enumerableProperties = firstModel.GetType().GetProperties().Where(x => x.PropertyType.IsGenericType && x.PropertyType.GetGenericTypeDefinition() == typeof(List<>)).ToList();
 
 			IWorkbook xlsFile;
-			using (FileStream file = new FileStream(fileName, FileMode.Open, FileAccess.Read)) {
+			using (FileStream file = new FileStream(filename, FileMode.Open, FileAccess.Read)) {
 				if (isXlsx) {
 					xlsFile = new XSSFWorkbook(file);
 				} else {
@@ -1376,10 +1395,10 @@ namespace FormattedExcelExport.Tests {
 				}
 			}
 		}
-		private static void ExcelStyleReflectionComplexExportTest<T>(List<T> models, string fileName, bool isXlsx = false) {
+		private static void ExcelStyleReflectionComplexExportTest<T>(List<T> models, string filename, bool isXlsx = false) {
 			Assert.NotNull(models.FirstOrDefault());
 			IWorkbook xlsFile;
-			using (FileStream file = new FileStream(fileName, FileMode.Open, FileAccess.Read)) {
+			using (FileStream file = new FileStream(filename, FileMode.Open, FileAccess.Read)) {
 				if (isXlsx) {
 					xlsFile = new XSSFWorkbook(file);
 				} else {
@@ -1473,14 +1492,20 @@ namespace FormattedExcelExport.Tests {
 
 			return childColumnsNames;
 		}
-		private static void WriteToFile(MemoryStream ms, string fileName) {
-			using (FileStream file = new FileStream(fileName, FileMode.Create, FileAccess.Write)) {
+		private static void WriteToFile(MemoryStream ms, string filename) {
+			using (FileStream file = new FileStream(filename, FileMode.Create, FileAccess.Write)) {
 				byte[] bytes = new byte[ms.Length];
 				ms.Read(bytes, 0, (int)ms.Length);
 				file.Write(bytes, 0, bytes.Length);
 				ms.Close();
 			}
 		}
+
+	    private static void DeleteTestFile(string filename) {
+	        if (File.Exists(filename)) {
+	            File.Delete(filename);
+	        }
+	    }
 		private enum FontBoldWeight {
 			Normal = 400,
 			Bold = 700,
