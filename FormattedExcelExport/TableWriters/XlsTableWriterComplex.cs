@@ -50,7 +50,7 @@ namespace FormattedExcelExport.TableWriters {
 
 	    public void WriteHeader(params string[] cells) {
 			IRow row = WorkSheet.CreateRow(RowIndex);
-			row.Height = Style.HeaderHeight;
+			//row.Height = Style.HeaderHeight;
 			
 			HeaderCellStyle.VerticalAlignment = VerticalAlignment.Top;
 

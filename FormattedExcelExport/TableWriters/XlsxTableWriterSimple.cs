@@ -27,7 +27,7 @@ namespace FormattedExcelExport.TableWriters {
 
         public void WriteHeader(List<string> cells) {
             ExcelRow row = WorkSheet.Row(RowIndex);
-            row.Height = Style.HeaderHeight / 20;
+            //row.Height = Style.HeaderHeight / 20;
             Font font = ConvertCellStyle(Style.HeaderCell);
             int columnIndex = 1;
             foreach (string cell in cells) {

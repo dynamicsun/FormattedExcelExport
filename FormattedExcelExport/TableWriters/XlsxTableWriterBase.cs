@@ -7,6 +7,7 @@ using OfficeOpenXml;
 namespace FormattedExcelExport.TableWriters {
     public abstract class XlsxTableWriterBase {
         protected const int MaxRowIndex = 1048575;
+        protected const int MaxWidth = 5000;
         protected readonly ExcelPackage Package;
         protected ExcelWorksheet WorkSheet;
         protected readonly TableWriterStyle Style;
@@ -34,9 +35,10 @@ namespace FormattedExcelExport.TableWriters {
                     columnLengths.Add(columnMaxixumLength);
                 }
 
-                for (int i = 1; i <= sheet.Dimension.End.Column; i++) {
-                    int width = (columnLengths.ElementAt(i - 1) * Style.FontFactor + Style.FontAbsoluteTerm) / 256;
-                    sheet.Column(i).Width = width < Style.MaxColumnWidth ? width : Style.MaxColumnWidth;
+                for (int i = 1; i < sheet.Dimension.End.Column; i++) {
+                    int width = (columnLengths.ElementAt(i) * Style.FontFactor + Style.FontAbsoluteTerm) / 256;
+                    sheet.Column(i).Width = width < MaxWidth / 256 ? width : MaxWidth / 256;
+                    sheet.Column(i).Style.WrapText = true;
                 }
             }
         }

@@ -25,7 +25,7 @@ namespace FormattedExcelExport.TableWriters {
 
 	    public void WriteHeader(List<string> cells) {
 			IRow row = WorkSheet.CreateRow(RowIndex);
-			row.Height = Style.HeaderHeight;
+			//row.Height = Style.HeaderHeight;
 			CellStyle.VerticalAlignment = VerticalAlignment.Top;
 
 			int columnIndex = 0;

@@ -10,6 +10,7 @@ using NPOI.SS.UserModel;
 namespace FormattedExcelExport.TableWriters {
 	public abstract class XlsTableWriterBase {
         protected const int MaxRowIndex = 65535;
+	    protected const int MaxWidth = 5000;
 		protected readonly HSSFWorkbook Workbook;
 		protected ISheet WorkSheet;
 		protected readonly TableWriterStyle Style;
@@ -44,7 +45,12 @@ namespace FormattedExcelExport.TableWriters {
 
 		        for (int i = 0; i < WorkSheet.GetRow(0).LastCellNum; i++) {
 		            int width = columnLengths.ElementAt(i)*Style.FontFactor + Style.FontAbsoluteTerm;
-		            WorkSheet.SetColumnWidth(i, width < Style.MaxColumnWidth ? width : Style.MaxColumnWidth);
+                    WorkSheet.SetColumnWidth(i, width < MaxWidth ? width : MaxWidth);
+		            for (int j = 0; j < WorkSheet.LastRowNum; j++) {
+		                if (WorkSheet.GetRow(j).GetCell(i) != null) {
+		                    WorkSheet.GetRow(j).GetCell(i).CellStyle.WrapText = true;
+		                }
+		            }
 		        }
 		    }
 		}

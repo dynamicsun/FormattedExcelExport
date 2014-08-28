@@ -29,7 +29,7 @@ namespace FormattedExcelExport.Tests {
                 
 
                 TableConfigurationBuilder<ClientExampleModel> confBuilder = new TableConfigurationBuilder<ClientExampleModel>("Клиент", new CultureInfo("ru-RU"));
-                confBuilder.RegisterColumn("Название", x => x.Title, new TableConfigurationBuilder<ClientExampleModel>.ConditionTheme(condStyle, x => x.Title == "Вторая компания"));
+                confBuilder.RegisterColumn("Названиеddddddddddddddddddd", x => x.Title, new TableConfigurationBuilder<ClientExampleModel>.ConditionTheme(condStyle, x => x.Title == "Вторая компания"));
                 confBuilder.RegisterColumn("Дата регистрации", x => x.RegistrationDate);
                 confBuilder.RegisterColumn("Телефон", x => x.Phone, new TableConfigurationBuilder<ClientExampleModel>.ConditionTheme(condStyle2, x => x.Okato == "OPEEHBSSDD"));
                 confBuilder.RegisterColumn("ИНН", x => x.Inn);
@@ -57,7 +57,7 @@ namespace FormattedExcelExport.Tests {
                 product.RegisterColumn("Наименование", x => x.Title);
                 product.RegisterColumn("Количество", x => x.Amount);
 
-                TableConfigurationBuilder<ClientExampleModel.EnumProp1> enumProp1 = confBuilder.RegisterChild("Перечисл. свойство 1", x => x.EnumProps1);
+                TableConfigurationBuilder<ClientExampleModel.EnumProp1> enumProp1 = confBuilder.RegisterChild("Переч. свойство 1", x => x.EnumProps1);
                 enumProp1.RegisterColumn("Поле 1-", x => x.Field1);
                 enumProp1.RegisterColumn("Поле 2-", x => x.Field2);
                 enumProp1.RegisterColumn("Поле 3-", x => x.Field3);
@@ -72,7 +72,7 @@ namespace FormattedExcelExport.Tests {
             }
             else {
                 TableConfigurationBuilder<ClientExampleModel> confBuilder = new TableConfigurationBuilder<ClientExampleModel>("Клиент", new CultureInfo("ru-RU"));
-                confBuilder.RegisterColumn("Название", x => x.Title);
+                confBuilder.RegisterColumn("Названиеdddddddddddddddddddddd", x => x.Title);
                 confBuilder.RegisterColumn("Дата регистрации", x => x.RegistrationDate);
                 confBuilder.RegisterColumn("Телефон", x => x.Phone);
                 confBuilder.RegisterColumn("ИНН", x => x.Inn);
@@ -101,7 +101,7 @@ namespace FormattedExcelExport.Tests {
                 product.RegisterColumn("Наименование", x => x.Title);
                 product.RegisterColumn("Количество", x => x.Amount);
 
-                TableConfigurationBuilder<ClientExampleModel.EnumProp1> enumProp1 = confBuilder.RegisterChild("Перечисл. свойство 1", x => x.EnumProps1);
+                TableConfigurationBuilder<ClientExampleModel.EnumProp1> enumProp1 = confBuilder.RegisterChild("Переч. свойство 1", x => x.EnumProps1);
                 enumProp1.RegisterColumn("Поле 1", x => x.Field1);
                 enumProp1.RegisterColumn("Поле 2", x => x.Field2);
                 enumProp1.RegisterColumn("Поле 3", x => x.Field3);
@@ -120,7 +120,7 @@ namespace FormattedExcelExport.Tests {
             List<ClientExampleModel> models = new List<ClientExampleModel>();
             for (int i = 0; i < 17500; i++) {
                 models.Add(new ClientExampleModel(
-                    "Первая компания",
+                    "Первая компанияdddddddddddddddddddddddddddddddddddddddddd",
                     DateTime.Now,
                     "+7 333 4442 00",
                     "9040043234562",
@@ -241,7 +241,7 @@ namespace FormattedExcelExport.Tests {
         internal static List<ClientExampleModel> CreateSimpleTestDataModels() {
             return new List<ClientExampleModel> {
 				new ClientExampleModel(
-					"Первая компания", 
+					"Первая компанияdddddddddddddddddd", 
 					DateTime.Now, 
 					"+7 333 4442 00", 
 					"9040043234562",
@@ -608,7 +608,7 @@ namespace FormattedExcelExport.Tests {
                 }
             }
 
-            [ExcelExportClassName(Name = "Перечисл. свойство1")]
+            [ExcelExportClassName(Name = "Переч. свойство1")]
             public sealed class EnumProp1 {
                 private readonly string _field1;
                 private readonly int _field2;
