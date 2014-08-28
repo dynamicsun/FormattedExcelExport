@@ -688,7 +688,15 @@ namespace FormattedExcelExport.Tests {
 		}
 		[Test]
 		public void ExcelReflectionSimpleExport() {
-            string filename = "RandomTestReflectionSimple.xls";
+            string filename = "TestReflectionSimple.xls";
+            DeleteTestFile(filename);
+		    var testData = TestDataEntities.CreateSimpleTestDataModels();
+            var memoryStream1 = ReflectionWriterSimple.Write(testData, new XlsTableWriterSimple(), new CultureInfo("ru-Ru"));
+
+            WriteToFile(memoryStream1, filename);
+            ExcelReflectionSimpleExportTest(testData, filename);
+
+            filename = "RandomTestReflectionSimple.xls";
             DeleteTestFile(filename);
 			List<ReflectionTestDataEntities> test = new List<ReflectionTestDataEntities>();
 			Random rand = new Random();

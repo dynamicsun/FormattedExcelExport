@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using FormattedExcelExport.Style;
 using FormattedExcelExport.TableWriters;
 
@@ -84,7 +85,8 @@ namespace FormattedExcelExport.Reflection {
 						row.Add(propertyInfo.GetValue(model).ToString());
 						break;
 					case "DateTime":
-						row.Add(((DateTime)propertyInfo.GetValue(model)).ToString(cultureInfo.DateTimeFormat.LongDatePattern));
+				        Thread.CurrentThread.CurrentCulture = cultureInfo;
+                        row.Add(((DateTime)propertyInfo.GetValue(model)).ToString(cultureInfo.DateTimeFormat.LongDatePattern));
 						break;
 					case "Decimal":
 						row.Add(string.Format(cultureInfo, "{0:C}", propertyInfo.GetValue(model)));
