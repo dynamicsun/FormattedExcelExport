@@ -14,7 +14,11 @@ namespace FormattedExcelExport.Reflection {
 	public static class ReflectionWriterComplex {
 		public static MemoryStream Write<T>(IEnumerable<T> models, ITableWriterComplex tableWriter, CultureInfo cultureInfo) {
 			IEnumerable<PropertyInfo> nonEnumerableProperties = typeof(T).GetProperties()
-				.Where(x => x.PropertyType == typeof(string) || x.PropertyType == typeof(DateTime) || x.PropertyType == typeof(decimal) || x.PropertyType == typeof(int) || x.PropertyType == typeof(bool));
+				.Where(x => x.PropertyType == typeof(string)
+					|| x.PropertyType == typeof(DateTime) || x.PropertyType == typeof(DateTime?)
+					|| x.PropertyType == typeof(decimal) || x.PropertyType == typeof(decimal?)
+					|| x.PropertyType == typeof(int) || x.PropertyType == typeof(int?)
+					|| x.PropertyType == typeof(bool) || x.PropertyType == typeof(bool?));
 
 			ExcelExportClassNameAttribute classAttribute = typeof(T).GetCustomAttribute<ExcelExportClassNameAttribute>();
 			string className = classAttribute != null ? classAttribute.Name : "";
@@ -47,7 +51,11 @@ namespace FormattedExcelExport.Reflection {
 					Type listType = propertyType.GetGenericArguments()[0];
 
 					IEnumerable<PropertyInfo> props = listType.GetProperties()
-					.Where(x => x.PropertyType == typeof(string) || x.PropertyType == typeof(DateTime) || x.PropertyType == typeof(decimal) || x.PropertyType == typeof(int) || x.PropertyType == typeof(bool));
+					.Where(x => x.PropertyType == typeof(string)
+						|| x.PropertyType == typeof(DateTime) || x.PropertyType == typeof(DateTime?)
+						|| x.PropertyType == typeof(decimal) || x.PropertyType == typeof(decimal?)
+						|| x.PropertyType == typeof(int) || x.PropertyType == typeof(int?)
+						|| x.PropertyType == typeof(bool) || x.PropertyType == typeof(bool?));
 
 
 					ExcelExportClassNameAttribute nestedClassAttribute = listType.GetCustomAttribute<ExcelExportClassNameAttribute>();
