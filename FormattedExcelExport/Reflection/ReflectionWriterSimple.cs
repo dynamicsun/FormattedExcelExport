@@ -155,15 +155,35 @@ namespace FormattedExcelExport.Reflection {
 						//row.Add(((bool) propertyInfo.GetValue(model)) ? "Да" : "Нет");
 						break;
 					case "Nullable`1":
-						if(propertyInfo.PropertyType.FullName.Contains("DateTime"))
-							row.Add(((DateTime)propertyInfo.GetValue(model)).ToString(cultureInfo.DateTimeFormat.LongDatePattern));
-						if (propertyInfo.PropertyType.FullName.Contains("Decimal"))
-							row.Add(string.Format(cultureInfo, "{0}", propertyInfo.GetValue(model)));
-						if (propertyInfo.PropertyType.FullName.Contains("Int32"))
-							row.Add(propertyInfo.GetValue(model).ToString());
-						if (propertyInfo.PropertyType.FullName.Contains("Boolean"))
-							row.Add(((bool)propertyInfo.GetValue(model)) ? "Да" : "Нет");
-						break;
+				        if (propertyInfo.PropertyType.FullName.Contains("DateTime")) {
+				            if (propertyInfo.GetCustomAttribute<ExcelExportAttribute>().ConditionType != null) {
+				                row.Add(new KeyValuePair<string, TableWriterStyle>(((DateTime) propertyInfo.GetValue(model)).ToString(cultureInfo.DateTimeFormat.LongDatePattern), style));
+				            } else {
+				                row.Add(new KeyValuePair<string, TableWriterStyle>(((DateTime) propertyInfo.GetValue(model)).ToString(cultureInfo.DateTimeFormat.LongDatePattern), null));
+				            }
+				        }
+				        if (propertyInfo.PropertyType.FullName.Contains("Decimal")) {
+				            if (propertyInfo.GetCustomAttribute<ExcelExportAttribute>().ConditionType != null) {
+				                row.Add(new KeyValuePair<string, TableWriterStyle>(string.Format(cultureInfo, "{0}", propertyInfo.GetValue(model)), style));
+				            } else {
+                                row.Add(new KeyValuePair<string, TableWriterStyle>(string.Format(cultureInfo, "{0}", propertyInfo.GetValue(model)), null));
+				            }
+				        }
+				        if (propertyInfo.PropertyType.FullName.Contains("Int32")) {
+				            if (propertyInfo.GetCustomAttribute<ExcelExportAttribute>().ConditionType != null) {
+				                row.Add(new KeyValuePair<string, TableWriterStyle>(propertyInfo.GetValue(model).ToString(), style));
+				            } else {
+                                row.Add(new KeyValuePair<string, TableWriterStyle>(propertyInfo.GetValue(model).ToString(), null));
+				            }
+				        }
+				        if (propertyInfo.PropertyType.FullName.Contains("Boolean")) {
+				            if (propertyInfo.GetCustomAttribute<ExcelExportAttribute>().ConditionType != null) {
+				                row.Add(new KeyValuePair<string, TableWriterStyle>(((bool) propertyInfo.GetValue(model)) ? "Да" : "Нет", style));
+				            } else {
+                                row.Add(new KeyValuePair<string, TableWriterStyle>(((bool)propertyInfo.GetValue(model)) ? "Да" : "Нет", null));
+				            }
+				        }
+				        break;
 				}
 			}
 		}
