@@ -29,7 +29,7 @@ namespace FormattedExcelExport.Tests {
                 
 
                 TableConfigurationBuilder<ClientExampleModel> confBuilder = new TableConfigurationBuilder<ClientExampleModel>("Клиент", new CultureInfo("ru-RU"));
-                confBuilder.RegisterColumn("Названиеddddddddddddddddddd", x => x.Title, new TableConfigurationBuilder<ClientExampleModel>.ConditionTheme(condStyle, x => x.Title == "Вторая компания"));
+                confBuilder.RegisterColumn("Название", x => x.Title, new TableConfigurationBuilder<ClientExampleModel>.ConditionTheme(condStyle, x => x.Title == "Вторая компания"));
                 confBuilder.RegisterColumn("Дата регистрации", x => x.RegistrationDate);
                 confBuilder.RegisterColumn("Телефон", x => x.Phone, new TableConfigurationBuilder<ClientExampleModel>.ConditionTheme(condStyle2, x => x.Okato == "OPEEHBSSDD"));
                 confBuilder.RegisterColumn("ИНН", x => x.Inn);
@@ -51,28 +51,28 @@ namespace FormattedExcelExport.Tests {
                 TableConfigurationBuilder<ClientExampleModel.Contract> contract = confBuilder.RegisterChild("Контракт", x => x.Contracts);
                 contract.RegisterColumn("Дата начала", x => x.BeginDate);
                 contract.RegisterColumn("Дата окончания", x => x.EndDate);
-                contract.RegisterColumn("Статус", x => x.Status, new TableConfigurationBuilder<ClientExampleModel.Contract>.ConditionTheme(new TableWriterStyle(), x => true));
+                contract.RegisterColumn("Статус222222222222222222222", x => x.Status, new TableConfigurationBuilder<ClientExampleModel.Contract>.ConditionTheme(new TableWriterStyle(), x => true));
 
                 TableConfigurationBuilder<ClientExampleModel.Product> product = confBuilder.RegisterChild("Продукт", x => x.Products);
                 product.RegisterColumn("Наименование", x => x.Title);
                 product.RegisterColumn("Количество", x => x.Amount);
 
                 TableConfigurationBuilder<ClientExampleModel.EnumProp1> enumProp1 = confBuilder.RegisterChild("Переч. свойство 1", x => x.EnumProps1);
-                enumProp1.RegisterColumn("Поле 1-", x => x.Field1);
+                enumProp1.RegisterColumn("Поле2222222222222222222222 1-", x => x.Field1);
                 enumProp1.RegisterColumn("Поле 2-", x => x.Field2);
-                enumProp1.RegisterColumn("Поле 3-", x => x.Field3);
+                enumProp1.RegisterColumn("Поле22222222222222 3-", x => x.Field3);
 
                 TableConfigurationBuilder<ClientExampleModel.EnumProp2> enumProp2 = confBuilder.RegisterChild("Перечисл. свойство 2", x => x.EnumProps2);
                 enumProp2.RegisterColumn("Поле 4-", x => x.Field4);
                 enumProp2.RegisterColumn("Поле 5-", x => x.Field5);
                 enumProp2.RegisterColumn("Поле 6-", x => x.Field6);
-                enumProp2.RegisterColumn("Поле 7-", x => x.Field7);
-                enumProp2.RegisterColumn("Поле 8-", x => x.Field8);
+                enumProp2.RegisterColumn("Поле 72222222222222222222222222222222222-", x => x.Field7);
+                enumProp2.RegisterColumn("Поле 822222222222222222222222222222-", x => x.Field8);
                 return confBuilder;
             }
             else {
                 TableConfigurationBuilder<ClientExampleModel> confBuilder = new TableConfigurationBuilder<ClientExampleModel>("Клиент", new CultureInfo("ru-RU"));
-                confBuilder.RegisterColumn("Названиеdddddddddddddddddddddd", x => x.Title);
+                confBuilder.RegisterColumn("Названиеd", x => x.Title);
                 confBuilder.RegisterColumn("Дата регистрации", x => x.RegistrationDate);
                 confBuilder.RegisterColumn("Телефон", x => x.Phone);
                 confBuilder.RegisterColumn("ИНН", x => x.Inn);
@@ -83,13 +83,13 @@ namespace FormattedExcelExport.Tests {
                 confBuilder.RegisterColumn("Свойство 1", x => x.Prop1);
                 confBuilder.RegisterColumn("Свойство 2", x => x.Prop2);
                 confBuilder.RegisterColumn("Свойство 3", x => x.Prop3);
-                confBuilder.RegisterColumn("Свойство 4", x => x.Prop4);
+                confBuilder.RegisterColumn("Свойство 3333333333333333333333333333334", x => x.Prop4);
                 confBuilder.RegisterColumn("Свойство 5", x => x.Prop5);
                 confBuilder.RegisterColumn("Свойство 6", x => x.Prop6);
                 confBuilder.RegisterColumn("Свойство 7", x => x.Prop7);
 
                 TableConfigurationBuilder<ClientExampleModel.Contact> contact = confBuilder.RegisterChild("Контакт", x => x.Contacts);
-                contact.RegisterColumn("Название", x => x.Title);
+                contact.RegisterColumn("Название3333333333333333333333333333", x => x.Title);
                 contact.RegisterColumn("Email", x => x.Email);
 
                 TableConfigurationBuilder<ClientExampleModel.Contract> contract = confBuilder.RegisterChild("Контракт", x => x.Contracts);
@@ -111,7 +111,7 @@ namespace FormattedExcelExport.Tests {
                 enumProp2.RegisterColumn("Поле 5", x => x.Field5);
                 enumProp2.RegisterColumn("Поле 6", x => x.Field6);
                 enumProp2.RegisterColumn("Поле 7", x => x.Field7);
-                enumProp2.RegisterColumn("Поле 8", x => x.Field8);
+                enumProp2.RegisterColumn("Поле 811111111111111", x => x.Field8);
                 return confBuilder;
             }
         }
