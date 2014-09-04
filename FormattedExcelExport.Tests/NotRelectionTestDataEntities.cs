@@ -120,7 +120,7 @@ namespace FormattedExcelExport.Tests {
             List<ClientExampleModel> models = new List<ClientExampleModel>();
             for (int i = 0; i < 17500; i++) {
                 models.Add(new ClientExampleModel(
-                    "Первая компанияdddddddddddddddddddddddddddddddddddddddddd",
+                    null,
                     DateTime.Now,
                     "+7 333 4442 00",
                     "9040043234562",
@@ -241,7 +241,7 @@ namespace FormattedExcelExport.Tests {
         internal static List<ClientExampleModel> CreateSimpleTestDataModels() {
             return new List<ClientExampleModel> {
 				new ClientExampleModel(
-					"Первая компанияdddddddddddddddddd", 
+					null, 
 					DateTime.Now, 
 					"+7 333 4442 00", 
 					"9040043234562",

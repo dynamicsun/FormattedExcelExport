@@ -24,10 +24,10 @@ namespace FormattedExcelExport.Reflection {
 			var header = new List<string>();
 			foreach (PropertyInfo propertyInfo in nonEnumerableProperties) {
 				ExcelExportAttribute attribute = propertyInfo.GetCustomAttribute<ExcelExportAttribute>();
-				if (attribute != null && !attribute.IsExportable) {
+				if (attribute == null || !attribute.IsExportable) {
 					continue;
 				}
-				header.Add(attribute != null ? attribute.PropertyName : "");
+				header.Add(attribute.PropertyName);
 				exportedProperties.Add(propertyInfo);
 			}
 
@@ -110,13 +110,20 @@ namespace FormattedExcelExport.Reflection {
             style.RegularChildCell.BackgroundColor = new AdHocCellStyle.Color(255, 0, 0);
 			foreach (PropertyInfo propertyInfo in exportedProperties) {
 				var propertyTypeName = propertyInfo.PropertyType.Name;
+			    if (propertyInfo.GetValue(model) == null) {
+			        row.Add(new KeyValuePair<string, TableWriterStyle>(String.Empty, style));
+			    }
 				switch (propertyTypeName) {
 					case "String":
 				        if (propertyInfo.GetCustomAttribute<ExcelExportAttribute>().ConditionType != null) {
                             row.Add(new KeyValuePair<string, TableWriterStyle>(propertyInfo.GetValue(model).ToString(), style));
 				        }
 				        else {
-                            row.Add(new KeyValuePair<string, TableWriterStyle>(propertyInfo.GetValue(model).ToString(), null));
+                            row.Add(new KeyValuePair<string, TableWriterStyle>(
+                                propertyInfo.GetValue(model) == null 
+                                    ? string.Empty 
+                                    : propertyInfo.GetValue(model).ToString(), 
+                                null));
 				        }
 						//row.Add(propertyInfo.GetValue(model).ToString());
 						break;

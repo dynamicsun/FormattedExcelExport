@@ -329,24 +329,24 @@ namespace FormattedExcelExport.Tests {
             DeleteTestFile(filename);
 			NotRelectionTestDataEntities.TestData simpleTestData = NotRelectionTestDataEntities.CreateSimpleTestData();
 			NotRelectionTestDataEntities.ClientExampleModel firstTestDataRow = simpleTestData.Models.FirstOrDefault();
-			Assert.NotNull(firstTestDataRow);
-			MemoryStream memoryStream = TableWriterSimple.Write(new XlsTableWriterSimple(), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
-			WriteToFile(memoryStream, filename);
+            Assert.NotNull(firstTestDataRow);
+            MemoryStream memoryStream = TableWriterSimple.Write(new XlsTableWriterSimple(), simpleTestData.Models, simpleTestData.ConfigurationBuilder.Value);
+            WriteToFile(memoryStream, filename);
 
-			NotRelectionTestDataEntities.ClientExampleModel.Contact firstContact = firstTestDataRow.Contacts.FirstOrDefault();
-			Assert.NotNull(firstContact);
+            NotRelectionTestDataEntities.ClientExampleModel.Contact firstContact = firstTestDataRow.Contacts.FirstOrDefault();
+            Assert.NotNull(firstContact);
 
-			NotRelectionTestDataEntities.ClientExampleModel.Contract firstContract = firstTestDataRow.Contracts.FirstOrDefault();
-			Assert.NotNull(firstContract);
+            NotRelectionTestDataEntities.ClientExampleModel.Contract firstContract = firstTestDataRow.Contracts.FirstOrDefault();
+            Assert.NotNull(firstContract);
 
-			NotRelectionTestDataEntities.ClientExampleModel.Product firstProduct = firstTestDataRow.Products.FirstOrDefault();
-			Assert.NotNull(firstProduct);
+            NotRelectionTestDataEntities.ClientExampleModel.Product firstProduct = firstTestDataRow.Products.FirstOrDefault();
+            Assert.NotNull(firstProduct);
 
 			NotRelectionTestDataEntities.ClientExampleModel.EnumProp1 firstEnumProp1 = firstTestDataRow.EnumProps1.FirstOrDefault();
-			Assert.NotNull(firstEnumProp1);
+            Assert.NotNull(firstEnumProp1);
 
 			NotRelectionTestDataEntities.ClientExampleModel.EnumProp2 firstEnumProp2 = firstTestDataRow.EnumProps2.FirstOrDefault();
-			Assert.NotNull(firstEnumProp2);
+            Assert.NotNull(firstEnumProp2);
 
 			int parentColumnsQuantity = simpleTestData.ConfigurationBuilder.Value.ColumnsMap.Count;
 			int contactsFieldsQuantity = firstContact.GetType().GetProperties().Count();
@@ -1482,24 +1482,26 @@ namespace FormattedExcelExport.Tests {
 		private static string ConvertPropertyToString<T>(PropertyInfo nonEnumerableProperty, T model, CultureInfo cultureInfo) {
 			string propertyTypeName = nonEnumerableProperty.PropertyType.Name;
 			string value = String.Empty;
-			switch (propertyTypeName) {
-				case "String":
-					value = nonEnumerableProperty.GetValue(model).ToString();
-					break;
-				case "DateTime":
-					value = ((DateTime)nonEnumerableProperty.GetValue(model)).ToString(cultureInfo.DateTimeFormat.LongDatePattern);
-					break;
-				case "Decimal":
-					value = string.Format(cultureInfo, "{0:C}", nonEnumerableProperty.GetValue(model));
-					break;
-				case "Int32":
-					value = nonEnumerableProperty.GetValue(model).ToString();
-					break;
-				case "Boolean":
-					value = ((bool)nonEnumerableProperty.GetValue(model)) ? "Да" : "Нет";
-					break;
-			}
-			return value;
+		    if (nonEnumerableProperty.GetValue(model) != null) {
+		        switch (propertyTypeName) {
+		            case "String":
+		                value = nonEnumerableProperty.GetValue(model).ToString();
+		                break;
+		            case "DateTime":
+		                value = ((DateTime) nonEnumerableProperty.GetValue(model)).ToString(cultureInfo.DateTimeFormat.LongDatePattern);
+		                break;
+		            case "Decimal":
+		                value = string.Format(cultureInfo, "{0:C}", nonEnumerableProperty.GetValue(model));
+		                break;
+		            case "Int32":
+		                value = nonEnumerableProperty.GetValue(model).ToString();
+		                break;
+		            case "Boolean":
+		                value = ((bool) nonEnumerableProperty.GetValue(model)) ? "Да" : "Нет";
+		                break;
+		        }
+		    }
+		    return value;
 		}
 		private static List<string> TestChildHeader(IRow row, int childNumber, NotRelectionTestDataEntities.TestData simpleTestData) {
 			string childName = simpleTestData.ConfigurationBuilder.Value.ChildrenMap[childNumber].Title;

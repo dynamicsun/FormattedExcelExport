@@ -68,7 +68,7 @@ namespace FormattedExcelExport.Tests {
         internal static List<ClientExampleModel> CreateSimpleTestDataModels() {
             return new List<ClientExampleModel> {
 				new ClientExampleModel(
-					"Первая компания", 
+					"dddddddddddddddddd", 
 					DateTime.Now, 
 					"+7 333 4442 00", 
 					"9040043234562",
