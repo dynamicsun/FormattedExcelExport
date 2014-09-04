@@ -55,8 +55,12 @@ namespace FormattedExcelExport.Tests {
                 _enumField5.Add(new EnumProp5());
             }
         }
-
-        [ExcelExport(PropertyName = "Enum Field 1")]
+        public sealed class CustomCondition : Condition<EnumProp1> {
+            public override Func<EnumProp1, bool> Check() {
+                return x => x.Field1 == "";
+            }
+        }
+        [ExcelExport(PropertyName = "Enum Field 1", ConditionType = typeof(CustomCondition))]
         public List<EnumProp1> EnumField1 {
             get { return _enumField1; }
         }
@@ -77,7 +81,7 @@ namespace FormattedExcelExport.Tests {
             get { return _enumField5; }
         }
 
-        [ExcelExport(PropertyName = "Свойство 1")]
+        [ExcelExport(PropertyName = "Свойство 1fffffffffffffffffffffhhhhhhhhhhhhhhhhhhh")]
         public int Prop1 { get; private set; }
 
         [ExcelExport(PropertyName = "Свойство 2")]

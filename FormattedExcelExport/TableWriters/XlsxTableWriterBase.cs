@@ -21,6 +21,7 @@ namespace FormattedExcelExport.TableWriters {
         }
 
         public void AutosizeColumns() {
+            const int conversionFactorWidth = 256;
             foreach (var sheet in Package.Workbook.Worksheets) {
                 List<int> columnLengths = new List<int>();
                 for (int columnNum = 1; columnNum <= sheet.Dimension.End.Column; columnNum++) {
@@ -34,10 +35,9 @@ namespace FormattedExcelExport.TableWriters {
                     }
                     columnLengths.Add(columnMaxixumLength);
                 }
-
                 for (int i = 1; i < sheet.Dimension.End.Column; i++) {
-                    int width = (columnLengths.ElementAt(i) * Style.FontFactor + Style.FontAbsoluteTerm) / 256;
-                    sheet.Column(i).Width = width < MaxWidth / 256 ? width : MaxWidth / 256;
+                    int width = columnLengths.ElementAt(i) * Style.FontFactor + Style.FontAbsoluteTerm;
+                    sheet.Column(i).Width = (width < MaxWidth ? width : MaxWidth) / conversionFactorWidth;
                     sheet.Column(i).Style.WrapText = true;
                 }
             }

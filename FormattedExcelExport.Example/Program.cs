@@ -52,10 +52,7 @@ namespace FormattedExcelExport.Example {
 
             ms = TableWriterSimple.Write(new XlsTableWriterSimple(style), models, confBuilder.Value);
             WriteToFile(ms, "TestSimple.xls");
-
-            TableWriterSimple.Write(new XlsxTableWriterSimpleOld(style), models, confBuilder.Value);
-            TableWriterComplex.Write(new XlsxTableWriterComplexOld(style), models, confBuilder.Value);
-
+            
             ms = ReflectionWriterSimple.Write(models, new DsvTableWriterSimple(), new CultureInfo("ru-Ru"));
             WriteToFile(ms, "TestReflectionSimple.txt");
 

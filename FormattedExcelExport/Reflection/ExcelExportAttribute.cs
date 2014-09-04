@@ -1,6 +1,5 @@
 ﻿using System;
 
-
 namespace FormattedExcelExport.Reflection {
 	[AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
 	public sealed class ExcelExportAttribute : Attribute {
@@ -14,6 +13,7 @@ namespace FormattedExcelExport.Reflection {
 		}
 		public string PropertyName { get; set; }
 		public bool IsExportable { get; set; }
+        public Type ConditionType { get; set; }
 	}
 	[AttributeUsage(AttributeTargets.Class)]
 	public sealed class ExcelExportClassNameAttribute : Attribute {
@@ -24,6 +24,8 @@ namespace FormattedExcelExport.Reflection {
 		}
 		public string Name { get; set; }
 	}
-
+    public abstract class Condition<T> {
+        public abstract Func<T, bool> Check();
+    }
 }
 
