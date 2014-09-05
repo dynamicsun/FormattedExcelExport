@@ -111,7 +111,7 @@ namespace FormattedExcelExport.Tests {
                 enumProp2.RegisterColumn("Поле 5", x => x.Field5);
                 enumProp2.RegisterColumn("Поле 6", x => x.Field6);
                 enumProp2.RegisterColumn("Поле 7", x => x.Field7);
-                enumProp2.RegisterColumn("Поле 811111111111111", x => x.Field8);
+                enumProp2.RegisterColumn("Поле 811111111111111eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", x => x.Field8);
                 return confBuilder;
             }
         }
