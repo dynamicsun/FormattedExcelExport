@@ -145,6 +145,14 @@ namespace FormattedExcelExport.Reflection {
                         }
 						//row.Add(string.Format(cultureInfo, "{0:C}", propertyInfo.GetValue(model)));
 						break;
+                    case "Single":
+                        if (propertyInfo.GetCustomAttribute<ExcelExportAttribute>().ConditionType != null) {
+                            row.Add(new KeyValuePair<string, TableWriterStyle>(string.Format(cultureInfo, "{0:F}", propertyInfo.GetValue(model)), style));
+                        } else {
+                            row.Add(new KeyValuePair<string, TableWriterStyle>(string.Format(cultureInfo, "{0:F}", propertyInfo.GetValue(model)), null));
+                        }
+                        //row.Add(string.Format(cultureInfo, "{0:C}", propertyInfo.GetValue(model)));
+                        break;
 					case "Int32":
                         if (propertyInfo.GetCustomAttribute<ExcelExportAttribute>().ConditionType != null) {
                             row.Add(new KeyValuePair<string, TableWriterStyle>(propertyInfo.GetValue(model).ToString(), style));
@@ -153,14 +161,14 @@ namespace FormattedExcelExport.Reflection {
                         }
 						//row.Add(propertyInfo.GetValue(model).ToString());
 						break;
-					case "Boolean":
+                    case "Boolean":
                         if (propertyInfo.GetCustomAttribute<ExcelExportAttribute>().ConditionType != null) {
                             row.Add(new KeyValuePair<string, TableWriterStyle>(((bool)propertyInfo.GetValue(model)) ? "Да" : "Нет", style));
                         } else {
                             row.Add(new KeyValuePair<string, TableWriterStyle>(((bool)propertyInfo.GetValue(model)) ? "Да" : "Нет", null));
                         }
-						//row.Add(((bool) propertyInfo.GetValue(model)) ? "Да" : "Нет");
-						break;
+                        //row.Add(((bool) propertyInfo.GetValue(model)) ? "Да" : "Нет");
+                        break;
 					case "Nullable`1":
 				        if (propertyInfo.PropertyType.FullName.Contains("DateTime")) {
 				            if (propertyInfo.GetCustomAttribute<ExcelExportAttribute>().ConditionType != null) {
@@ -176,6 +184,13 @@ namespace FormattedExcelExport.Reflection {
                                 row.Add(new KeyValuePair<string, TableWriterStyle>(string.Format(cultureInfo, "{0}", propertyInfo.GetValue(model)), null));
 				            }
 				        }
+                        if (propertyInfo.PropertyType.FullName.Contains("Single")) {
+                            if (propertyInfo.GetCustomAttribute<ExcelExportAttribute>().ConditionType != null) {
+                                row.Add(new KeyValuePair<string, TableWriterStyle>(string.Format(cultureInfo, "{0:F}", propertyInfo.GetValue(model)), style));
+                            } else {
+                                row.Add(new KeyValuePair<string, TableWriterStyle>(string.Format(cultureInfo, "{0:F}", propertyInfo.GetValue(model)), null));
+                            }
+                        }
 				        if (propertyInfo.PropertyType.FullName.Contains("Int32")) {
 				            if (propertyInfo.GetCustomAttribute<ExcelExportAttribute>().ConditionType != null) {
 				                row.Add(new KeyValuePair<string, TableWriterStyle>(propertyInfo.GetValue(model).ToString(), style));

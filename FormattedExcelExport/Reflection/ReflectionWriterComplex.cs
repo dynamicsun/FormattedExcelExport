@@ -99,6 +99,9 @@ namespace FormattedExcelExport.Reflection {
 					case "Decimal":
 						row.Add(string.Format(cultureInfo, "{0:C}", propertyInfo.GetValue(model)));
 						break;
+                    case "Single":
+                        row.Add(string.Format(cultureInfo, "{0:F}", propertyInfo.GetValue(model)));
+                        break;
 					case "Int32":
 						row.Add(propertyInfo.GetValue(model).ToString());
 						break;
