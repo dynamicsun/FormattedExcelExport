@@ -17,6 +17,7 @@ namespace FormattedExcelExport.Reflection {
 				.Where(x => x.PropertyType == typeof(string)
 					|| x.PropertyType == typeof(DateTime) || x.PropertyType == typeof(DateTime?)
 					|| x.PropertyType == typeof(decimal) || x.PropertyType == typeof(decimal?)
+                    || x.PropertyType == typeof(float) || x.PropertyType == typeof(float?)
 					|| x.PropertyType == typeof(int) || x.PropertyType == typeof(int?)
 					|| x.PropertyType == typeof(bool) || x.PropertyType == typeof(bool?));
 
@@ -53,6 +54,7 @@ namespace FormattedExcelExport.Reflection {
 					.Where(x => x.PropertyType == typeof(string)
 						|| x.PropertyType == typeof(DateTime) || x.PropertyType == typeof(DateTime?)
 						|| x.PropertyType == typeof(decimal) || x.PropertyType == typeof(decimal?)
+                        || x.PropertyType == typeof(float) || x.PropertyType == typeof(float?)
 						|| x.PropertyType == typeof(int) || x.PropertyType == typeof(int?)
 						|| x.PropertyType == typeof(bool) || x.PropertyType == typeof(bool?));
 
@@ -86,6 +88,7 @@ namespace FormattedExcelExport.Reflection {
 					.Where(x => x.PropertyType == typeof(string)
 						|| x.PropertyType == typeof(DateTime) || x.PropertyType == typeof(DateTime?)
 						|| x.PropertyType == typeof(decimal) || x.PropertyType == typeof(decimal?)
+                        || x.PropertyType == typeof(float) || x.PropertyType == typeof(float?)
 						|| x.PropertyType == typeof(int) || x.PropertyType == typeof(int?)
 						|| x.PropertyType == typeof(bool) || x.PropertyType == typeof(bool?));
 
@@ -147,9 +150,9 @@ namespace FormattedExcelExport.Reflection {
 						break;
                     case "Single":
                         if (propertyInfo.GetCustomAttribute<ExcelExportAttribute>().ConditionType != null) {
-                            row.Add(new KeyValuePair<string, TableWriterStyle>(string.Format(cultureInfo, "{0:F}", propertyInfo.GetValue(model)), style));
+                            row.Add(new KeyValuePair<string, TableWriterStyle>(string.Format(cultureInfo, "{0}", propertyInfo.GetValue(model)), style));
                         } else {
-                            row.Add(new KeyValuePair<string, TableWriterStyle>(string.Format(cultureInfo, "{0:F}", propertyInfo.GetValue(model)), null));
+                            row.Add(new KeyValuePair<string, TableWriterStyle>(string.Format(cultureInfo, "{0}", propertyInfo.GetValue(model)), null));
                         }
                         //row.Add(string.Format(cultureInfo, "{0:C}", propertyInfo.GetValue(model)));
                         break;
@@ -186,9 +189,9 @@ namespace FormattedExcelExport.Reflection {
 				        }
                         if (propertyInfo.PropertyType.FullName.Contains("Single")) {
                             if (propertyInfo.GetCustomAttribute<ExcelExportAttribute>().ConditionType != null) {
-                                row.Add(new KeyValuePair<string, TableWriterStyle>(string.Format(cultureInfo, "{0:F}", propertyInfo.GetValue(model)), style));
+                                row.Add(new KeyValuePair<string, TableWriterStyle>(string.Format(cultureInfo, "{0}", propertyInfo.GetValue(model)), style));
                             } else {
-                                row.Add(new KeyValuePair<string, TableWriterStyle>(string.Format(cultureInfo, "{0:F}", propertyInfo.GetValue(model)), null));
+                                row.Add(new KeyValuePair<string, TableWriterStyle>(string.Format(cultureInfo, "{0}", propertyInfo.GetValue(model)), null));
                             }
                         }
 				        if (propertyInfo.PropertyType.FullName.Contains("Int32")) {

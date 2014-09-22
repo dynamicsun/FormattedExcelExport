@@ -17,6 +17,7 @@ namespace FormattedExcelExport.Reflection {
 				.Where(x => x.PropertyType == typeof(string)
 					|| x.PropertyType == typeof(DateTime) || x.PropertyType == typeof(DateTime?)
 					|| x.PropertyType == typeof(decimal) || x.PropertyType == typeof(decimal?)
+                    || x.PropertyType == typeof(float) || x.PropertyType == typeof(float?)
 					|| x.PropertyType == typeof(int) || x.PropertyType == typeof(int?)
 					|| x.PropertyType == typeof(bool) || x.PropertyType == typeof(bool?));
 
@@ -54,6 +55,7 @@ namespace FormattedExcelExport.Reflection {
 					.Where(x => x.PropertyType == typeof(string)
 						|| x.PropertyType == typeof(DateTime) || x.PropertyType == typeof(DateTime?)
 						|| x.PropertyType == typeof(decimal) || x.PropertyType == typeof(decimal?)
+                        || x.PropertyType == typeof(float) || x.PropertyType == typeof(float?)
 						|| x.PropertyType == typeof(int) || x.PropertyType == typeof(int?)
 						|| x.PropertyType == typeof(bool) || x.PropertyType == typeof(bool?));
 

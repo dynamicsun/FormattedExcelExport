@@ -18,6 +18,30 @@ using FormattedExcelExport.TableWriters;
 namespace FormattedExcelExport.Tests {
 	[TestFixture]
 	public class Test {
+	    public class FloatExpotClass {
+	        [ExcelExport(PropertyName = "Имя значения")]
+            public string Name { get; set; }
+            [ExcelExport(PropertyName = "Само значение")]
+            public float Value { get; set; }
+	    }
+	    [Test]
+	    public void ExportFloatFormatInReflection() {
+	        var floatList = new List<FloatExpotClass>();
+            floatList.Add(new FloatExpotClass {
+                Name = "Значение один",
+                Value = (float) 0.67
+            });
+            floatList.Add(new FloatExpotClass {
+                Name = "Значение два",
+                Value = (float)0.7
+            }); floatList.Add(new FloatExpotClass {
+                Name = "Значение три",
+                Value = (float)1.62
+            });
+	        const string filename = "FloatExport.xlsx";
+            var memoryStream1 = ReflectionWriterSimple.Write(floatList, new XlsxTableWriterSimple(new TableWriterStyle()), new CultureInfo("ru-Ru"));
+            WriteToFile(memoryStream1, filename);
+	    }
 		[Test]
 		[Ignore("Слишком долго выполняется")]
 		public void ExcelSimpleExportRowOverflow() {
