@@ -183,16 +183,16 @@ namespace FormattedExcelExport.Reflection {
 				        }
 				        if (propertyInfo.PropertyType.FullName.Contains("Decimal")) {
 				            if (propertyInfo.GetCustomAttribute<ExcelExportAttribute>().ConditionType != null) {
-                                row.Add(new KeyValuePair<string, TableWriterStyle>(propertyInfo.GetValue(model) != null ? string.Format(cultureInfo, "{0}", propertyInfo.GetValue(model)) : string.Empty, style));
+                                row.Add(new KeyValuePair<string, TableWriterStyle>(propertyInfo.GetValue(model) != null ? string.Format(cultureInfo, "{0:C}", propertyInfo.GetValue(model)) : string.Empty, style));
 				            } else {
-                                row.Add(new KeyValuePair<string, TableWriterStyle>(propertyInfo.GetValue(model) != null ? string.Format(cultureInfo, "{0}", propertyInfo.GetValue(model)) : string.Empty, null));
+                                row.Add(new KeyValuePair<string, TableWriterStyle>(propertyInfo.GetValue(model) != null ? string.Format(cultureInfo, "{0:C}", propertyInfo.GetValue(model)) : string.Empty, null));
 				            }
 				        }
                         if (propertyInfo.PropertyType.FullName.Contains("Single")) {
                             if (propertyInfo.GetCustomAttribute<ExcelExportAttribute>().ConditionType != null) {
-                                row.Add(new KeyValuePair<string, TableWriterStyle>(propertyInfo.GetValue(model) != null ? string.Format(cultureInfo, "{0:C}", propertyInfo.GetValue(model)) : string.Empty, style));
+                                row.Add(new KeyValuePair<string, TableWriterStyle>(propertyInfo.GetValue(model) != null ? string.Format(cultureInfo, "{0}", propertyInfo.GetValue(model)) : string.Empty, style));
                             } else {
-                                row.Add(new KeyValuePair<string, TableWriterStyle>(propertyInfo.GetValue(model) != null ? string.Format(cultureInfo, "{0:C}", propertyInfo.GetValue(model)) : string.Empty, null));
+                                row.Add(new KeyValuePair<string, TableWriterStyle>(propertyInfo.GetValue(model) != null ? string.Format(cultureInfo, "{0}", propertyInfo.GetValue(model)) : string.Empty, null));
                             }
                         }
 				        if (propertyInfo.PropertyType.FullName.Contains("Int32")) {
