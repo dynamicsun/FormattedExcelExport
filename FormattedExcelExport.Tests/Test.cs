@@ -22,22 +22,24 @@ namespace FormattedExcelExport.Tests {
 	        [ExcelExport(PropertyName = "Имя значения")]
             public string Name { get; set; }
             [ExcelExport(PropertyName = "Само значение")]
-            public float Value { get; set; }
+            public float? Value { get; set; }
 	    }
 	    [Test]
 	    public void ExportFloatFormatInReflection() {
-	        var floatList = new List<FloatExpotClass>();
-            floatList.Add(new FloatExpotClass {
-                Name = "Значение один",
-                Value = (float) 0.67
-            });
-            floatList.Add(new FloatExpotClass {
-                Name = "Значение два",
-                Value = (float)0.7
-            }); floatList.Add(new FloatExpotClass {
-                Name = "Значение три",
-                Value = (float)1.62
-            });
+	        var floatList = new List<FloatExpotClass> {
+	            new FloatExpotClass {
+	                Name = string.Empty,
+	                Value = (float?) 2.1
+	            },
+	            new FloatExpotClass {
+	                Name = "Значение два",
+	                Value = (float?) 4.1,
+	            },
+	            new FloatExpotClass {
+	                Name = "Значение три",
+	                Value = null
+	            }
+	        };
 	        const string filename = "FloatExport.xlsx";
             var memoryStream1 = ReflectionWriterSimple.Write(floatList, new XlsxTableWriterSimple(new TableWriterStyle()), new CultureInfo("ru-Ru"));
             WriteToFile(memoryStream1, filename);

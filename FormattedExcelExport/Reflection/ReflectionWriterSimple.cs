@@ -113,9 +113,10 @@ namespace FormattedExcelExport.Reflection {
             style.RegularChildCell.BackgroundColor = new AdHocCellStyle.Color(255, 0, 0);
 			foreach (PropertyInfo propertyInfo in exportedProperties) {
 				var propertyTypeName = propertyInfo.PropertyType.Name;
-			    if (propertyInfo.GetValue(model) == null) {
-			        row.Add(new KeyValuePair<string, TableWriterStyle>(String.Empty, style));
-			    }
+                //todo неясно, зачем это здесь нужно. в чем идея подсвечивать null-значения
+                //if (propertyInfo.GetValue(model) == null) {
+                //    row.Add(new KeyValuePair<string, TableWriterStyle>(String.Empty, style));
+                //}
 				switch (propertyTypeName) {
 					case "String":
 				        if (propertyInfo.GetCustomAttribute<ExcelExportAttribute>().ConditionType != null) {
@@ -182,23 +183,23 @@ namespace FormattedExcelExport.Reflection {
 				        }
 				        if (propertyInfo.PropertyType.FullName.Contains("Decimal")) {
 				            if (propertyInfo.GetCustomAttribute<ExcelExportAttribute>().ConditionType != null) {
-				                row.Add(new KeyValuePair<string, TableWriterStyle>(string.Format(cultureInfo, "{0}", propertyInfo.GetValue(model)), style));
+                                row.Add(new KeyValuePair<string, TableWriterStyle>(propertyInfo.GetValue(model) != null ? string.Format(cultureInfo, "{0}", propertyInfo.GetValue(model)) : string.Empty, style));
 				            } else {
-                                row.Add(new KeyValuePair<string, TableWriterStyle>(string.Format(cultureInfo, "{0}", propertyInfo.GetValue(model)), null));
+                                row.Add(new KeyValuePair<string, TableWriterStyle>(propertyInfo.GetValue(model) != null ? string.Format(cultureInfo, "{0}", propertyInfo.GetValue(model)) : string.Empty, null));
 				            }
 				        }
                         if (propertyInfo.PropertyType.FullName.Contains("Single")) {
                             if (propertyInfo.GetCustomAttribute<ExcelExportAttribute>().ConditionType != null) {
-                                row.Add(new KeyValuePair<string, TableWriterStyle>(string.Format(cultureInfo, "{0}", propertyInfo.GetValue(model)), style));
+                                row.Add(new KeyValuePair<string, TableWriterStyle>(propertyInfo.GetValue(model) != null ? string.Format(cultureInfo, "{0:C}", propertyInfo.GetValue(model)) : string.Empty, style));
                             } else {
-                                row.Add(new KeyValuePair<string, TableWriterStyle>(string.Format(cultureInfo, "{0}", propertyInfo.GetValue(model)), null));
+                                row.Add(new KeyValuePair<string, TableWriterStyle>(propertyInfo.GetValue(model) != null ? string.Format(cultureInfo, "{0:C}", propertyInfo.GetValue(model)) : string.Empty, null));
                             }
                         }
 				        if (propertyInfo.PropertyType.FullName.Contains("Int32")) {
 				            if (propertyInfo.GetCustomAttribute<ExcelExportAttribute>().ConditionType != null) {
-				                row.Add(new KeyValuePair<string, TableWriterStyle>(propertyInfo.GetValue(model).ToString(), style));
+				                row.Add(new KeyValuePair<string, TableWriterStyle>(propertyInfo.GetValue(model) != null ? propertyInfo.GetValue(model).ToString() : string.Empty, style));
 				            } else {
-                                row.Add(new KeyValuePair<string, TableWriterStyle>(propertyInfo.GetValue(model).ToString(), null));
+                                row.Add(new KeyValuePair<string, TableWriterStyle>(propertyInfo.GetValue(model) != null ? propertyInfo.GetValue(model).ToString() : string.Empty, null));
 				            }
 				        }
 				        if (propertyInfo.PropertyType.FullName.Contains("Boolean")) {
