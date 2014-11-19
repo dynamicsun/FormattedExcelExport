@@ -77,7 +77,6 @@
     <Compile Include="TableWriters\XlsxTableWriterSimple.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="FormattedExcelExport.nuspec" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
