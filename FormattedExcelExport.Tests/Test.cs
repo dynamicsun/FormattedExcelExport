@@ -38,7 +38,6 @@ namespace FormattedExcelExport.Tests {
 	    }
 	    [Test]
 	    public void ExportNullableNotReflectionTest() {
-	        var filename = "TestNullableNotReflection.xls";
 	        var nullTypeList = new List<NullableTypes>();
             nullTypeList.Add(new NullableTypes {
                 DateValue = null,
@@ -58,25 +57,33 @@ namespace FormattedExcelExport.Tests {
             confBuilder.RegisterColumn("Int", x => x.IntValue);
             confBuilder.RegisterColumn("Float", x => x.FloatValue);
 
+            var filename = "TestNullableNotReflection.xls";
+            DeleteTestFile(filename);
             MemoryStream memoryStream = TableWriterSimple.Write(new XlsTableWriterSimple(), nullTypeList, confBuilder.Value);
             WriteToFile(memoryStream, filename);
+
 	        var filenameXlsx = "TestNullableNotReflection.xlsx";
+            DeleteTestFile(filenameXlsx);
             MemoryStream memoryStreamXlsx = TableWriterSimple.Write(new XlsxTableWriterSimple(new TableWriterStyle()), nullTypeList, confBuilder.Value);
             WriteToFile(memoryStreamXlsx, filenameXlsx);
 
             var filenameXlsReflection = "TestNullableReflection.xls";
+            DeleteTestFile(filenameXlsReflection);
             var memoryStream1 = ReflectionWriterSimple.Write(nullTypeList, new XlsTableWriterSimple(new TableWriterStyle()), new CultureInfo("ru-Ru"));
             WriteToFile(memoryStream1, filenameXlsReflection);
 
             var filenameXlsxReflection = "TestNullableReflection.xlsx";
+            DeleteTestFile(filenameXlsxReflection);
             var memoryStream2 = ReflectionWriterSimple.Write(nullTypeList, new XlsxTableWriterSimple(new TableWriterStyle()), new CultureInfo("ru-Ru"));
             WriteToFile(memoryStream2, filenameXlsxReflection);
 
             var filenameXlsReflectionComplex = "TestNullableReflectionComplex.xls";
+            DeleteTestFile(filenameXlsReflectionComplex);
             var memoryStreamComplex1 = ReflectionWriterComplex.Write(nullTypeList, new XlsTableWriterComplex(new TableWriterStyle()), new CultureInfo("ru-Ru"));
             WriteToFile(memoryStreamComplex1, filenameXlsReflectionComplex);
 
             var filenameXlsxReflectionComplex = "TestNullableReflectionComplex.xlsx";
+            DeleteTestFile(filenameXlsxReflectionComplex);
             var memoryStreamComplex2 = ReflectionWriterComplex.Write(nullTypeList, new XlsxTableWriterComplex(new TableWriterStyle()), new CultureInfo("ru-Ru"));
             WriteToFile(memoryStreamComplex2, filenameXlsxReflectionComplex);
 	    }
