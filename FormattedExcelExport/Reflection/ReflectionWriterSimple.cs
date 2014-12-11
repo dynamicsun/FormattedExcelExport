@@ -100,7 +100,6 @@ namespace FormattedExcelExport.Reflection {
 					}
 				}
                 tableWriter.WriteRow(row);
-				//tableWriter.WriteRow(row.ConvertAll(x => new KeyValuePair<string, TableWriterStyle>(x, null)));
 			}
 
 			tableWriter.AutosizeColumns();
@@ -113,10 +112,6 @@ namespace FormattedExcelExport.Reflection {
             style.RegularChildCell.BackgroundColor = new AdHocCellStyle.Color(255, 0, 0);
 			foreach (PropertyInfo propertyInfo in exportedProperties) {
 				var propertyTypeName = propertyInfo.PropertyType.Name;
-                //todo неясно, зачем это здесь нужно. в чем идея подсвечивать null-значения
-                //if (propertyInfo.GetValue(model) == null) {
-                //    row.Add(new KeyValuePair<string, TableWriterStyle>(String.Empty, style));
-                //}
 				switch (propertyTypeName) {
 					case "String":
 				        if (propertyInfo.GetCustomAttribute<ExcelExportAttribute>().ConditionType != null) {
@@ -175,10 +170,11 @@ namespace FormattedExcelExport.Reflection {
                         break;
 					case "Nullable`1":
 				        if (propertyInfo.PropertyType.FullName.Contains("DateTime")) {
+                            Thread.CurrentThread.CurrentCulture = cultureInfo;
 				            if (propertyInfo.GetCustomAttribute<ExcelExportAttribute>().ConditionType != null) {
-				                row.Add(new KeyValuePair<string, TableWriterStyle>(((DateTime) propertyInfo.GetValue(model)).ToString(cultureInfo.DateTimeFormat.LongDatePattern), style));
+				                row.Add(new KeyValuePair<string, TableWriterStyle>(propertyInfo.GetValue(model) != null ? ((DateTime)propertyInfo.GetValue(model)).ToString(cultureInfo.DateTimeFormat.LongDatePattern) : string.Empty, style));
 				            } else {
-				                row.Add(new KeyValuePair<string, TableWriterStyle>(((DateTime) propertyInfo.GetValue(model)).ToString(cultureInfo.DateTimeFormat.LongDatePattern), null));
+				                row.Add(new KeyValuePair<string, TableWriterStyle>(propertyInfo.GetValue(model) != null ? ((DateTime) propertyInfo.GetValue(model)).ToString(cultureInfo.DateTimeFormat.LongDatePattern) : string.Empty, null));
 				            }
 				        }
 				        if (propertyInfo.PropertyType.FullName.Contains("Decimal")) {
@@ -204,9 +200,9 @@ namespace FormattedExcelExport.Reflection {
 				        }
 				        if (propertyInfo.PropertyType.FullName.Contains("Boolean")) {
 				            if (propertyInfo.GetCustomAttribute<ExcelExportAttribute>().ConditionType != null) {
-				                row.Add(new KeyValuePair<string, TableWriterStyle>(((bool) propertyInfo.GetValue(model)) ? "Да" : "Нет", style));
+                                row.Add(new KeyValuePair<string, TableWriterStyle>(propertyInfo.GetValue(model) != null ? (((bool)propertyInfo.GetValue(model)) ? "Да" : "Нет") : string.Empty, style));
 				            } else {
-                                row.Add(new KeyValuePair<string, TableWriterStyle>(((bool)propertyInfo.GetValue(model)) ? "Да" : "Нет", null));
+                                row.Add(new KeyValuePair<string, TableWriterStyle>(propertyInfo.GetValue(model) != null ? (((bool)propertyInfo.GetValue(model)) ? "Да" : "Нет") : string.Empty, null));
 				            }
 				        }
 				        break;

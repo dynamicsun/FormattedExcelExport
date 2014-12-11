@@ -110,6 +110,24 @@ namespace FormattedExcelExport.Reflection {
 					case "Boolean":
 						row.Add(((bool)propertyInfo.GetValue(model)) ? "Да" : "Нет");
 						break;
+                    case "Nullable`1":
+                        if (propertyInfo.PropertyType.FullName.Contains("DateTime")) {
+                            Thread.CurrentThread.CurrentCulture = cultureInfo;
+                            row.Add(propertyInfo.GetValue(model) != null ? ((DateTime)propertyInfo.GetValue(model)).ToString(cultureInfo.DateTimeFormat.LongDatePattern) : string.Empty);
+				        }
+				        if (propertyInfo.PropertyType.FullName.Contains("Decimal")) {
+                            row.Add(propertyInfo.GetValue(model) != null ? string.Format(cultureInfo, "{0:C}", propertyInfo.GetValue(model)) : string.Empty);
+				        }
+                        if (propertyInfo.PropertyType.FullName.Contains("Single")) {
+                            row.Add(propertyInfo.GetValue(model) != null ? string.Format(cultureInfo, "{0:F}", propertyInfo.GetValue(model)) : string.Empty);
+                        }
+				        if (propertyInfo.PropertyType.FullName.Contains("Int32")) {
+                            row.Add(propertyInfo.GetValue(model) != null ? propertyInfo.GetValue(model).ToString() : string.Empty);
+				        }
+				        if (propertyInfo.PropertyType.FullName.Contains("Boolean")) {
+                            row.Add(propertyInfo.GetValue(model) != null ? ((bool)propertyInfo.GetValue(model)) ? "Да" : "Нет" : string.Empty);
+				        }
+				        break;
 				}
 			}
 		}

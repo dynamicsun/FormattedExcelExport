@@ -49,6 +49,10 @@ namespace FormattedExcelExport.Configuaration {
 			RegisterColumnIf(true, header, getter, conditionTheme);
 		}
 
+        public void RegisterColumn(string header, Func<TModel, float?> getter, ConditionTheme conditionTheme = null) {
+            RegisterColumnIf(true, header, getter, conditionTheme);
+        }
+
 		public void RegisterColumnIf(bool expression, string header, Func<TModel, string> getter, ConditionTheme conditionTheme = null) {
 			if (!expression)
 				return;
@@ -70,6 +74,14 @@ namespace FormattedExcelExport.Configuaration {
 				return value.HasValue ? string.Format(_culture, "{0:C}", value.Value) : string.Empty;
 			}, conditionTheme);
 		}
+
+        public void RegisterColumnIf(bool expression, string header, Func<TModel, float?> getter, ConditionTheme conditionTheme = null) {
+            RegisterColumnIf(expression, header, x => {
+                float? value = getter(x);
+
+                return value.HasValue ? string.Format(_culture, "{0:0.00}", value.Value) : string.Empty;
+            }, conditionTheme);
+        }
 
 		public void RegisterColumnIf(bool expression, string header, Func<TModel, DateTime?> getter, ConditionTheme conditionTheme = null) {
 			RegisterColumnIf(expression, header, x => {

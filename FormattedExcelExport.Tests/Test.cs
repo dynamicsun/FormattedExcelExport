@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using Extensions;
+using FormattedExcelExport.Configuaration;
 using FormattedExcelExport.Reflection;
 using FormattedExcelExport.Style;
 using NPOI.HSSF.UserModel;
@@ -23,6 +24,61 @@ namespace FormattedExcelExport.Tests {
             public string Name { get; set; }
             [ExcelExport(PropertyName = "Само значение")]
             public float? Value { get; set; }
+	    }
+
+	    public class NullableTypes {
+            [ExcelExport(PropertyName = "Int")]
+            public int? IntValue { get; set; }
+            [ExcelExport(PropertyName = "Float")]
+            public float? FloatValue { get; set; }
+            [ExcelExport(PropertyName = "Decimal")]
+            public decimal? DecimalValue { get; set; }
+            [ExcelExport(PropertyName = "Date")]
+            public DateTime? DateValue { get; set; }
+	    }
+	    [Test]
+	    public void ExportNullableNotReflectionTest() {
+	        var filename = "TestNullableNotReflection.xls";
+	        var nullTypeList = new List<NullableTypes>();
+            nullTypeList.Add(new NullableTypes {
+                DateValue = null,
+                DecimalValue = (decimal?) 1.4544,
+                FloatValue = (float?) 0.323232,
+                IntValue = null
+             });
+            nullTypeList.Add(new NullableTypes {
+                DateValue = new DateTime(2012, 11, 21),
+                DecimalValue = null,
+                FloatValue = null,
+                IntValue = 12
+            });
+            TableConfigurationBuilder<NullableTypes> confBuilder = new TableConfigurationBuilder<NullableTypes>("Nullable", new CultureInfo("ru-RU"));
+            confBuilder.RegisterColumn("Date", x => x.DateValue);
+            confBuilder.RegisterColumn("Decimal", x => x.DecimalValue);
+            confBuilder.RegisterColumn("Int", x => x.IntValue);
+            confBuilder.RegisterColumn("Float", x => x.FloatValue);
+
+            MemoryStream memoryStream = TableWriterSimple.Write(new XlsTableWriterSimple(), nullTypeList, confBuilder.Value);
+            WriteToFile(memoryStream, filename);
+	        var filenameXlsx = "TestNullableNotReflection.xlsx";
+            MemoryStream memoryStreamXlsx = TableWriterSimple.Write(new XlsxTableWriterSimple(new TableWriterStyle()), nullTypeList, confBuilder.Value);
+            WriteToFile(memoryStreamXlsx, filenameXlsx);
+
+            var filenameXlsReflection = "TestNullableReflection.xls";
+            var memoryStream1 = ReflectionWriterSimple.Write(nullTypeList, new XlsTableWriterSimple(new TableWriterStyle()), new CultureInfo("ru-Ru"));
+            WriteToFile(memoryStream1, filenameXlsReflection);
+
+            var filenameXlsxReflection = "TestNullableReflection.xlsx";
+            var memoryStream2 = ReflectionWriterSimple.Write(nullTypeList, new XlsxTableWriterSimple(new TableWriterStyle()), new CultureInfo("ru-Ru"));
+            WriteToFile(memoryStream2, filenameXlsxReflection);
+
+            var filenameXlsReflectionComplex = "TestNullableReflectionComplex.xls";
+            var memoryStreamComplex1 = ReflectionWriterComplex.Write(nullTypeList, new XlsTableWriterComplex(new TableWriterStyle()), new CultureInfo("ru-Ru"));
+            WriteToFile(memoryStreamComplex1, filenameXlsReflectionComplex);
+
+            var filenameXlsxReflectionComplex = "TestNullableReflectionComplex.xlsx";
+            var memoryStreamComplex2 = ReflectionWriterComplex.Write(nullTypeList, new XlsxTableWriterComplex(new TableWriterStyle()), new CultureInfo("ru-Ru"));
+            WriteToFile(memoryStreamComplex2, filenameXlsxReflectionComplex);
 	    }
 	    [Test]
 	    public void ExportFloatFormatInReflection() {
@@ -715,7 +771,7 @@ namespace FormattedExcelExport.Tests {
 			}
 		}
 		[Test]
-		[Ignore("Проблема с рублёвым форматом. Decimal - это просто число")]
+		//[Ignore("Проблема с рублёвым форматом. Decimal - это просто число")]
 		public void ExcelReflectionSimpleExport() {
             string filename = "TestReflectionSimple.xls";
             DeleteTestFile(filename);
@@ -797,7 +853,7 @@ namespace FormattedExcelExport.Tests {
 		}
 
 		[Test]
-		[Ignore("Временно исключён. Разные значения")]
+		//[Ignore("Временно исключён. Разные значения")]
 		public void ExcelSimpleXlsxExport() {
 		    const string filename = "TestSimple.xlsx";
             DeleteTestFile(filename);
@@ -949,7 +1005,7 @@ namespace FormattedExcelExport.Tests {
 			}
 		}
 		[Test]
-		[Ignore("Временно исключён. Разные значения")]
+		//[Ignore("Временно исключён. Разные значения")]
 		public void ExcelStyleSimpleXlsxExport() {
 		    const string filename = "TestSimpleStyle.xlsx";
             DeleteTestFile(filename);
@@ -1003,7 +1059,7 @@ namespace FormattedExcelExport.Tests {
             //CustomAssert.IsEqualExcelColor((XSSFColor)sheet.GetRow(2).GetCell(15).CellStyle.FillForegroundColorColor, blue);
 		}
 		[Test]
-		[Ignore("Слишком долго выполняется")]
+		//[Ignore("Слишком долго выполняется")]
 		public void ExcelComplexXlsxExport() {
 		    const string filename = "TestComplex.xlsx";
             DeleteTestFile(filename);
@@ -1132,7 +1188,7 @@ namespace FormattedExcelExport.Tests {
 			}
 		}
 		[Test]
-		[Ignore("Временно исключён. Не удаётся найти файл")]
+		//[Ignore("Временно исключён. Не удаётся найти файл")]
 		public void ExcelStyleComplexXlsxExport() {
 		    const string filename = "TestComplexStyle.xlsx";
             DeleteTestFile(filename);
@@ -1198,7 +1254,7 @@ namespace FormattedExcelExport.Tests {
 			ExcelStyleReflectionSimpleExportTest(test, filename, true);
 		}
 		[Test]
-		[Ignore("Временно исключён. Не совпадают шрифты")]
+		//[Ignore("Временно исключён. Не совпадают шрифты")]
 		public void ExcelReflectionComplexXlsxExport() {
 		    const string filename = "TestComplex.xlsx";
             DeleteTestFile(filename);
