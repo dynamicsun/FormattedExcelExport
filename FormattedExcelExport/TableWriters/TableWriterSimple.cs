@@ -9,7 +9,7 @@ using FormattedExcelExport.Style;
 namespace FormattedExcelExport.TableWriters {
 	public interface ITableWriterSimple {
 		void WriteHeader(List<string> cells);
-		void WriteRow(List<KeyValuePair<string, TableWriterStyle>> cells);
+		void WriteRow(List<KeyValuePair<dynamic, TableWriterStyle>> cells);
 		void AutosizeColumns();
 		MemoryStream GetStream();
 	}
@@ -54,15 +54,15 @@ namespace FormattedExcelExport.TableWriters {
 			writer.WriteHeader(parentNamesList.ToList());
 
 			foreach (TModel model in models) {
-				var cellsWithStyle = new List<KeyValuePair<string, TableWriterStyle>>();
+                var cellsWithStyle = new List<KeyValuePair<dynamic, TableWriterStyle>>();
 
 				foreach (AggregatedContainer aggregatedContainer in aggregatedContainers) {
 					TableWriterStyle cellStyle = null;
 					if (aggregatedContainer.ConditionFunc(model)) {
 						cellStyle = aggregatedContainer.Style;
 					}
-					string cell = aggregatedContainer.ValueFunc(model);
-					cellsWithStyle.Add(new KeyValuePair<string, TableWriterStyle>(cell, cellStyle));
+					dynamic cell = aggregatedContainer.ValueFunc(model);
+                    cellsWithStyle.Add(new KeyValuePair<dynamic, TableWriterStyle>(cell, cellStyle));
 				}
 
 				int counter3 = 0;
@@ -76,15 +76,15 @@ namespace FormattedExcelExport.TableWriters {
 							if (childTableCellValueGetter.ConditionFunc(child)) {
 								cellStyle = childTableCellValueGetter.Style;
 							}
-							string cell = childTableCellValueGetter.ValueFunc(child);
-							cellsWithStyle.Add(new KeyValuePair<string, TableWriterStyle>(cell, cellStyle));
+							dynamic cell = childTableCellValueGetter.ValueFunc(child);
+                            cellsWithStyle.Add(new KeyValuePair<dynamic, TableWriterStyle>(cell, cellStyle));
 						}
 					}
 
 					int difference = (maximums[counter3] - children.Count()) * childAggregatedContainers.Count();
 
 					for (int i = 0; i < difference; i++) {
-						cellsWithStyle.Add(new KeyValuePair<string, TableWriterStyle>(null, null));
+                        cellsWithStyle.Add(new KeyValuePair<dynamic, TableWriterStyle>(null, null));
 					}
 					counter3++;
 				}

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using FormattedExcelExport.Style;
@@ -66,7 +67,7 @@ namespace FormattedExcelExport.TableWriters {
 			RowIndex++;
 			_colorIndex = 0;
 		}
-		public void WriteRow(IEnumerable<KeyValuePair<string, TableWriterStyle>> cells, bool prependDelimeter = false) {
+        public void WriteRow(List<KeyValuePair<dynamic, TableWriterStyle>> cells, bool prependDelimeter = false) {
 			IRow row = WorkSheet.CreateRow(RowIndex);
 			int columnIndex = 0;
 			if (prependDelimeter) {
@@ -76,18 +77,22 @@ namespace FormattedExcelExport.TableWriters {
 
 				columnIndex++;
 			}
-			foreach (KeyValuePair<string, TableWriterStyle> cell in cells) {
+            foreach (KeyValuePair<dynamic, TableWriterStyle> cell in cells) {
 				ICell newCell = row.CreateCell(columnIndex);
-				newCell.SetCellValue(cell.Key);
-
-				if (cell.Value != null) {
-					ICellStyle customCellStyle = ConvertToNpoiStyle(cell.Value.RegularCell);
-					newCell.CellStyle = customCellStyle;
-				}
-				else {
-					newCell.CellStyle = CellStyle;
-				}
-				columnIndex++;
+				newCell.SetCellValue(cell.Key ?? string.Empty);
+                if (cell.Key != null && cell.Key is DateTime?) {
+                    newCell.CellStyle = DateCellStyle;
+                }
+                else {
+                    if (cell.Value != null) {
+                        ICellStyle customCellStyle = ConvertToNpoiStyle(cell.Value.RegularCell);
+                        newCell.CellStyle = customCellStyle;
+                    }
+                    else {
+                        newCell.CellStyle = CellStyle;
+                    }
+                }
+                columnIndex++;
 			}
 			RowIndex++;
 		}
@@ -119,7 +124,8 @@ namespace FormattedExcelExport.TableWriters {
 		    _lastChildHeader = cells;
 			RowIndex++;
 		}
-		public void WriteChildRow(IEnumerable<KeyValuePair<string, TableWriterStyle>> cells, bool prependDelimeter = false) {
+
+	    public void WriteChildRow(IEnumerable<KeyValuePair<dynamic, TableWriterStyle>> cells, bool prependDelimeter = false) {
 			IRow row = WorkSheet.CreateRow(RowIndex);
 
 			int columnIndex = 0;
@@ -130,18 +136,22 @@ namespace FormattedExcelExport.TableWriters {
 
 				columnIndex++;
 			}
-			foreach (KeyValuePair<string, TableWriterStyle> cell in cells) {
+            foreach (KeyValuePair<dynamic, TableWriterStyle> cell in cells) {
 				ICell newCell = row.CreateCell(columnIndex);
 				newCell.SetCellValue(cell.Key);
-
-				if (cell.Value != null) {
-					ICellStyle customCellStyle = ConvertToNpoiStyle(cell.Value.RegularChildCell);
-					newCell.CellStyle = customCellStyle;
-				}
-				else {
-					newCell.CellStyle = CellStyle;
-				}
-				columnIndex++;
+                if (cell.Key != null && cell.Key is DateTime?) {
+                    newCell.CellStyle = DateCellStyle;
+                }
+                else {
+                    if (cell.Value != null) {
+                        ICellStyle customCellStyle = ConvertToNpoiStyle(cell.Value.RegularChildCell);
+                        newCell.CellStyle = customCellStyle;
+                    }
+                    else {
+                        newCell.CellStyle = CellStyle;
+                    }
+                }
+                columnIndex++;
 			}
 			RowIndex++;
 		}

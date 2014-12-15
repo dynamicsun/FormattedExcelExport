@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using FormattedExcelExport.Style;
 
 namespace FormattedExcelExport.Reflection {
 	[AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]

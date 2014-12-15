@@ -16,12 +16,23 @@ namespace FormattedExcelExport.TableWriters {
 		protected readonly TableWriterStyle Style;
         protected ICellStyle CellStyle;
         protected ICellStyle HeaderCellStyle;
+	    protected ICellStyle DateCellStyle;
 		protected XlsTableWriterBase(TableWriterStyle style) {
 			Workbook = new HSSFWorkbook();
 			Style = style ?? new TableWriterStyle();
 			WorkSheet = Workbook.CreateSheet();
             CellStyle = ConvertToNpoiStyle(Style.RegularCell);
             HeaderCellStyle = ConvertToNpoiStyle(Style.HeaderCell);
+            var dataFormat = "m/d/yy";
+		    short dataFormatValue;
+            var builtinFormatId = HSSFDataFormat.GetBuiltinFormat(dataFormat);
+            if (builtinFormatId != -1)
+                dataFormatValue = builtinFormatId;
+            else {
+                var dataFormatCustom = Workbook.CreateDataFormat();
+                dataFormatValue = dataFormatCustom.GetFormat(dataFormat);
+            }
+		    DateCellStyle = ConvertToNpoiStyle(Style.RegularCell, dataFormatValue);
 		}
 
 		public void AutosizeColumns() {
@@ -36,9 +47,12 @@ namespace FormattedExcelExport.TableWriters {
 		                if (!currentRow.Cells.Any()) continue;
 		                ICell cell = currentRow.GetCell(columnNum);
 		                if (cell == null) continue;
-
-		                if (cell.StringCellValue.Length > columnMaximumLength) 
-		                    columnMaximumLength = cell.StringCellValue.Length;
+                        if (cell.CellType == CellType.String) 
+                            if (cell.StringCellValue.Length > columnMaximumLength) 
+                                columnMaximumLength = cell.StringCellValue.Length;
+                        if (cell.CellType == CellType.Numeric)
+                            if (cell.NumericCellValue.ToString().Length > columnMaximumLength)
+                                columnMaximumLength = cell.NumericCellValue.ToString().Length;
 		            }
 		            columnLengths.Add(columnMaximumLength);
 		        }
@@ -55,7 +69,7 @@ namespace FormattedExcelExport.TableWriters {
 		    }
 		}
 
-		protected ICellStyle ConvertToNpoiStyle(AdHocCellStyle adHocCellStyle) {
+		protected ICellStyle ConvertToNpoiStyle(AdHocCellStyle adHocCellStyle, short dateFormat = 0) {
 			IFont cellFont = Workbook.CreateFont();
 
 			cellFont.FontName = adHocCellStyle.FontName;
@@ -76,6 +90,7 @@ namespace FormattedExcelExport.TableWriters {
 				cellStyle.FillForegroundColor = similarColor.GetIndex();
 				cellStyle.FillPattern = FillPattern.SolidForeground;
 			}
+		    cellStyle.DataFormat = dateFormat;
 			return cellStyle;
 		}
 

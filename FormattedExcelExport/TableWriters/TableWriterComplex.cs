@@ -17,14 +17,14 @@ namespace FormattedExcelExport.TableWriters {
 			foreach (TModel model in models) {
 				writer.WriteHeader(headerNamesList.ToArray());
 
-				var cellsWithStyle = new List<KeyValuePair<string, TableWriterStyle>>();
+                var cellsWithStyle = new List<KeyValuePair<dynamic, TableWriterStyle>>();
 				foreach (AggregatedContainer aggregatedContainer in aggregatedContainers) {
 					TableWriterStyle cellStyle = null;
 					if (aggregatedContainer.ConditionFunc(model)) {
 						cellStyle = aggregatedContainer.Style;
 					}
-					string cell = aggregatedContainer.ValueFunc(model);
-					cellsWithStyle.Add(new KeyValuePair<string, TableWriterStyle>(cell, cellStyle));
+					dynamic cell = aggregatedContainer.ValueFunc(model);
+                    cellsWithStyle.Add(new KeyValuePair<dynamic, TableWriterStyle>(cell, cellStyle));
 				}
 				writer.WriteRow(cellsWithStyle, true);
 
@@ -36,15 +36,15 @@ namespace FormattedExcelExport.TableWriters {
 					writer.WriteChildHeader(childHeaderNamesList.ToArray());
 
 					foreach (object child in children) {
-						var childCellsWithStyle = new List<KeyValuePair<string, TableWriterStyle>>();
+                        var childCellsWithStyle = new List<KeyValuePair<dynamic, TableWriterStyle>>();
 
 						foreach (AggregatedContainer childTableCellValueGetter in childAggregatedContainers) {
 							TableWriterStyle cellStyle = null;
 							if (childTableCellValueGetter.ConditionFunc(child)) {
 								cellStyle = childTableCellValueGetter.Style;
 							}
-							string cell = childTableCellValueGetter.ValueFunc(child);
-							childCellsWithStyle.Add(new KeyValuePair<string, TableWriterStyle>(cell, cellStyle));
+							dynamic cell = childTableCellValueGetter.ValueFunc(child);
+                            childCellsWithStyle.Add(new KeyValuePair<dynamic, TableWriterStyle>(cell, cellStyle));
 						}
 						writer.WriteChildRow(childCellsWithStyle, true);
 					}

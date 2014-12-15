@@ -14,13 +14,13 @@ namespace FormattedExcelExport.TableWriters {
 		}
 
 	    public void WriteHeader(List<string> cells) {
-			WriteRow(cells.ConvertAll(x => new KeyValuePair<string, TableWriterStyle>(x, null)));
+			WriteRow(cells.ConvertAll(x => new KeyValuePair<dynamic, TableWriterStyle>(x, null)));
 		}
 
-		public void WriteRow(List<KeyValuePair<string, TableWriterStyle>> cells) {
+	    public void WriteRow(List<KeyValuePair<dynamic, TableWriterStyle>> cells) {
 			int cellsCount = cells.Count() - 1;
 			int i = 0;
-			foreach (KeyValuePair<string, TableWriterStyle> cell in cells) {
+			foreach (KeyValuePair<dynamic, TableWriterStyle> cell in cells) {
 				if (cell.Key != null)
 					_stringBuilder.Append(cell.Key);
 

@@ -5,7 +5,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Threading;
 using FormattedExcelExport.Style;
 using FormattedExcelExport.TableWriters;
 
@@ -39,9 +38,9 @@ namespace FormattedExcelExport.Reflection {
 			foreach (T model in models) {
 				tableWriter.WriteHeader(header.ToArray());
 
-				List<string> row = new List<string>();
-				GetValue(cultureInfo, exportedProperties, row, model);
-				tableWriter.WriteRow(row.ConvertAll(x => new KeyValuePair<string, TableWriterStyle>(x, null)), true);
+                List<KeyValuePair<dynamic, TableWriterStyle>> row = new List<KeyValuePair<dynamic, TableWriterStyle>>();
+				ReflectionWriter.GetValue(cultureInfo, exportedProperties, row, model);
+				tableWriter.WriteRow(row, true);
 				row.Clear();
 
 				for (int i = 0; i < enumerableProperties.Count(); i++) {
@@ -74,8 +73,8 @@ namespace FormattedExcelExport.Reflection {
 					childHeader.Clear();
 
 					foreach (var submodel in submodels) {
-						GetValue(cultureInfo, props, row, submodel);
-						tableWriter.WriteChildRow(row.ConvertAll(x => new KeyValuePair<string, TableWriterStyle>(x, null)), true);
+						ReflectionWriter.GetValue(cultureInfo, props, row, submodel);
+                        tableWriter.WriteChildRow(row, true);
 						row.Clear();
 					}
 				}
@@ -84,52 +83,6 @@ namespace FormattedExcelExport.Reflection {
 			tableWriter.AutosizeColumns();
 			MemoryStream stream = tableWriter.GetStream();
 			return stream;
-		}
-
-		private static void GetValue<T>(CultureInfo cultureInfo, IEnumerable<PropertyInfo> exportedProperties, List<string> row, T model) {
-			foreach (PropertyInfo propertyInfo in exportedProperties) {
-				var propertyTypeName = propertyInfo.PropertyType.Name;
-
-				switch (propertyTypeName) {
-					case "String":
-						row.Add(propertyInfo.GetValue(model).ToString());
-						break;
-					case "DateTime":
-				        Thread.CurrentThread.CurrentCulture = cultureInfo;
-                        row.Add(((DateTime)propertyInfo.GetValue(model)).ToString(cultureInfo.DateTimeFormat.LongDatePattern));
-						break;
-					case "Decimal":
-						row.Add(string.Format(cultureInfo, "{0:C}", propertyInfo.GetValue(model)));
-						break;
-                    case "Single":
-                        row.Add(string.Format(cultureInfo, "{0:F}", propertyInfo.GetValue(model)));
-                        break;
-					case "Int32":
-						row.Add(propertyInfo.GetValue(model).ToString());
-						break;
-					case "Boolean":
-						row.Add(((bool)propertyInfo.GetValue(model)) ? "Да" : "Нет");
-						break;
-                    case "Nullable`1":
-                        if (propertyInfo.PropertyType.FullName.Contains("DateTime")) {
-                            Thread.CurrentThread.CurrentCulture = cultureInfo;
-                            row.Add(propertyInfo.GetValue(model) != null ? ((DateTime)propertyInfo.GetValue(model)).ToString(cultureInfo.DateTimeFormat.LongDatePattern) : string.Empty);
-				        }
-				        if (propertyInfo.PropertyType.FullName.Contains("Decimal")) {
-                            row.Add(propertyInfo.GetValue(model) != null ? string.Format(cultureInfo, "{0:C}", propertyInfo.GetValue(model)) : string.Empty);
-				        }
-                        if (propertyInfo.PropertyType.FullName.Contains("Single")) {
-                            row.Add(propertyInfo.GetValue(model) != null ? string.Format(cultureInfo, "{0:F}", propertyInfo.GetValue(model)) : string.Empty);
-                        }
-				        if (propertyInfo.PropertyType.FullName.Contains("Int32")) {
-                            row.Add(propertyInfo.GetValue(model) != null ? propertyInfo.GetValue(model).ToString() : string.Empty);
-				        }
-				        if (propertyInfo.PropertyType.FullName.Contains("Boolean")) {
-                            row.Add(propertyInfo.GetValue(model) != null ? ((bool)propertyInfo.GetValue(model)) ? "Да" : "Нет" : string.Empty);
-				        }
-				        break;
-				}
-			}
 		}
 	}
 }

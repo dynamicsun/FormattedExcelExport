@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using FormattedExcelExport.Infrastructure;
 using FormattedExcelExport.Style;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
@@ -44,13 +46,18 @@ namespace FormattedExcelExport.TableWriters {
             RowIndex++;
         }
 
-        public void WriteRow(List<KeyValuePair<string, TableWriterStyle>> cells) {
+        public void WriteRow(List<KeyValuePair<dynamic, TableWriterStyle>> cells) {
             int columnIndex = 1;
             Font font = ConvertCellStyle(Style.RegularCell);
-            foreach (KeyValuePair<string, TableWriterStyle> cell in cells) {
+            foreach (KeyValuePair<dynamic, TableWriterStyle> cell in cells) {
                 ExcelRange newCell = WorkSheet.Cells[RowIndex, columnIndex];
                 if (cell.Key != null)
-                    newCell.Value = cell.Key;
+                    if (cell.Key is DateTime?) {
+                        var date = (DateTime) cell.Key;
+                        newCell.Formula = "=Date(" + date.Year + "," + date.Month + "," + date.Day + ")";
+                        newCell.Style.Numberformat.Format = "dd.mm.yyyy";
+                    }
+                    else newCell.Value = cell.Key;
                 if (cell.Value != null) {
                     font = ConvertCellStyle(cell.Value.RegularCell);
                     newCell.Style.Font.SetFromFont(font);

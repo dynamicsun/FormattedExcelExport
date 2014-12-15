@@ -108,7 +108,7 @@ namespace FormattedExcelExport.Tests {
             WriteToFile(memoryStream1, filename);
 	    }
 		[Test]
-		[Ignore("Слишком долго выполняется")]
+		[Ignore("Слишком долго выполняется (но работает правильно)")]
 		public void ExcelSimpleExportRowOverflow() {
 		    const string filename = "TestSimpleOverflow.xls";
             DeleteTestFile(filename);
@@ -191,23 +191,23 @@ namespace FormattedExcelExport.Tests {
 					row = sheet.GetRow(rowNumber);
 					Assert.NotNull(row);
 					NotRelectionTestDataEntities.ClientExampleModel currentTestDataRow = simpleTestData.Models[modelNumber];
-					Assert.AreEqual(row.GetCell(0).StringCellValue, currentTestDataRow.Title);
-					Assert.AreEqual(row.GetCell(1).StringCellValue, currentTestDataRow.RegistrationDate.ToRussianFullString());
+					Assert.AreEqual(row.GetCell(0).StringCellValue, currentTestDataRow.Title ?? string.Empty);
+					Assert.AreEqual(DateUtil.GetJavaDate(row.GetCell(1).NumericCellValue).ToString(CultureInfo.InvariantCulture), currentTestDataRow.RegistrationDate.ToString(CultureInfo.InvariantCulture));
 					Assert.AreEqual(row.GetCell(2).StringCellValue, currentTestDataRow.Phone);
 					Assert.AreEqual(row.GetCell(3).StringCellValue, currentTestDataRow.Inn);
 					Assert.AreEqual(row.GetCell(4).StringCellValue, currentTestDataRow.Okato);
 
-					Assert.AreEqual(row.GetCell(5).StringCellValue, string.Format(new CultureInfo("ru-RU"), "{0:C}", currentTestDataRow.Revenue));
-					Assert.AreEqual(row.GetCell(6).StringCellValue, currentTestDataRow.EmployeeCount.ToString(CultureInfo.InvariantCulture));
+					Assert.AreEqual(row.GetCell(5).NumericCellValue, Convert.ToDouble(currentTestDataRow.Revenue));
+					Assert.AreEqual(row.GetCell(6).NumericCellValue, Convert.ToDouble(currentTestDataRow.EmployeeCount));
 					Assert.AreEqual(row.GetCell(7).StringCellValue, currentTestDataRow.IsActive.ToRussianString());
-					Assert.AreEqual(row.GetCell(8).StringCellValue, currentTestDataRow.Prop1.ToString(CultureInfo.InvariantCulture));
+					Assert.AreEqual(row.GetCell(8).NumericCellValue, Convert.ToDouble(currentTestDataRow.Prop1));
 					Assert.AreEqual(row.GetCell(9).StringCellValue, currentTestDataRow.Prop2);
 
 					Assert.AreEqual(row.GetCell(10).StringCellValue, currentTestDataRow.Prop3.ToRussianString());
-					Assert.AreEqual(row.GetCell(11).StringCellValue, currentTestDataRow.Prop4.ToString(CultureInfo.InvariantCulture));
+					Assert.AreEqual(row.GetCell(11).NumericCellValue, Convert.ToDouble(currentTestDataRow.Prop4));
 					Assert.AreEqual(row.GetCell(12).StringCellValue, currentTestDataRow.Prop5);
 					Assert.AreEqual(row.GetCell(13).StringCellValue, currentTestDataRow.Prop6.ToRussianString());
-					Assert.AreEqual(row.GetCell(14).StringCellValue, currentTestDataRow.Prop7.ToString(CultureInfo.InvariantCulture));
+					Assert.AreEqual(row.GetCell(14).NumericCellValue, Convert.ToDouble(currentTestDataRow.Prop7));
 
 					for (int contactNumber = 0; contactNumber < currentTestDataRow.Contacts.Count; contactNumber++) {
 						NotRelectionTestDataEntities.ClientExampleModel.Contact currentContactRow = currentTestDataRow.Contacts[contactNumber];
@@ -216,10 +216,10 @@ namespace FormattedExcelExport.Tests {
 					}
 
 					for (int contractNumber = 0; contractNumber < currentTestDataRow.Contracts.Count; contractNumber++) {
-						Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + (contractNumber * contractsFieldsQuantity)).StringCellValue,
-							currentTestDataRow.Contracts[contractNumber].BeginDate.ToRussianFullString());
-						Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + (contractNumber * contractsFieldsQuantity + 1)).StringCellValue,
-							currentTestDataRow.Contracts[contractNumber].EndDate.ToRussianFullString());
+						Assert.AreEqual(DateUtil.GetJavaDate(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + (contractNumber * contractsFieldsQuantity)).NumericCellValue).ToString(CultureInfo.InvariantCulture),
+							currentTestDataRow.Contracts[contractNumber].BeginDate.ToString(CultureInfo.InvariantCulture));
+						Assert.AreEqual(DateUtil.GetJavaDate(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + (contractNumber * contractsFieldsQuantity + 1)).NumericCellValue).ToString(CultureInfo.InvariantCulture),
+							currentTestDataRow.Contracts[contractNumber].EndDate.ToString(CultureInfo.InvariantCulture));
 						Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + (contractNumber * contractsFieldsQuantity + 2)).StringCellValue,
 							currentTestDataRow.Contracts[contractNumber].Status.ToRussianString());
 					}
@@ -227,15 +227,15 @@ namespace FormattedExcelExport.Tests {
 					for (int productNumber = 0; productNumber < currentTestDataRow.Products.Count; productNumber++) {
 						Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + (productNumber * 2)).StringCellValue,
 							currentTestDataRow.Products[productNumber].Title);
-						Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + (productNumber * 2 + 1)).StringCellValue,
-							currentTestDataRow.Products[productNumber].Amount.ToString(CultureInfo.InvariantCulture));
+						Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + (productNumber * 2 + 1)).NumericCellValue,
+							Convert.ToDouble(currentTestDataRow.Products[productNumber].Amount));
 					}
 
 					for (int enumProp1Number = 0; enumProp1Number < currentTestDataRow.EnumProps1.Count; enumProp1Number++) {
 						Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + (enumProp1Number * 3)).StringCellValue,
 							currentTestDataRow.EnumProps1[enumProp1Number].Field1);
-						Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + (enumProp1Number * 3 + 1)).StringCellValue,
-							currentTestDataRow.EnumProps1[enumProp1Number].Field2.ToString(CultureInfo.InvariantCulture));
+						Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + (enumProp1Number * 3 + 1)).NumericCellValue,
+							Convert.ToDouble(currentTestDataRow.EnumProps1[enumProp1Number].Field2));
 						Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + (enumProp1Number * 3 + 2)).StringCellValue,
 							currentTestDataRow.EnumProps1[enumProp1Number].Field3.ToRussianString());
 					}
@@ -243,14 +243,14 @@ namespace FormattedExcelExport.Tests {
 					for (int enumProp2Number = 0; enumProp2Number < currentTestDataRow.EnumProps2.Count; enumProp2Number++) {
 						Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + testDataEnumProp1ColumnsQuantity + (enumProp2Number * 5)).StringCellValue,
 							currentTestDataRow.EnumProps2[enumProp2Number].Field4);
-						Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + testDataEnumProp1ColumnsQuantity + (enumProp2Number * 5 + 1)).StringCellValue,
-							currentTestDataRow.EnumProps2[enumProp2Number].Field5.ToString(CultureInfo.InvariantCulture));
+						Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + testDataEnumProp1ColumnsQuantity + (enumProp2Number * 5 + 1)).NumericCellValue,
+							Convert.ToDouble(currentTestDataRow.EnumProps2[enumProp2Number].Field5));
 						Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + testDataEnumProp1ColumnsQuantity + (enumProp2Number * 5 + 2)).StringCellValue,
 							currentTestDataRow.EnumProps2[enumProp2Number].Field6.ToRussianString());
 						Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + testDataEnumProp1ColumnsQuantity + (enumProp2Number * 5 + 3)).StringCellValue,
 							currentTestDataRow.EnumProps2[enumProp2Number].Field7);
-						Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + testDataEnumProp1ColumnsQuantity + (enumProp2Number * 5 + 4)).StringCellValue,
-							currentTestDataRow.EnumProps2[enumProp2Number].Field8.ToString(CultureInfo.InvariantCulture));
+						Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + testDataEnumProp1ColumnsQuantity + (enumProp2Number * 5 + 4)).NumericCellValue,
+							Convert.ToDouble(currentTestDataRow.EnumProps2[enumProp2Number].Field8));
 					}
 					modelNumber++;
 				}
@@ -258,7 +258,7 @@ namespace FormattedExcelExport.Tests {
 			}
 		}
 		[Test]
-		[Ignore("Слишком долго выполняется")]
+		[Ignore("Слишком долго выполняется (но работает правильно)")]
 		public void ExcelComplexExportRowOverflow() {
 		    const string filename = "TestComplexOverflow.xls";
             DeleteTestFile(filename);
@@ -279,10 +279,10 @@ namespace FormattedExcelExport.Tests {
 			int rowNumber = 0;
 
 			ISheet sheet = xlsFile.GetSheetAt(sheetNumber);
-
+            List<string> lastChildHeader = new List<string>();
 			for (int modelNumber = 0; modelNumber < modelsQuantity; modelNumber++) {
 				List<string> lastParentHeader = new List<string>();
-				List<string> lastChildHeader = new List<string>();
+				
 				NotRelectionTestDataEntities.ClientExampleModel currentTestDataRow = simpleTestData.Models[modelNumber];
 				IRow row = sheet.GetRow(rowNumber);
 				ICell cell = row.GetCell(0);
@@ -295,21 +295,21 @@ namespace FormattedExcelExport.Tests {
 				RowNumberIncrement(lastParentHeader, lastChildHeader, xlsFile, ref rowNumber, ref sheet, ref sheetNumber);
 				row = sheet.GetRow(rowNumber);
 
-				Assert.AreEqual(row.GetCell(1).StringCellValue, currentTestDataRow.Title);
-				Assert.AreEqual(row.GetCell(2).StringCellValue, currentTestDataRow.RegistrationDate.ToRussianFullString());
+				Assert.AreEqual(row.GetCell(1).StringCellValue, currentTestDataRow.Title ?? string.Empty);
+                Assert.AreEqual(DateUtil.GetJavaDate(row.GetCell(2).NumericCellValue).ToString(CultureInfo.InvariantCulture), currentTestDataRow.RegistrationDate.ToString(CultureInfo.InvariantCulture));
 				Assert.AreEqual(row.GetCell(3).StringCellValue, currentTestDataRow.Phone);
 				Assert.AreEqual(row.GetCell(4).StringCellValue, currentTestDataRow.Inn);
 				Assert.AreEqual(row.GetCell(5).StringCellValue, currentTestDataRow.Okato);
-				Assert.AreEqual(row.GetCell(6).StringCellValue, string.Format(new CultureInfo("ru-RU"), "{0:C}", currentTestDataRow.Revenue));
-				Assert.AreEqual(row.GetCell(7).StringCellValue, currentTestDataRow.EmployeeCount.ToString(CultureInfo.InvariantCulture));
+				Assert.AreEqual(row.GetCell(6).NumericCellValue, Convert.ToDouble(currentTestDataRow.Revenue));
+				Assert.AreEqual(row.GetCell(7).NumericCellValue, Convert.ToDouble(currentTestDataRow.EmployeeCount));
 				Assert.AreEqual(row.GetCell(8).StringCellValue, currentTestDataRow.IsActive.ToRussianString());
-				Assert.AreEqual(row.GetCell(9).StringCellValue, currentTestDataRow.Prop1.ToString(CultureInfo.InvariantCulture));
+				Assert.AreEqual(row.GetCell(9).NumericCellValue, Convert.ToDouble(currentTestDataRow.Prop1));
 				Assert.AreEqual(row.GetCell(10).StringCellValue, currentTestDataRow.Prop2);
 				Assert.AreEqual(row.GetCell(11).StringCellValue, currentTestDataRow.Prop3.ToRussianString());
-				Assert.AreEqual(row.GetCell(12).StringCellValue, currentTestDataRow.Prop4.ToString(CultureInfo.InvariantCulture));
+				Assert.AreEqual(row.GetCell(12).NumericCellValue, Convert.ToDouble(currentTestDataRow.Prop4));
 				Assert.AreEqual(row.GetCell(13).StringCellValue, currentTestDataRow.Prop5);
 				Assert.AreEqual(row.GetCell(14).StringCellValue, currentTestDataRow.Prop6.ToRussianString());
-				Assert.AreEqual(row.GetCell(15).StringCellValue, currentTestDataRow.Prop7.ToString(CultureInfo.InvariantCulture));
+				Assert.AreEqual(row.GetCell(15).NumericCellValue, Convert.ToDouble(currentTestDataRow.Prop7));
 				RowNumberIncrement(lastParentHeader, null, xlsFile, ref rowNumber, ref sheet, ref sheetNumber);
 				row = sheet.GetRow(rowNumber);
 
@@ -320,14 +320,15 @@ namespace FormattedExcelExport.Tests {
 						case 0: {
 								List<NotRelectionTestDataEntities.ClientExampleModel.Contact> child = currentTestDataRow.Contacts;
 								lastChildHeader = TestChildHeader(row, childNumber, simpleTestData);
-								RowNumberIncrement(lastParentHeader, lastChildHeader, xlsFile, ref rowNumber, ref sheet, ref sheetNumber);
+                                RowNumberIncrement(lastParentHeader, lastChildHeader, xlsFile, ref rowNumber, ref sheet, ref sheetNumber);
 								row = sheet.GetRow(rowNumber);
 								foreach (NotRelectionTestDataEntities.ClientExampleModel.Contact childProperty in child) {
 									Assert.AreEqual(row.GetCell(1).StringCellValue, childProperty.Title);
 									Assert.AreEqual(row.GetCell(2).StringCellValue, childProperty.Email);
 									RowNumberIncrement(lastParentHeader, lastChildHeader, xlsFile, ref rowNumber, ref sheet, ref sheetNumber); 
 									row = sheet.GetRow(rowNumber);
-								}
+                                }
+                                    lastChildHeader = null;
 								break;
 							}
 						case 1: {
@@ -336,12 +337,13 @@ namespace FormattedExcelExport.Tests {
 								RowNumberIncrement(lastParentHeader, lastChildHeader, xlsFile, ref rowNumber, ref sheet, ref sheetNumber);
 								row = sheet.GetRow(rowNumber);
 								foreach (NotRelectionTestDataEntities.ClientExampleModel.Contract childProperty in child) {
-									Assert.AreEqual(row.GetCell(1).StringCellValue, childProperty.BeginDate.ToRussianFullString());
-									Assert.AreEqual(row.GetCell(2).StringCellValue, childProperty.EndDate.ToRussianFullString());
+									Assert.AreEqual(DateUtil.GetJavaDate(row.GetCell(1).NumericCellValue).ToString(CultureInfo.InvariantCulture), childProperty.BeginDate.ToString(CultureInfo.InvariantCulture));
+									Assert.AreEqual(DateUtil.GetJavaDate(row.GetCell(2).NumericCellValue).ToString(CultureInfo.InvariantCulture), childProperty.EndDate.ToString(CultureInfo.InvariantCulture));
 									Assert.AreEqual(row.GetCell(3).StringCellValue, childProperty.Status.ToRussianString());
 									RowNumberIncrement(lastParentHeader, lastChildHeader, xlsFile, ref rowNumber, ref sheet, ref sheetNumber); 
 									row = sheet.GetRow(rowNumber);
 								}
+                                lastChildHeader = null;
 								break;
 							}
 						case 2: {
@@ -351,10 +353,11 @@ namespace FormattedExcelExport.Tests {
 								row = sheet.GetRow(rowNumber);
 								foreach (NotRelectionTestDataEntities.ClientExampleModel.Product childProperty in child) {
 									Assert.AreEqual(row.GetCell(1).StringCellValue, childProperty.Title);
-									Assert.AreEqual(row.GetCell(2).StringCellValue, childProperty.Amount.ToString(CultureInfo.InvariantCulture));
+									Assert.AreEqual(row.GetCell(2).NumericCellValue, Convert.ToDouble(childProperty.Amount));
 									RowNumberIncrement(lastParentHeader, lastChildHeader, xlsFile, ref rowNumber, ref sheet, ref sheetNumber); 
 									row = sheet.GetRow(rowNumber);
 								}
+                                lastChildHeader = null;
 								break;
 							}
 						case 3: {
@@ -364,11 +367,12 @@ namespace FormattedExcelExport.Tests {
 								row = sheet.GetRow(rowNumber);
 								foreach (NotRelectionTestDataEntities.ClientExampleModel.EnumProp1 childProperty in child) {
 									Assert.AreEqual(row.GetCell(1).StringCellValue, childProperty.Field1);
-									Assert.AreEqual(row.GetCell(2).StringCellValue, childProperty.Field2.ToString(CultureInfo.InvariantCulture));
+									Assert.AreEqual(row.GetCell(2).NumericCellValue, Convert.ToDouble(childProperty.Field2));
 									Assert.AreEqual(row.GetCell(3).StringCellValue, childProperty.Field3.ToRussianString());
 									RowNumberIncrement(lastParentHeader, lastChildHeader, xlsFile, ref rowNumber, ref sheet, ref sheetNumber); 
 									row = sheet.GetRow(rowNumber);
 								}
+                                lastChildHeader = null;
 								break;
 							}
 						case 4: {
@@ -378,20 +382,21 @@ namespace FormattedExcelExport.Tests {
 								row = sheet.GetRow(rowNumber);
 								foreach (NotRelectionTestDataEntities.ClientExampleModel.EnumProp2 childProperty in child) {
 									Assert.AreEqual(row.GetCell(1).StringCellValue, childProperty.Field4);
-									Assert.AreEqual(row.GetCell(2).StringCellValue, childProperty.Field5.ToString(CultureInfo.InvariantCulture));
+									Assert.AreEqual(row.GetCell(2).NumericCellValue, Convert.ToDouble(childProperty.Field5));
 									Assert.AreEqual(row.GetCell(3).StringCellValue, childProperty.Field6.ToRussianString());
 									Assert.AreEqual(row.GetCell(4).StringCellValue, childProperty.Field7);
-									Assert.AreEqual(row.GetCell(5).StringCellValue, childProperty.Field8.ToString(CultureInfo.InvariantCulture));
+									Assert.AreEqual(row.GetCell(5).NumericCellValue, Convert.ToDouble(childProperty.Field8));
 									RowNumberIncrement(lastParentHeader, lastChildHeader, xlsFile, ref rowNumber, ref sheet, ref sheetNumber); 
 									row = sheet.GetRow(rowNumber);
 								}
+                                lastChildHeader = null;
 								break;
 							}
 					}
 				}
 			}
 		}
-		private static void RowNumberIncrement(IReadOnlyList<string> lastParentHeader, List<string> lastChildHeader, IWorkbook workbook, ref int rowNumber, ref ISheet sheet, ref int sheetNumber) {
+		private static void RowNumberIncrement(IReadOnlyList<string> lastParentHeader, List<string> lastChildHeader, IWorkbook workbook, ref int rowNumber, ref ISheet sheet, ref int sheetNumber, bool lastCellIsChildHeader = false) {
 			if (rowNumber >= 65535) {
 				sheetNumber++;
 				sheet = workbook.GetSheetAt(sheetNumber);
@@ -400,7 +405,7 @@ namespace FormattedExcelExport.Tests {
 					Assert.AreEqual(row.GetCell(columnNumber).StringCellValue, lastParentHeader[columnNumber - 1]);
 				}
 				row = sheet.GetRow(1);
-				if (lastChildHeader != null) {
+                if (lastChildHeader != null) {
 					for (int columnNumber = 1; columnNumber < row.LastCellNum; columnNumber++) {
 						Assert.AreEqual(row.GetCell(columnNumber).StringCellValue, lastChildHeader[columnNumber - 1]);
 					}
@@ -502,22 +507,22 @@ namespace FormattedExcelExport.Tests {
 				Assert.NotNull(row);
 				NotRelectionTestDataEntities.ClientExampleModel currentTestDataRow = simpleTestData.Models[rowNumber - 1];
 				Assert.AreEqual(row.GetCell(0).StringCellValue, currentTestDataRow.Title);
-				Assert.AreEqual(row.GetCell(1).StringCellValue, currentTestDataRow.RegistrationDate.ToRussianFullString());
+                Assert.AreEqual(DateUtil.GetJavaDate(row.GetCell(1).NumericCellValue).ToString(CultureInfo.InvariantCulture), currentTestDataRow.RegistrationDate.ToString(CultureInfo.InvariantCulture));
 				Assert.AreEqual(row.GetCell(2).StringCellValue, currentTestDataRow.Phone);
 				Assert.AreEqual(row.GetCell(3).StringCellValue, currentTestDataRow.Inn);
 				Assert.AreEqual(row.GetCell(4).StringCellValue, currentTestDataRow.Okato);
 
-				Assert.AreEqual(row.GetCell(5).StringCellValue, string.Format(new CultureInfo("ru-RU"), "{0:C}", currentTestDataRow.Revenue));
-				Assert.AreEqual(row.GetCell(6).StringCellValue, currentTestDataRow.EmployeeCount.ToString(CultureInfo.InvariantCulture));
+				Assert.AreEqual(row.GetCell(5).NumericCellValue, Convert.ToDouble(currentTestDataRow.Revenue));
+				Assert.AreEqual(row.GetCell(6).NumericCellValue, Convert.ToDouble(currentTestDataRow.EmployeeCount));
 				Assert.AreEqual(row.GetCell(7).StringCellValue, currentTestDataRow.IsActive.ToRussianString());
-				Assert.AreEqual(row.GetCell(8).StringCellValue, currentTestDataRow.Prop1.ToString(CultureInfo.InvariantCulture));
+				Assert.AreEqual(row.GetCell(8).NumericCellValue, Convert.ToDouble(currentTestDataRow.Prop1));
 				Assert.AreEqual(row.GetCell(9).StringCellValue, currentTestDataRow.Prop2);
 
 				Assert.AreEqual(row.GetCell(10).StringCellValue, currentTestDataRow.Prop3.ToRussianString());
-				Assert.AreEqual(row.GetCell(11).StringCellValue, currentTestDataRow.Prop4.ToString(CultureInfo.InvariantCulture));
+				Assert.AreEqual(row.GetCell(11).NumericCellValue, Convert.ToDouble(currentTestDataRow.Prop4));
 				Assert.AreEqual(row.GetCell(12).StringCellValue, currentTestDataRow.Prop5);
 				Assert.AreEqual(row.GetCell(13).StringCellValue, currentTestDataRow.Prop6.ToRussianString());
-				Assert.AreEqual(row.GetCell(14).StringCellValue, currentTestDataRow.Prop7.ToString(CultureInfo.InvariantCulture));
+				Assert.AreEqual(row.GetCell(14).NumericCellValue, Convert.ToDouble(currentTestDataRow.Prop7));
 
 				for (int contactNumber = 0; contactNumber < currentTestDataRow.Contacts.Count; contactNumber++) {
 					NotRelectionTestDataEntities.ClientExampleModel.Contact currentContactRow = currentTestDataRow.Contacts[contactNumber];
@@ -526,10 +531,10 @@ namespace FormattedExcelExport.Tests {
 				}
 
 				for (int contractNumber = 0; contractNumber < currentTestDataRow.Contracts.Count; contractNumber++) {
-					Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + (contractNumber * contractsFieldsQuantity)).StringCellValue,
-						currentTestDataRow.Contracts[contractNumber].BeginDate.ToRussianFullString());
-					Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + (contractNumber * contractsFieldsQuantity + 1)).StringCellValue,
-						currentTestDataRow.Contracts[contractNumber].EndDate.ToRussianFullString());
+					Assert.AreEqual(DateUtil.GetJavaDate(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + (contractNumber * contractsFieldsQuantity)).NumericCellValue).ToString(CultureInfo.InvariantCulture),
+                        currentTestDataRow.Contracts[contractNumber].BeginDate.ToString(CultureInfo.InvariantCulture));
+					Assert.AreEqual(DateUtil.GetJavaDate(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + (contractNumber * contractsFieldsQuantity + 1)).NumericCellValue).ToString(CultureInfo.InvariantCulture),
+                        currentTestDataRow.Contracts[contractNumber].EndDate.ToString(CultureInfo.InvariantCulture));
 					Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + (contractNumber * contractsFieldsQuantity + 2)).StringCellValue,
 						currentTestDataRow.Contracts[contractNumber].Status.ToRussianString());
 				}
@@ -537,15 +542,15 @@ namespace FormattedExcelExport.Tests {
 				for (int productNumber = 0; productNumber < currentTestDataRow.Products.Count; productNumber++) {
 					Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + (productNumber * 2)).StringCellValue,
 						currentTestDataRow.Products[productNumber].Title);
-					Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + (productNumber * 2 + 1)).StringCellValue,
-						currentTestDataRow.Products[productNumber].Amount.ToString(CultureInfo.InvariantCulture));
+					Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + (productNumber * 2 + 1)).NumericCellValue,
+						Convert.ToDouble(currentTestDataRow.Products[productNumber].Amount));
 				}
 
 				for (int enumProp1Number = 0; enumProp1Number < currentTestDataRow.EnumProps1.Count; enumProp1Number++) {
 					Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + (enumProp1Number * 3)).StringCellValue,
 						currentTestDataRow.EnumProps1[enumProp1Number].Field1);
-					Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + (enumProp1Number * 3 + 1)).StringCellValue,
-						currentTestDataRow.EnumProps1[enumProp1Number].Field2.ToString(CultureInfo.InvariantCulture));
+					Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + (enumProp1Number * 3 + 1)).NumericCellValue,
+						Convert.ToDouble(currentTestDataRow.EnumProps1[enumProp1Number].Field2));
 					Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + (enumProp1Number * 3 + 2)).StringCellValue,
 						currentTestDataRow.EnumProps1[enumProp1Number].Field3.ToRussianString());
 				}
@@ -553,14 +558,14 @@ namespace FormattedExcelExport.Tests {
 				for (int enumProp2Number = 0; enumProp2Number < currentTestDataRow.EnumProps2.Count; enumProp2Number++) {
 					Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + testDataEnumProp1ColumnsQuantity + (enumProp2Number * 5)).StringCellValue,
 						currentTestDataRow.EnumProps2[enumProp2Number].Field4);
-					Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + testDataEnumProp1ColumnsQuantity + (enumProp2Number * 5 + 1)).StringCellValue,
-						currentTestDataRow.EnumProps2[enumProp2Number].Field5.ToString(CultureInfo.InvariantCulture));
+					Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + testDataEnumProp1ColumnsQuantity + (enumProp2Number * 5 + 1)).NumericCellValue,
+						Convert.ToDouble(currentTestDataRow.EnumProps2[enumProp2Number].Field5));
 					Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + testDataEnumProp1ColumnsQuantity + (enumProp2Number * 5 + 2)).StringCellValue,
 						currentTestDataRow.EnumProps2[enumProp2Number].Field6.ToRussianString());
 					Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + testDataEnumProp1ColumnsQuantity + (enumProp2Number * 5 + 3)).StringCellValue,
 						currentTestDataRow.EnumProps2[enumProp2Number].Field7);
-					Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + testDataEnumProp1ColumnsQuantity + (enumProp2Number * 5 + 4)).StringCellValue,
-						currentTestDataRow.EnumProps2[enumProp2Number].Field8.ToString(CultureInfo.InvariantCulture));
+					Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + testDataEnumProp1ColumnsQuantity + (enumProp2Number * 5 + 4)).NumericCellValue,
+						Convert.ToDouble(currentTestDataRow.EnumProps2[enumProp2Number].Field8));
 				}
 			}
 		}
@@ -598,9 +603,7 @@ namespace FormattedExcelExport.Tests {
 				}
 			}
 			CustomAssert.IsEqualExcelColor((HSSFColor)sheet.GetRow(1).GetCell(2).CellStyle.FillForegroundColorColor, green);
-			CustomAssert.IsEqualExcelColor((HSSFColor)sheet.GetRow(1).GetCell(15).CellStyle.FillForegroundColorColor, blue);
 			CustomAssert.IsEqualExcelColor((HSSFColor)sheet.GetRow(2).GetCell(0).CellStyle.FillForegroundColorColor, red);
-			CustomAssert.IsEqualExcelColor((HSSFColor)sheet.GetRow(2).GetCell(15).CellStyle.FillForegroundColorColor, blue);
 		}
 		[Test]
 		public void ExcelComplexExport() {
@@ -635,21 +638,21 @@ namespace FormattedExcelExport.Tests {
 				row = sheet.GetRow(rowNumber);
 
 				Assert.AreEqual(row.GetCell(1).StringCellValue, currentTestDataRow.Title);
-				Assert.AreEqual(row.GetCell(2).StringCellValue, currentTestDataRow.RegistrationDate.ToRussianFullString());
+				Assert.AreEqual(DateUtil.GetJavaDate(row.GetCell(2).NumericCellValue).ToString(CultureInfo.InvariantCulture),  currentTestDataRow.RegistrationDate.ToString(CultureInfo.InvariantCulture));
 				Assert.AreEqual(row.GetCell(3).StringCellValue, currentTestDataRow.Phone);
 				Assert.AreEqual(row.GetCell(4).StringCellValue, currentTestDataRow.Inn);
 				Assert.AreEqual(row.GetCell(5).StringCellValue, currentTestDataRow.Okato);
-				Assert.AreEqual(row.GetCell(6).StringCellValue, string.Format(new CultureInfo("ru-RU"), "{0:C}", currentTestDataRow.Revenue));
-				Assert.AreEqual(row.GetCell(7).StringCellValue, currentTestDataRow.EmployeeCount.ToString(CultureInfo.InvariantCulture));
+				Assert.AreEqual(row.GetCell(6).NumericCellValue, Convert.ToDouble(currentTestDataRow.Revenue));
+				Assert.AreEqual(row.GetCell(7).NumericCellValue, Convert.ToDouble(currentTestDataRow.EmployeeCount));
 				Assert.AreEqual(row.GetCell(8).StringCellValue, currentTestDataRow.IsActive.ToRussianString());
-				Assert.AreEqual(row.GetCell(9).StringCellValue, currentTestDataRow.Prop1.ToString(CultureInfo.InvariantCulture));
+				Assert.AreEqual(row.GetCell(9).NumericCellValue, Convert.ToDouble(currentTestDataRow.Prop1));
 				Assert.AreEqual(row.GetCell(10).StringCellValue, currentTestDataRow.Prop2);
 
 				Assert.AreEqual(row.GetCell(11).StringCellValue, currentTestDataRow.Prop3.ToRussianString());
-				Assert.AreEqual(row.GetCell(12).StringCellValue, currentTestDataRow.Prop4.ToString(CultureInfo.InvariantCulture));
+				Assert.AreEqual(row.GetCell(12).NumericCellValue, Convert.ToDouble(currentTestDataRow.Prop4));
 				Assert.AreEqual(row.GetCell(13).StringCellValue, currentTestDataRow.Prop5);
 				Assert.AreEqual(row.GetCell(14).StringCellValue, currentTestDataRow.Prop6.ToRussianString());
-				Assert.AreEqual(row.GetCell(15).StringCellValue, currentTestDataRow.Prop7.ToString(CultureInfo.InvariantCulture));
+				Assert.AreEqual(row.GetCell(15).NumericCellValue, Convert.ToDouble(currentTestDataRow.Prop7));
 				rowNumber++;
 				row = sheet.GetRow(rowNumber);
 
@@ -676,8 +679,8 @@ namespace FormattedExcelExport.Tests {
 								rowNumber++;
 								row = sheet.GetRow(rowNumber);
 								foreach (NotRelectionTestDataEntities.ClientExampleModel.Contract childProperty in child) {
-									Assert.AreEqual(row.GetCell(1).StringCellValue, childProperty.BeginDate.ToRussianFullString());
-									Assert.AreEqual(row.GetCell(2).StringCellValue, childProperty.EndDate.ToRussianFullString());
+                                    Assert.AreEqual(DateUtil.GetJavaDate(row.GetCell(1).NumericCellValue).ToString(CultureInfo.InvariantCulture), childProperty.BeginDate.ToString(CultureInfo.InvariantCulture));
+                                    Assert.AreEqual(DateUtil.GetJavaDate(row.GetCell(2).NumericCellValue).ToString(CultureInfo.InvariantCulture), childProperty.EndDate.ToString(CultureInfo.InvariantCulture));
 									Assert.AreEqual(row.GetCell(3).StringCellValue, childProperty.Status.ToRussianString());
 									rowNumber++;
 									row = sheet.GetRow(rowNumber);
@@ -691,7 +694,7 @@ namespace FormattedExcelExport.Tests {
 								row = sheet.GetRow(rowNumber);
 								foreach (NotRelectionTestDataEntities.ClientExampleModel.Product childProperty in child) {
 									Assert.AreEqual(row.GetCell(1).StringCellValue, childProperty.Title);
-									Assert.AreEqual(row.GetCell(2).StringCellValue, childProperty.Amount.ToString(CultureInfo.InvariantCulture));
+									Assert.AreEqual(row.GetCell(2).NumericCellValue, Convert.ToDouble(childProperty.Amount));
 									rowNumber++;
 									row = sheet.GetRow(rowNumber);
 								}
@@ -704,7 +707,7 @@ namespace FormattedExcelExport.Tests {
 								row = sheet.GetRow(rowNumber);
 								foreach (NotRelectionTestDataEntities.ClientExampleModel.EnumProp1 childProperty in child) {
 									Assert.AreEqual(row.GetCell(1).StringCellValue, childProperty.Field1);
-									Assert.AreEqual(row.GetCell(2).StringCellValue, childProperty.Field2.ToString(CultureInfo.InvariantCulture));
+									Assert.AreEqual(row.GetCell(2).NumericCellValue, Convert.ToDouble(childProperty.Field2));
 									Assert.AreEqual(row.GetCell(3).StringCellValue, childProperty.Field3.ToRussianString());
 									rowNumber++;
 									row = sheet.GetRow(rowNumber);
@@ -718,10 +721,10 @@ namespace FormattedExcelExport.Tests {
 								row = sheet.GetRow(rowNumber);
 								foreach (NotRelectionTestDataEntities.ClientExampleModel.EnumProp2 childProperty in child) {
 									Assert.AreEqual(row.GetCell(1).StringCellValue, childProperty.Field4);
-									Assert.AreEqual(row.GetCell(2).StringCellValue, childProperty.Field5.ToString(CultureInfo.InvariantCulture));
+									Assert.AreEqual(row.GetCell(2).NumericCellValue, Convert.ToDouble(childProperty.Field5));
 									Assert.AreEqual(row.GetCell(3).StringCellValue, childProperty.Field6.ToRussianString());
 									Assert.AreEqual(row.GetCell(4).StringCellValue, childProperty.Field7);
-									Assert.AreEqual(row.GetCell(5).StringCellValue, childProperty.Field8.ToString(CultureInfo.InvariantCulture));
+									Assert.AreEqual(row.GetCell(5).NumericCellValue, Convert.ToDouble(childProperty.Field8));
 									rowNumber++;
 									row = sheet.GetRow(rowNumber);
 								}
@@ -944,72 +947,72 @@ namespace FormattedExcelExport.Tests {
 					}
 				}
 			}
-			for (rowNumber = 1; rowNumber <= sheet.LastRowNum; rowNumber++) {
-				row = sheet.GetRow(rowNumber);
-				Assert.NotNull(row);
-				NotRelectionTestDataEntities.ClientExampleModel currentTestDataRow = simpleTestData.Models[rowNumber - 1];
-				Assert.AreEqual(row.GetCell(0).StringCellValue, currentTestDataRow.Title);
-				Assert.AreEqual(row.GetCell(1).StringCellValue, currentTestDataRow.RegistrationDate.ToRussianFullString());
-				Assert.AreEqual(row.GetCell(2).StringCellValue, currentTestDataRow.Phone);
-				Assert.AreEqual(row.GetCell(3).StringCellValue, currentTestDataRow.Inn);
-				Assert.AreEqual(row.GetCell(4).StringCellValue, currentTestDataRow.Okato);
+            for (rowNumber = 1; rowNumber <= sheet.LastRowNum; rowNumber++) {
+                row = sheet.GetRow(rowNumber);
+                Assert.NotNull(row);
+                NotRelectionTestDataEntities.ClientExampleModel currentTestDataRow = simpleTestData.Models[rowNumber - 1];
+                Assert.AreEqual(row.GetCell(0).StringCellValue, currentTestDataRow.Title);
+                Assert.AreEqual(row.GetCell(1).CellFormula, string.Format("=Date({0},{1},{2})", currentTestDataRow.RegistrationDate.Year, currentTestDataRow.RegistrationDate.Month, currentTestDataRow.RegistrationDate.Day));
+                Assert.AreEqual(row.GetCell(2).StringCellValue, currentTestDataRow.Phone);
+                Assert.AreEqual(row.GetCell(3).StringCellValue, currentTestDataRow.Inn);
+                Assert.AreEqual(row.GetCell(4).StringCellValue, currentTestDataRow.Okato);
 
-				Assert.AreEqual(row.GetCell(5).StringCellValue, string.Format(new CultureInfo("ru-RU"), "{0:C}", currentTestDataRow.Revenue));
-				Assert.AreEqual(row.GetCell(6).StringCellValue, currentTestDataRow.EmployeeCount.ToString(CultureInfo.InvariantCulture));
-				Assert.AreEqual(row.GetCell(7).StringCellValue, currentTestDataRow.IsActive.ToRussianString());
-				Assert.AreEqual(row.GetCell(8).StringCellValue, currentTestDataRow.Prop1.ToString(CultureInfo.InvariantCulture));
-				Assert.AreEqual(row.GetCell(9).StringCellValue, currentTestDataRow.Prop2);
+                Assert.AreEqual(row.GetCell(5).NumericCellValue, Convert.ToDouble(currentTestDataRow.Revenue));
+                Assert.AreEqual(row.GetCell(6).NumericCellValue, Convert.ToDouble(currentTestDataRow.EmployeeCount));
+                Assert.AreEqual(row.GetCell(7).StringCellValue, currentTestDataRow.IsActive.ToRussianString());
+                Assert.AreEqual(row.GetCell(8).NumericCellValue, Convert.ToDouble(currentTestDataRow.Prop1));
+                Assert.AreEqual(row.GetCell(9).StringCellValue, currentTestDataRow.Prop2);
 
-				Assert.AreEqual(row.GetCell(10).StringCellValue, currentTestDataRow.Prop3.ToRussianString());
-				Assert.AreEqual(row.GetCell(11).StringCellValue, currentTestDataRow.Prop4.ToString(CultureInfo.InvariantCulture));
-				Assert.AreEqual(row.GetCell(12).StringCellValue, currentTestDataRow.Prop5);
-				Assert.AreEqual(row.GetCell(13).StringCellValue, currentTestDataRow.Prop6.ToRussianString());
-				Assert.AreEqual(row.GetCell(14).StringCellValue, currentTestDataRow.Prop7.ToString(CultureInfo.InvariantCulture));
+                Assert.AreEqual(row.GetCell(10).StringCellValue, currentTestDataRow.Prop3.ToRussianString());
+                Assert.AreEqual(row.GetCell(11).NumericCellValue, Convert.ToDouble(currentTestDataRow.Prop4));
+                Assert.AreEqual(row.GetCell(12).StringCellValue, currentTestDataRow.Prop5);
+                Assert.AreEqual(row.GetCell(13).StringCellValue, currentTestDataRow.Prop6.ToRussianString());
+                Assert.AreEqual(row.GetCell(14).NumericCellValue, Convert.ToDouble(currentTestDataRow.Prop7));
 
-				for (int contactNumber = 0; contactNumber < currentTestDataRow.Contacts.Count; contactNumber++) {
-					NotRelectionTestDataEntities.ClientExampleModel.Contact currentContactRow = currentTestDataRow.Contacts[contactNumber];
-					Assert.AreEqual(row.GetCell(parentColumnsQuantity + (contactNumber * contactsFieldsQuantity)).StringCellValue, currentContactRow.Title);
-					Assert.AreEqual(row.GetCell(parentColumnsQuantity + (contactNumber * contactsFieldsQuantity + 1)).StringCellValue, currentContactRow.Email);
-				}
+                for (int contactNumber = 0; contactNumber < currentTestDataRow.Contacts.Count; contactNumber++) {
+                    NotRelectionTestDataEntities.ClientExampleModel.Contact currentContactRow = currentTestDataRow.Contacts[contactNumber];
+                    Assert.AreEqual(row.GetCell(parentColumnsQuantity + (contactNumber * contactsFieldsQuantity)).StringCellValue, currentContactRow.Title);
+                    Assert.AreEqual(row.GetCell(parentColumnsQuantity + (contactNumber * contactsFieldsQuantity + 1)).StringCellValue, currentContactRow.Email);
+                }
 
-				for (int contractNumber = 0; contractNumber < currentTestDataRow.Contracts.Count; contractNumber++) {
-					Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + (contractNumber * contractsFieldsQuantity)).StringCellValue,
-						currentTestDataRow.Contracts[contractNumber].BeginDate.ToRussianFullString());
-					Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + (contractNumber * contractsFieldsQuantity + 1)).StringCellValue,
-						currentTestDataRow.Contracts[contractNumber].EndDate.ToRussianFullString());
-					Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + (contractNumber * contractsFieldsQuantity + 2)).StringCellValue,
-						currentTestDataRow.Contracts[contractNumber].Status.ToRussianString());
-				}
+                for (int contractNumber = 0; contractNumber < currentTestDataRow.Contracts.Count; contractNumber++) {
+                    Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + (contractNumber * contractsFieldsQuantity)).CellFormula,
+                        string.Format("=Date({0},{1},{2})", currentTestDataRow.Contracts[contractNumber].BeginDate.Year, currentTestDataRow.Contracts[contractNumber].BeginDate.Month, currentTestDataRow.Contracts[contractNumber].BeginDate.Day));
+                    Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + (contractNumber * contractsFieldsQuantity + 1)).CellFormula,
+                        string.Format("=Date({0},{1},{2})", currentTestDataRow.Contracts[contractNumber].EndDate.Year, currentTestDataRow.Contracts[contractNumber].EndDate.Month, currentTestDataRow.Contracts[contractNumber].EndDate.Day));
+                    Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + (contractNumber * contractsFieldsQuantity + 2)).StringCellValue,
+                        currentTestDataRow.Contracts[contractNumber].Status.ToRussianString());
+                }
 
-				for (int productNumber = 0; productNumber < currentTestDataRow.Products.Count; productNumber++) {
-					Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + (productNumber * 2)).StringCellValue,
-						currentTestDataRow.Products[productNumber].Title);
-					Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + (productNumber * 2 + 1)).StringCellValue,
-						currentTestDataRow.Products[productNumber].Amount.ToString(CultureInfo.InvariantCulture));
-				}
+                for (int productNumber = 0; productNumber < currentTestDataRow.Products.Count; productNumber++) {
+                    Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + (productNumber * 2)).StringCellValue,
+                        currentTestDataRow.Products[productNumber].Title);
+                    Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + (productNumber * 2 + 1)).NumericCellValue,
+                        Convert.ToDouble(currentTestDataRow.Products[productNumber].Amount));
+                }
 
-				for (int enumProp1Number = 0; enumProp1Number < currentTestDataRow.EnumProps1.Count; enumProp1Number++) {
-					Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + (enumProp1Number * 3)).StringCellValue,
-						currentTestDataRow.EnumProps1[enumProp1Number].Field1);
-					Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + (enumProp1Number * 3 + 1)).StringCellValue,
-						currentTestDataRow.EnumProps1[enumProp1Number].Field2.ToString(CultureInfo.InvariantCulture));
-					Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + (enumProp1Number * 3 + 2)).StringCellValue,
-						currentTestDataRow.EnumProps1[enumProp1Number].Field3.ToRussianString());
-				}
+                for (int enumProp1Number = 0; enumProp1Number < currentTestDataRow.EnumProps1.Count; enumProp1Number++) {
+                    Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + (enumProp1Number * 3)).StringCellValue,
+                        currentTestDataRow.EnumProps1[enumProp1Number].Field1);
+                    Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + (enumProp1Number * 3 + 1)).NumericCellValue,
+                        Convert.ToDouble(currentTestDataRow.EnumProps1[enumProp1Number].Field2));
+                    Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + (enumProp1Number * 3 + 2)).StringCellValue,
+                        currentTestDataRow.EnumProps1[enumProp1Number].Field3.ToRussianString());
+                }
 
-				for (int enumProp2Number = 0; enumProp2Number < currentTestDataRow.EnumProps2.Count; enumProp2Number++) {
-					Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + testDataEnumProp1ColumnsQuantity + (enumProp2Number * 5)).StringCellValue,
-						currentTestDataRow.EnumProps2[enumProp2Number].Field4);
-					Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + testDataEnumProp1ColumnsQuantity + (enumProp2Number * 5 + 1)).StringCellValue,
-						currentTestDataRow.EnumProps2[enumProp2Number].Field5.ToString(CultureInfo.InvariantCulture));
-					Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + testDataEnumProp1ColumnsQuantity + (enumProp2Number * 5 + 2)).StringCellValue,
-						currentTestDataRow.EnumProps2[enumProp2Number].Field6.ToRussianString());
-					Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + testDataEnumProp1ColumnsQuantity + (enumProp2Number * 5 + 3)).StringCellValue,
-						currentTestDataRow.EnumProps2[enumProp2Number].Field7);
-					Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + testDataEnumProp1ColumnsQuantity + (enumProp2Number * 5 + 4)).StringCellValue,
-						currentTestDataRow.EnumProps2[enumProp2Number].Field8.ToString(CultureInfo.InvariantCulture));
-				}
-			}
+                for (int enumProp2Number = 0; enumProp2Number < currentTestDataRow.EnumProps2.Count; enumProp2Number++) {
+                    Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + testDataEnumProp1ColumnsQuantity + (enumProp2Number * 5)).StringCellValue,
+                        currentTestDataRow.EnumProps2[enumProp2Number].Field4);
+                    Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + testDataEnumProp1ColumnsQuantity + (enumProp2Number * 5 + 1)).NumericCellValue,
+                        Convert.ToDouble(currentTestDataRow.EnumProps2[enumProp2Number].Field5));
+                    Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + testDataEnumProp1ColumnsQuantity + (enumProp2Number * 5 + 2)).StringCellValue,
+                        currentTestDataRow.EnumProps2[enumProp2Number].Field6.ToRussianString());
+                    Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + testDataEnumProp1ColumnsQuantity + (enumProp2Number * 5 + 3)).StringCellValue,
+                        currentTestDataRow.EnumProps2[enumProp2Number].Field7);
+                    Assert.AreEqual(row.GetCell(parentColumnsQuantity + testDataContactColumnsQuantity + testDataContractColumnsQuantity + testDataProductColumnsQuantity + testDataEnumProp1ColumnsQuantity + (enumProp2Number * 5 + 4)).NumericCellValue,
+                        Convert.ToDouble(currentTestDataRow.EnumProps2[enumProp2Number].Field8));
+                }
+            }
 		}
 		[Test]
 		//[Ignore("Временно исключён. Разные значения")]
@@ -1060,10 +1063,6 @@ namespace FormattedExcelExport.Tests {
 					CustomAssert.IsEqualFont(xlsFile, rowNumber, cellNumber, "Arial", 10, (short)FontBoldWeight.Normal);
 				}
 			}
-            //CustomAssert.IsEqualExcelColor((XSSFColor)sheet.GetRow(1).GetCell(2).CellStyle.FillForegroundColorColor, green);
-            //CustomAssert.IsEqualExcelColor((XSSFColor)sheet.GetRow(1).GetCell(15).CellStyle.FillForegroundColorColor, blue);
-            //CustomAssert.IsEqualExcelColor((XSSFColor)sheet.GetRow(2).GetCell(0).CellStyle.FillForegroundColorColor, red);
-            //CustomAssert.IsEqualExcelColor((XSSFColor)sheet.GetRow(2).GetCell(15).CellStyle.FillForegroundColorColor, blue);
 		}
 		[Test]
 		//[Ignore("Слишком долго выполняется")]
@@ -1085,114 +1084,114 @@ namespace FormattedExcelExport.Tests {
 
 			int modelsQuantity = simpleTestData.Models.Count;
 			int rowNumber = 0;
-			for (int modelNumber = 0; modelNumber < modelsQuantity; modelNumber++) {
-				NotRelectionTestDataEntities.ClientExampleModel currentTestDataRow = simpleTestData.Models[modelNumber];
-				IRow row = sheet.GetRow(rowNumber);
-				ICell cell = row.GetCell(0);
-				Assert.AreEqual(cell.StringCellValue, simpleTestData.ConfigurationBuilder.Value.Title);
-				for (int cellNumber = 1; cellNumber < row.LastCellNum; cellNumber++) {
-					cell = row.GetCell(cellNumber);
-					Assert.AreEqual(cell.StringCellValue, parentColumnsNames[cellNumber - 1]);
-				}
-				rowNumber++;
-				row = sheet.GetRow(rowNumber);
+            for (int modelNumber = 0; modelNumber < modelsQuantity; modelNumber++) {
+                NotRelectionTestDataEntities.ClientExampleModel currentTestDataRow = simpleTestData.Models[modelNumber];
+                IRow row = sheet.GetRow(rowNumber);
+                ICell cell = row.GetCell(0);
+                Assert.AreEqual(cell.StringCellValue, simpleTestData.ConfigurationBuilder.Value.Title);
+                for (int cellNumber = 1; cellNumber < row.LastCellNum; cellNumber++) {
+                    cell = row.GetCell(cellNumber);
+                    Assert.AreEqual(cell.StringCellValue, parentColumnsNames[cellNumber - 1]);
+                }
+                rowNumber++;
+                row = sheet.GetRow(rowNumber);
 
-				Assert.AreEqual(row.GetCell(1).StringCellValue, currentTestDataRow.Title);
-				Assert.AreEqual(row.GetCell(2).StringCellValue, currentTestDataRow.RegistrationDate.ToRussianFullString());
-				Assert.AreEqual(row.GetCell(3).StringCellValue, currentTestDataRow.Phone);
-				Assert.AreEqual(row.GetCell(4).StringCellValue, currentTestDataRow.Inn);
-				Assert.AreEqual(row.GetCell(5).StringCellValue, currentTestDataRow.Okato);
-				Assert.AreEqual(row.GetCell(6).StringCellValue, string.Format(new CultureInfo("ru-RU"), "{0:C}", currentTestDataRow.Revenue));
-				Assert.AreEqual(row.GetCell(7).StringCellValue, currentTestDataRow.EmployeeCount.ToString(CultureInfo.InvariantCulture));
-				Assert.AreEqual(row.GetCell(8).StringCellValue, currentTestDataRow.IsActive.ToRussianString());
-				Assert.AreEqual(row.GetCell(9).StringCellValue, currentTestDataRow.Prop1.ToString(CultureInfo.InvariantCulture));
-				Assert.AreEqual(row.GetCell(10).StringCellValue, currentTestDataRow.Prop2);
+                Assert.AreEqual(row.GetCell(1).StringCellValue, currentTestDataRow.Title);
+                Assert.AreEqual(row.GetCell(2).CellFormula, string.Format("=Date({0},{1},{2})", currentTestDataRow.RegistrationDate.Year, currentTestDataRow.RegistrationDate.Month, currentTestDataRow.RegistrationDate.Day));
+                Assert.AreEqual(row.GetCell(3).StringCellValue, currentTestDataRow.Phone);
+                Assert.AreEqual(row.GetCell(4).StringCellValue, currentTestDataRow.Inn);
+                Assert.AreEqual(row.GetCell(5).StringCellValue, currentTestDataRow.Okato);
+                Assert.AreEqual(row.GetCell(6).NumericCellValue, Convert.ToDouble(currentTestDataRow.Revenue));
+                Assert.AreEqual(row.GetCell(7).NumericCellValue, Convert.ToDouble(currentTestDataRow.EmployeeCount));
+                Assert.AreEqual(row.GetCell(8).StringCellValue, currentTestDataRow.IsActive.ToRussianString());
+                Assert.AreEqual(row.GetCell(9).NumericCellValue, Convert.ToDouble(currentTestDataRow.Prop1));
+                Assert.AreEqual(row.GetCell(10).StringCellValue, currentTestDataRow.Prop2);
 
-				Assert.AreEqual(row.GetCell(11).StringCellValue, currentTestDataRow.Prop3.ToRussianString());
-				Assert.AreEqual(row.GetCell(12).StringCellValue, currentTestDataRow.Prop4.ToString(CultureInfo.InvariantCulture));
-				Assert.AreEqual(row.GetCell(13).StringCellValue, currentTestDataRow.Prop5);
-				Assert.AreEqual(row.GetCell(14).StringCellValue, currentTestDataRow.Prop6.ToRussianString());
-				Assert.AreEqual(row.GetCell(15).StringCellValue, currentTestDataRow.Prop7.ToString(CultureInfo.InvariantCulture));
-				rowNumber++;
-				row = sheet.GetRow(rowNumber);
+                Assert.AreEqual(row.GetCell(11).StringCellValue, currentTestDataRow.Prop3.ToRussianString());
+                Assert.AreEqual(row.GetCell(12).NumericCellValue, Convert.ToDouble(currentTestDataRow.Prop4));
+                Assert.AreEqual(row.GetCell(13).StringCellValue, currentTestDataRow.Prop5);
+                Assert.AreEqual(row.GetCell(14).StringCellValue, currentTestDataRow.Prop6.ToRussianString());
+                Assert.AreEqual(row.GetCell(15).NumericCellValue, Convert.ToDouble(currentTestDataRow.Prop7));
+                rowNumber++;
+                row = sheet.GetRow(rowNumber);
 
-				int childsQuantity = simpleTestData.ConfigurationBuilder.Value.ChildrenMap.Count;
+                int childsQuantity = simpleTestData.ConfigurationBuilder.Value.ChildrenMap.Count;
 
-				for (int childNumber = 0; childNumber < childsQuantity; childNumber++) {
-					switch (childNumber) {
-						case 0: {
-								List<NotRelectionTestDataEntities.ClientExampleModel.Contact> child = currentTestDataRow.Contacts;
-								TestChildHeader(row, childNumber, simpleTestData);
-								rowNumber++;
-								row = sheet.GetRow(rowNumber);
-								foreach (NotRelectionTestDataEntities.ClientExampleModel.Contact childProperty in child) {
-									Assert.AreEqual(row.GetCell(1).StringCellValue, childProperty.Title);
-									Assert.AreEqual(row.GetCell(2).StringCellValue, childProperty.Email);
-									rowNumber++;
-									row = sheet.GetRow(rowNumber);
-								}
-								break;
-							}
-						case 1: {
-								List<NotRelectionTestDataEntities.ClientExampleModel.Contract> child = currentTestDataRow.Contracts;
-								TestChildHeader(row, childNumber, simpleTestData);
-								rowNumber++;
-								row = sheet.GetRow(rowNumber);
-								foreach (NotRelectionTestDataEntities.ClientExampleModel.Contract childProperty in child) {
-									Assert.AreEqual(row.GetCell(1).StringCellValue, childProperty.BeginDate.ToRussianFullString());
-									Assert.AreEqual(row.GetCell(2).StringCellValue, childProperty.EndDate.ToRussianFullString());
-									Assert.AreEqual(row.GetCell(3).StringCellValue, childProperty.Status.ToRussianString());
-									rowNumber++;
-									row = sheet.GetRow(rowNumber);
-								}
-								break;
-							}
-						case 2: {
-								List<NotRelectionTestDataEntities.ClientExampleModel.Product> child = currentTestDataRow.Products;
-								TestChildHeader(row, childNumber, simpleTestData);
-								rowNumber++;
-								row = sheet.GetRow(rowNumber);
-								foreach (NotRelectionTestDataEntities.ClientExampleModel.Product childProperty in child) {
-									Assert.AreEqual(row.GetCell(1).StringCellValue, childProperty.Title);
-									Assert.AreEqual(row.GetCell(2).StringCellValue, childProperty.Amount.ToString(CultureInfo.InvariantCulture));
-									rowNumber++;
-									row = sheet.GetRow(rowNumber);
-								}
-								break;
-							}
-						case 3: {
-								List<NotRelectionTestDataEntities.ClientExampleModel.EnumProp1> child = currentTestDataRow.EnumProps1;
-								TestChildHeader(row, childNumber, simpleTestData);
-								rowNumber++;
-								row = sheet.GetRow(rowNumber);
-								foreach (NotRelectionTestDataEntities.ClientExampleModel.EnumProp1 childProperty in child) {
-									Assert.AreEqual(row.GetCell(1).StringCellValue, childProperty.Field1);
-									Assert.AreEqual(row.GetCell(2).StringCellValue, childProperty.Field2.ToString(CultureInfo.InvariantCulture));
-									Assert.AreEqual(row.GetCell(3).StringCellValue, childProperty.Field3.ToRussianString());
-									rowNumber++;
-									row = sheet.GetRow(rowNumber);
-								}
-								break;
-							}
-						case 4: {
-								List<NotRelectionTestDataEntities.ClientExampleModel.EnumProp2> child = currentTestDataRow.EnumProps2;
-								TestChildHeader(row, childNumber, simpleTestData);
-								rowNumber++;
-								row = sheet.GetRow(rowNumber);
-								foreach (NotRelectionTestDataEntities.ClientExampleModel.EnumProp2 childProperty in child) {
-									Assert.AreEqual(row.GetCell(1).StringCellValue, childProperty.Field4);
-									Assert.AreEqual(row.GetCell(2).StringCellValue, childProperty.Field5.ToString(CultureInfo.InvariantCulture));
-									Assert.AreEqual(row.GetCell(3).StringCellValue, childProperty.Field6.ToRussianString());
-									Assert.AreEqual(row.GetCell(4).StringCellValue, childProperty.Field7);
-									Assert.AreEqual(row.GetCell(5).StringCellValue, childProperty.Field8.ToString(CultureInfo.InvariantCulture));
-									rowNumber++;
-									row = sheet.GetRow(rowNumber);
-								}
-								break;
-							}
-					}
-				}
-			}
+                for (int childNumber = 0; childNumber < childsQuantity; childNumber++) {
+                    switch (childNumber) {
+                        case 0: {
+                                List<NotRelectionTestDataEntities.ClientExampleModel.Contact> child = currentTestDataRow.Contacts;
+                                TestChildHeader(row, childNumber, simpleTestData);
+                                rowNumber++;
+                                row = sheet.GetRow(rowNumber);
+                                foreach (NotRelectionTestDataEntities.ClientExampleModel.Contact childProperty in child) {
+                                    Assert.AreEqual(row.GetCell(1).StringCellValue, childProperty.Title);
+                                    Assert.AreEqual(row.GetCell(2).StringCellValue, childProperty.Email);
+                                    rowNumber++;
+                                    row = sheet.GetRow(rowNumber);
+                                }
+                                break;
+                            }
+                        case 1: {
+                                List<NotRelectionTestDataEntities.ClientExampleModel.Contract> child = currentTestDataRow.Contracts;
+                                TestChildHeader(row, childNumber, simpleTestData);
+                                rowNumber++;
+                                row = sheet.GetRow(rowNumber);
+                                foreach (NotRelectionTestDataEntities.ClientExampleModel.Contract childProperty in child) {
+                                    Assert.AreEqual(row.GetCell(1).CellFormula, string.Format("=Date({0},{1},{2})", childProperty.BeginDate.Year, childProperty.BeginDate.Month, childProperty.BeginDate.Day));
+                                    Assert.AreEqual(row.GetCell(2).CellFormula, string.Format("=Date({0},{1},{2})", childProperty.EndDate.Year, childProperty.EndDate.Month, childProperty.EndDate.Day));
+                                    Assert.AreEqual(row.GetCell(3).StringCellValue, childProperty.Status.ToRussianString());
+                                    rowNumber++;
+                                    row = sheet.GetRow(rowNumber);
+                                }
+                                break;
+                            }
+                        case 2: {
+                                List<NotRelectionTestDataEntities.ClientExampleModel.Product> child = currentTestDataRow.Products;
+                                TestChildHeader(row, childNumber, simpleTestData);
+                                rowNumber++;
+                                row = sheet.GetRow(rowNumber);
+                                foreach (NotRelectionTestDataEntities.ClientExampleModel.Product childProperty in child) {
+                                    Assert.AreEqual(row.GetCell(1).StringCellValue, childProperty.Title);
+                                    Assert.AreEqual(row.GetCell(2).NumericCellValue, Convert.ToDouble(childProperty.Amount));
+                                    rowNumber++;
+                                    row = sheet.GetRow(rowNumber);
+                                }
+                                break;
+                            }
+                        case 3: {
+                                List<NotRelectionTestDataEntities.ClientExampleModel.EnumProp1> child = currentTestDataRow.EnumProps1;
+                                TestChildHeader(row, childNumber, simpleTestData);
+                                rowNumber++;
+                                row = sheet.GetRow(rowNumber);
+                                foreach (NotRelectionTestDataEntities.ClientExampleModel.EnumProp1 childProperty in child) {
+                                    Assert.AreEqual(row.GetCell(1).StringCellValue, childProperty.Field1);
+                                    Assert.AreEqual(row.GetCell(2).NumericCellValue, Convert.ToDouble(childProperty.Field2));
+                                    Assert.AreEqual(row.GetCell(3).StringCellValue, childProperty.Field3.ToRussianString());
+                                    rowNumber++;
+                                    row = sheet.GetRow(rowNumber);
+                                }
+                                break;
+                            }
+                        case 4: {
+                                List<NotRelectionTestDataEntities.ClientExampleModel.EnumProp2> child = currentTestDataRow.EnumProps2;
+                                TestChildHeader(row, childNumber, simpleTestData);
+                                rowNumber++;
+                                row = sheet.GetRow(rowNumber);
+                                foreach (NotRelectionTestDataEntities.ClientExampleModel.EnumProp2 childProperty in child) {
+                                    Assert.AreEqual(row.GetCell(1).StringCellValue, childProperty.Field4);
+                                    Assert.AreEqual(row.GetCell(2).NumericCellValue, Convert.ToDouble(childProperty.Field5));
+                                    Assert.AreEqual(row.GetCell(3).StringCellValue, childProperty.Field6.ToRussianString());
+                                    Assert.AreEqual(row.GetCell(4).StringCellValue, childProperty.Field7);
+                                    Assert.AreEqual(row.GetCell(5).NumericCellValue, Convert.ToDouble(childProperty.Field8));
+                                    rowNumber++;
+                                    row = sheet.GetRow(rowNumber);
+                                }
+                                break;
+                            }
+                    }
+                }
+            }
 		}
 		[Test]
 		//[Ignore("Временно исключён. Не удаётся найти файл")]
@@ -1228,7 +1227,9 @@ namespace FormattedExcelExport.Tests {
 				IRow row = sheet.GetRow(rowNumber);
 				//Assert.AreEqual(row.Height, 400);
 				for (int cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
-				    if (sheet.GetRow(rowNumber).GetCell(cellNumber).StringCellValue != "") {
+                    if (sheet.GetRow(rowNumber).GetCell(cellNumber) != null 
+                        && !(sheet.GetRow(rowNumber).GetCell(cellNumber).CellType == CellType.String 
+                        && string.IsNullOrWhiteSpace(sheet.GetRow(rowNumber).GetCell(cellNumber).StringCellValue))) {
 				        CustomAssert.IsEqualFont(xlsFile, rowNumber, cellNumber, "Arial", 10, (short) FontBoldWeight.Bold);
 				    }
 				}
@@ -1237,7 +1238,9 @@ namespace FormattedExcelExport.Tests {
 				for (; rowNumber < childsQuantity; rowNumber++) {
 					row = sheet.GetRow(rowNumber);
 					for (int cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
-					    if (sheet.GetRow(rowNumber).GetCell(cellNumber).StringCellValue != "") {
+                        if (sheet.GetRow(rowNumber).GetCell(cellNumber) != null
+                        && !(sheet.GetRow(rowNumber).GetCell(cellNumber).CellType == CellType.String
+                        && string.IsNullOrWhiteSpace(sheet.GetRow(rowNumber).GetCell(cellNumber).StringCellValue))) {
 					        CustomAssert.IsEqualFont(xlsFile, rowNumber, cellNumber, "Arial", 10, (short) FontBoldWeight.Normal);
 					    }
 					}
@@ -1263,7 +1266,7 @@ namespace FormattedExcelExport.Tests {
 		[Test]
 		//[Ignore("Временно исключён. Не совпадают шрифты")]
 		public void ExcelReflectionComplexXlsxExport() {
-		    const string filename = "TestComplex.xlsx";
+		    const string filename = "TestReflectionComplex.xlsx";
             DeleteTestFile(filename);
 			List<ReflectionTestDataEntities> test = new List<ReflectionTestDataEntities>();
 			TableWriterStyle style = new TableWriterStyle();
@@ -1339,9 +1342,13 @@ namespace FormattedExcelExport.Tests {
 				foreach (PropertyInfo nonEnumerableProperty in nonEnumerableProperties) {
 					ExcelExportAttribute attribute = nonEnumerableProperty.GetCustomAttribute<ExcelExportAttribute>();
 					if (attribute != null && attribute.IsExportable) {
-						string value = ConvertPropertyToString(nonEnumerableProperty, model, cultureInfo);
-						Assert.AreEqual(row.GetCell(cellNumber).StringCellValue, value);
-						cellNumber++;
+						dynamic value = ConvertPropertyToExcelFormat(nonEnumerableProperty, model);
+                        if (value is DateTime) Assert.AreEqual(DateUtil.GetJavaDate(row.GetCell(cellNumber).NumericCellValue).ToString(CultureInfo.InvariantCulture), actual: value.ToString(CultureInfo.InvariantCulture));
+					    else {
+					        if (row.GetCell(cellNumber).CellType == CellType.String) Assert.AreEqual(row.GetCell(cellNumber).StringCellValue, value);
+					        if (row.GetCell(cellNumber).CellType == CellType.Numeric) Assert.AreEqual(row.GetCell(cellNumber).NumericCellValue, value);
+					    }
+					    cellNumber++;
 					}
 				}
 
@@ -1357,9 +1364,13 @@ namespace FormattedExcelExport.Tests {
 					foreach (object submodel in submodels) {
 						foreach (PropertyInfo listProperty in listPeroperties) {
 							ExcelExportAttribute attribute = listProperty.GetCustomAttribute<ExcelExportAttribute>();
-							if (attribute != null && attribute.IsExportable) {
-								string value = ConvertPropertyToString(listProperty, submodel, cultureInfo);
-								Assert.AreEqual(row.GetCell(cellNumber).StringCellValue, value);
+                            if (attribute != null && attribute.IsExportable) {
+                                dynamic value = ConvertPropertyToExcelFormat(listProperty, submodel);
+                                if (value is DateTime) Assert.AreEqual(DateUtil.GetJavaDate(row.GetCell(cellNumber).NumericCellValue).ToString(CultureInfo.InvariantCulture), actual: value.ToString(CultureInfo.InvariantCulture));
+                                else {
+                                    if (row.GetCell(cellNumber).CellType == CellType.String) Assert.AreEqual(row.GetCell(cellNumber).StringCellValue, value);
+                                    if (row.GetCell(cellNumber).CellType == CellType.Numeric) Assert.AreEqual(row.GetCell(cellNumber).NumericCellValue, value);
+                                }
 								cellNumber++;
 							}
 						}
@@ -1443,8 +1454,9 @@ namespace FormattedExcelExport.Tests {
 				foreach (PropertyInfo nonEnumerableProperty in nonEnumerableProperties) {
 					ExcelExportAttribute attribute = nonEnumerableProperty.GetCustomAttribute<ExcelExportAttribute>();
 					if (attribute != null && attribute.IsExportable) {
-						string value = ConvertPropertyToString(nonEnumerableProperty, model, cultureInfo);
-						Assert.AreEqual(row.GetCell(cellNumber).StringCellValue, value);
+						dynamic value = ConvertPropertyToExcelFormat(nonEnumerableProperty, model);
+                        if (row.GetCell(cellNumber).CellType == CellType.String) Assert.AreEqual(row.GetCell(cellNumber).StringCellValue, value);
+                        if (row.GetCell(cellNumber).CellType == CellType.Numeric) Assert.AreEqual(row.GetCell(cellNumber).NumericCellValue, value);
 						cellNumber++;
 					}
 				}
@@ -1476,8 +1488,9 @@ namespace FormattedExcelExport.Tests {
 							foreach (PropertyInfo prop in props) {
 								ExcelExportAttribute attribute = prop.GetCustomAttribute<ExcelExportAttribute>();
 								if (attribute != null && attribute.IsExportable) {
-									string value = ConvertPropertyToString(prop, submodel, cultureInfo);
-									Assert.AreEqual(row.GetCell(cellNumber).StringCellValue, value);
+									dynamic value = ConvertPropertyToExcelFormat(prop, submodel);
+                                    if (row.GetCell(cellNumber).CellType == CellType.String) Assert.AreEqual(row.GetCell(cellNumber).StringCellValue, value);
+                                    if (row.GetCell(cellNumber).CellType == CellType.Numeric) Assert.AreEqual(row.GetCell(cellNumber).NumericCellValue, value);
 									cellNumber++;
 								}
 							}
@@ -1508,11 +1521,15 @@ namespace FormattedExcelExport.Tests {
                 //Assert.AreEqual(row.Height, 400);
 				for (cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
 					if (isXlsx) {
-					    if (sheet.GetRow(rowNumber).GetCell(cellNumber).StringCellValue != "") {
+                        if (sheet.GetRow(rowNumber).GetCell(cellNumber) != null 
+                            && !(sheet.GetRow(rowNumber).GetCell(cellNumber).CellType == CellType.String 
+                            && string.IsNullOrWhiteSpace(sheet.GetRow(rowNumber).GetCell(cellNumber).StringCellValue))) {
 					        CustomAssert.IsEqualFont((XSSFWorkbook) xlsFile, rowNumber, cellNumber, "Arial", 10, (short) FontBoldWeight.Bold);
 					    }
 					} else {
-					    if (sheet.GetRow(rowNumber).GetCell(cellNumber).StringCellValue != "") {
+                        if (sheet.GetRow(rowNumber).GetCell(cellNumber) != null
+                            && !(sheet.GetRow(rowNumber).GetCell(cellNumber).CellType == CellType.String
+                            && string.IsNullOrWhiteSpace(sheet.GetRow(rowNumber).GetCell(cellNumber).StringCellValue))) {
 					        CustomAssert.IsEqualFont(xlsFile, sheet, rowNumber, cellNumber, "Arial", 10, (short) FontBoldWeight.Bold);
 					    }
 					}
@@ -1523,11 +1540,15 @@ namespace FormattedExcelExport.Tests {
 				List<PropertyInfo> enumerableProperties = model.GetType().GetProperties().Where(x => x.PropertyType.IsGenericType && x.PropertyType.GetGenericTypeDefinition() == typeof(List<>)).ToList();
 				for (cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
 					if (isXlsx) {
-					    if (sheet.GetRow(rowNumber).GetCell(cellNumber).StringCellValue != "") {
+                        if (sheet.GetRow(rowNumber).GetCell(cellNumber) != null
+                            && !(sheet.GetRow(rowNumber).GetCell(cellNumber).CellType == CellType.String
+                            && string.IsNullOrWhiteSpace(sheet.GetRow(rowNumber).GetCell(cellNumber).StringCellValue))) {
 					        CustomAssert.IsEqualFont((XSSFWorkbook) xlsFile, rowNumber, cellNumber, "Arial", 10, (short) FontBoldWeight.Normal);
 					    }
 					} else {
-					    if (sheet.GetRow(rowNumber).GetCell(cellNumber).StringCellValue != "") {
+                        if (sheet.GetRow(rowNumber).GetCell(cellNumber) != null
+                            && !(sheet.GetRow(rowNumber).GetCell(cellNumber).CellType == CellType.String
+                            && string.IsNullOrWhiteSpace(sheet.GetRow(rowNumber).GetCell(cellNumber).StringCellValue))) {
 					        CustomAssert.IsEqualFont(xlsFile, sheet, rowNumber, cellNumber, "Arial", 10, (short) FontBoldWeight.Normal);
 					    }
 					}
@@ -1538,11 +1559,15 @@ namespace FormattedExcelExport.Tests {
 					IList childs = (IList)enumerableProperty.GetValue(model);
 					for (cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
 						if (isXlsx) {
-						    if (sheet.GetRow(rowNumber).GetCell(cellNumber).StringCellValue != "") {
+                            if (sheet.GetRow(rowNumber).GetCell(cellNumber) != null
+                            && !(sheet.GetRow(rowNumber).GetCell(cellNumber).CellType == CellType.String
+                            && string.IsNullOrWhiteSpace(sheet.GetRow(rowNumber).GetCell(cellNumber).StringCellValue))) {
 						        CustomAssert.IsEqualFont((XSSFWorkbook) xlsFile, rowNumber, cellNumber, "Arial", 10, (short) FontBoldWeight.Normal);
 						    }
 						} else {
-						    if (sheet.GetRow(rowNumber).GetCell(cellNumber).StringCellValue != "") {
+                            if (sheet.GetRow(rowNumber).GetCell(cellNumber) != null
+                            && !(sheet.GetRow(rowNumber).GetCell(cellNumber).CellType == CellType.String
+                            && string.IsNullOrWhiteSpace(sheet.GetRow(rowNumber).GetCell(cellNumber).StringCellValue))) {
 						        CustomAssert.IsEqualFont(xlsFile, sheet, rowNumber, cellNumber, "Arial", 10, (short) FontBoldWeight.Normal);
 						    }
 						}
@@ -1554,11 +1579,15 @@ namespace FormattedExcelExport.Tests {
 						row = sheet.GetRow(rowNumber);
 						for (cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
 							if (isXlsx) {
-							    if (sheet.GetRow(rowNumber).GetCell(cellNumber).StringCellValue != "") {
+                                if (sheet.GetRow(rowNumber).GetCell(cellNumber) != null
+                            && !(sheet.GetRow(rowNumber).GetCell(cellNumber).CellType == CellType.String
+                            && string.IsNullOrWhiteSpace(sheet.GetRow(rowNumber).GetCell(cellNumber).StringCellValue))) {
 							        CustomAssert.IsEqualFont((XSSFWorkbook) xlsFile, rowNumber, cellNumber, "Arial", 10, (short) FontBoldWeight.Normal);
 							    }
 							} else {
-							    if (sheet.GetRow(rowNumber).GetCell(cellNumber).StringCellValue != "") {
+                                if (sheet.GetRow(rowNumber).GetCell(cellNumber) != null
+                            && !(sheet.GetRow(rowNumber).GetCell(cellNumber).CellType == CellType.String
+                            && string.IsNullOrWhiteSpace(sheet.GetRow(rowNumber).GetCell(cellNumber).StringCellValue))) {
 							        CustomAssert.IsEqualFont(xlsFile, sheet, rowNumber, cellNumber, "Arial", 10, (short) FontBoldWeight.Normal);
 							    }
 							}
@@ -1568,30 +1597,30 @@ namespace FormattedExcelExport.Tests {
 				}
 			}
 		}
-		private static string ConvertPropertyToString<T>(PropertyInfo nonEnumerableProperty, T model, CultureInfo cultureInfo) {
-			string propertyTypeName = nonEnumerableProperty.PropertyType.Name;
-			string value = String.Empty;
-		    if (nonEnumerableProperty.GetValue(model) != null) {
-		        switch (propertyTypeName) {
-		            case "String":
-		                value = nonEnumerableProperty.GetValue(model).ToString();
-		                break;
-		            case "DateTime":
-		                value = ((DateTime) nonEnumerableProperty.GetValue(model)).ToString(cultureInfo.DateTimeFormat.LongDatePattern);
-		                break;
-		            case "Decimal":
-		                value = string.Format(cultureInfo, "{0:C}", nonEnumerableProperty.GetValue(model));
-		                break;
-		            case "Int32":
-		                value = nonEnumerableProperty.GetValue(model).ToString();
-		                break;
-		            case "Boolean":
-		                value = ((bool) nonEnumerableProperty.GetValue(model)) ? "Да" : "Нет";
-		                break;
-		        }
-		    }
-		    return value;
-		}
+        private static dynamic ConvertPropertyToExcelFormat<T>(PropertyInfo nonEnumerableProperty, T model) {
+            string propertyTypeName = nonEnumerableProperty.PropertyType.Name;
+            dynamic value = String.Empty;
+            if (nonEnumerableProperty.GetValue(model) != null) {
+                switch (propertyTypeName) {
+                    case "String":
+                        value = nonEnumerableProperty.GetValue(model).ToString();
+                        break;
+                    case "DateTime":
+                        value = nonEnumerableProperty.GetValue(model);
+                        break;
+                    case "Decimal":
+                        value = Convert.ToDouble(nonEnumerableProperty.GetValue(model));
+                        break;
+                    case "Int32":
+                        value = Convert.ToDouble(nonEnumerableProperty.GetValue(model));
+                        break;
+                    case "Boolean":
+                        value = ((bool)nonEnumerableProperty.GetValue(model)) ? "Да" : "Нет";
+                        break;
+                }
+            }
+            return value;
+        }
 		private static List<string> TestChildHeader(IRow row, int childNumber, NotRelectionTestDataEntities.TestData simpleTestData) {
 			string childName = simpleTestData.ConfigurationBuilder.Value.ChildrenMap[childNumber].Title;
 			List<string> childColumnsNames = simpleTestData.ConfigurationBuilder.Value.ChildrenMap[childNumber].ColumnsMap.Keys.ToList();

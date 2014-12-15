@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Security.Cryptography.X509Certificates;
 using FormattedExcelExport.Configuaration;
 using FormattedExcelExport.Reflection;
 using FormattedExcelExport.Style;
@@ -122,7 +123,6 @@ namespace FormattedExcelExport.Tests {
             private readonly List<Contact> _contacts;
             private readonly List<Contract> _contracts;
             private readonly List<Product> _products;
-
             public ClientExampleModel(string title, DateTime registrationDate, string phone, string inn, string okato, decimal revenue, int employeeCount, bool isActive, List<Contact> contacts, List<Contract> contracts, List<Product> products) {
                 _title = title;
                 _registrationDate = registrationDate;

@@ -16,11 +16,12 @@ namespace FormattedExcelExport.TableWriters {
 	    public void WriteHeader(params string[] cells) {
 			WriteRow(false, cells);
 		}
-		public void WriteRow(IEnumerable<KeyValuePair<string, TableWriterStyle>> cells, bool prependDelimeter = false) {
+
+	    public void WriteRow(List<KeyValuePair<dynamic, TableWriterStyle>> cells, bool prependDelimeter = false) {
 			int cellsCount = cells.Count() - 1;
 			int i = 0;
 			if (prependDelimeter) _stringBuilder.Append(_delimeter);
-			foreach (KeyValuePair<string, TableWriterStyle> cell in cells) {
+			foreach (KeyValuePair<dynamic, TableWriterStyle> cell in cells) {
 				_stringBuilder.Append(cell.Key);
 
 				if (i < cellsCount)
@@ -45,8 +46,8 @@ namespace FormattedExcelExport.TableWriters {
 		public void WriteChildHeader(params string[] cells) {
 			WriteHeader(cells);
 		}
-		public void WriteChildRow(IEnumerable<KeyValuePair<string, TableWriterStyle>> cells, bool prependDelimeter = false) {
-			WriteRow(cells, prependDelimeter);
+		public void WriteChildRow(IEnumerable<KeyValuePair<dynamic, TableWriterStyle>> cells, bool prependDelimeter = false) {
+			WriteRow(cells.ToList(), prependDelimeter);
 		}
 		public void AutosizeColumns() { }
 		public MemoryStream GetStream() {

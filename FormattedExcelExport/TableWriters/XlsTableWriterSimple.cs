@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using FormattedExcelExport.Style;
 using NPOI.SS.UserModel;
 
@@ -38,29 +39,33 @@ namespace FormattedExcelExport.TableWriters {
 	        _lastHeader = cells;
 			RowIndex++;
 		}
-		public void WriteRow(List<KeyValuePair<string, TableWriterStyle>> cells) {
+        public void WriteRow(List<KeyValuePair<dynamic, TableWriterStyle>> cells) {
 			IRow row = WorkSheet.CreateRow(RowIndex);
 		    int columnIndex = 0;
-			foreach (KeyValuePair<string, TableWriterStyle> cell in cells) {
+            
+            
+            foreach (KeyValuePair<dynamic, TableWriterStyle> cell in cells) {
 				ICell newCell = row.CreateCell(columnIndex);
-                
 				if (cell.Key != null)
 					newCell.SetCellValue(cell.Key);
-                
-				if (cell.Value != null) {
-					if (cell.Value.RegularCell.BackgroundColor != null) {
-						ICellStyle customCellStyle = ConvertToNpoiStyle(cell.Value.RegularCell);
-						newCell.CellStyle = customCellStyle;
-					}
-					if (cell.Value.RegularChildCell.BackgroundColor != null) {
-						ICellStyle customCellStyle = ConvertToNpoiStyle(cell.Value.RegularChildCell);
-						newCell.CellStyle = customCellStyle;
-					}
-				}
-				else {
-					newCell.CellStyle = CellStyle;
-				}
-				columnIndex++;
+                if (cell.Key != null && cell.Key is DateTime?) {
+                    newCell.CellStyle = DateCellStyle;
+                }
+                else {
+                    if (cell.Value != null) {
+                        ICellStyle customCellStyle = ConvertToNpoiStyle(cell.Value.RegularCell);
+                        if (cell.Value.RegularCell.BackgroundColor != null) {
+                            newCell.CellStyle = customCellStyle;
+                        }
+                        if (cell.Value.RegularChildCell.BackgroundColor != null) {
+                            newCell.CellStyle = customCellStyle;
+                        }
+                    }
+                    else {
+                        newCell.CellStyle = CellStyle;
+                    }
+                }
+                columnIndex++;
 			}
 			RowIndex++;
 		}
