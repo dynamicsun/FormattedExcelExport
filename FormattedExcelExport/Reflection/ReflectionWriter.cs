@@ -28,18 +28,11 @@ namespace FormattedExcelExport.Reflection {
                         row.Add(new KeyValuePair<dynamic, TableWriterStyle>((DateTime?)propertyInfo.GetValue(model), null));
                     }
                 }
-                if (propertyInfo.PropertyType.FullName.Contains("Decimal") || propertyInfo.PropertyType.FullName.Contains("Single")) {
+                if (propertyInfo.PropertyType.FullName.Contains("Decimal") || propertyInfo.PropertyType.FullName.Contains("Single") || propertyInfo.PropertyType.FullName.Contains("Int32")) {
                     if (propertyInfo.GetCustomAttribute<ExcelExportAttribute>().ConditionType != null) {
                         row.Add(new KeyValuePair<dynamic, TableWriterStyle>(propertyInfo.GetValue(model) != null ? (double?)Convert.ToDouble(propertyInfo.GetValue(model)) : null, style));
                     } else {
                         row.Add(new KeyValuePair<dynamic, TableWriterStyle>(propertyInfo.GetValue(model) != null ? (double?)Convert.ToDouble(propertyInfo.GetValue(model)) : null, null));
-                    }
-                }
-                if (propertyInfo.PropertyType.FullName.Contains("Int32")) {
-                    if (propertyInfo.GetCustomAttribute<ExcelExportAttribute>().ConditionType != null) {
-                        row.Add(new KeyValuePair<dynamic, TableWriterStyle>((int?)propertyInfo.GetValue(model), style));
-                    } else {
-                        row.Add(new KeyValuePair<dynamic, TableWriterStyle>((int?)propertyInfo.GetValue(model), null));
                     }
                 }
                 if (propertyInfo.PropertyType.FullName.Contains("Boolean")) {

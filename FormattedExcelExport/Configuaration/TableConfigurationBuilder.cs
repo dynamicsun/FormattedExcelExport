@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using FormattedExcelExport.Infrastructure;
 using FormattedExcelExport.Style;
+using NPOI.HSSF.Record.Chart;
 
 
 namespace FormattedExcelExport.Configuaration {
@@ -16,67 +17,46 @@ namespace FormattedExcelExport.Configuaration {
 			public Func<TModel, bool> Condition { get; set; }
 			public TableWriterStyle Style { get; set; }
 		}
-
 		public TableConfiguration Value { get; set; }
 		private readonly CultureInfo _culture;
 
+	    private readonly Func<dynamic, dynamic> _getter = model => {
+	        dynamic value = null;
+	        if (model is decimal? || model is int? || model is float?) value = model != null ? (double?) Convert.ToDouble(model) : null;
+	        if (model is DateTime? || model is string) value = model;
+	        if (model is bool?) value = model != null ? (model == true ? "Да" : "Нет") : string.Empty;
+	        return value;
+	    };
 		public TableConfigurationBuilder(string title, CultureInfo culture) {
 			Value = new TableConfiguration { Title = title };
 			_culture = culture;
 		}
-		public TableConfigurationBuilder(string title, Func<object, IEnumerable<object>> getter, CultureInfo culture) {
-			Value = new ChildTableConfiguration { Getter = getter, Title = title };
-			_culture = culture;
-		}
-		public void RegisterColumn(string header, Func<TModel, string> getter, ConditionTheme conditionTheme = null) {
-            RegisterColumnIf(true, header, getter, conditionTheme);
-		}
-
-		public void RegisterColumn(string header, Func<TModel, int?> getter, ConditionTheme conditionTheme = null) {
-            RegisterColumnIf(true, header, x => {
-                dynamic value = getter(x);
-                return value;
-            }, conditionTheme);
-		}
-
-		public void RegisterColumn(string header, Func<TModel, decimal?> getter, ConditionTheme conditionTheme = null) {
-            RegisterColumnIf(true, header, x => {
-                var value = getter(x) != null ? (double?)Convert.ToDouble(getter(x)) : null;
-                return value;
-            }, conditionTheme);
-		}
-
-		public void RegisterColumn(string header, Func<TModel, DateTime?> getter, ConditionTheme conditionTheme = null) {
-            RegisterColumnIf(true, header, x => {
-                dynamic value = getter(x);
-                return value;
-            }, conditionTheme);
-		}
-
-		public void RegisterColumn(string header, Func<TModel, bool?> getter, ConditionTheme conditionTheme = null) {
-            RegisterColumnIf(true, header, x => {
-                var value = getter(x);
-                var resultValue = value != null 
-                    ? (value == true ? "Да" : "Нет") 
-                    : string.Empty;
-                return resultValue;
-            }, conditionTheme);
-		}
-
-        public void RegisterColumn(string header, Func<TModel, float?> getter, ConditionTheme conditionTheme = null) {
-            RegisterColumnIf(true, header, x => {
-                var value = getter(x) != null ? (double?) Convert.ToDouble(getter(x)) : null;
-                return value;
-            }, conditionTheme);
+        public TableConfigurationBuilder(string title, Func<object, IEnumerable<object>> getter, CultureInfo culture) {
+            Value = new ChildTableConfiguration { Getter = getter, Title = title };
+            _culture = culture;
         }
-
-		public void RegisterColumnIf(bool expression, string header, Func<TModel, dynamic> getter, ConditionTheme conditionTheme = null) {
-			if (!expression)
-				return;
-
+        //todo подумать как убрать дублирование (сейчас нужно для контроля типов, т.к. дальше применяется dynamic)
+        public void RegisterColumn(string header, Func<TModel, string> getter, ConditionTheme conditionTheme = null) {
+            RegisterColumnIf(header, getter, conditionTheme);
+        }
+        public void RegisterColumn(string header, Func<TModel, int?> getter, ConditionTheme conditionTheme = null) {
+            RegisterColumnIf(header, x => _getter(getter(x)), conditionTheme);
+        }
+        public void RegisterColumn(string header, Func<TModel, decimal?> getter, ConditionTheme conditionTheme = null) {
+            RegisterColumnIf(header, x => _getter(getter(x)), conditionTheme);
+        }
+        public void RegisterColumn(string header, Func<TModel, float?> getter, ConditionTheme conditionTheme = null) {
+            RegisterColumnIf(header, x => _getter(getter(x)), conditionTheme);
+        }
+        public void RegisterColumn(string header, Func<TModel, DateTime?> getter, ConditionTheme conditionTheme = null) {
+            RegisterColumnIf(header, x => _getter(getter(x)), conditionTheme);
+        }
+        public void RegisterColumn(string header, Func<TModel, bool?> getter, ConditionTheme conditionTheme = null) {
+            RegisterColumnIf(header, x => _getter(getter(x)), conditionTheme);
+        }
+		public void RegisterColumnIf(string header, Func<TModel, dynamic> getter, ConditionTheme conditionTheme = null) {
 			if(conditionTheme == null)
 				conditionTheme = new ConditionTheme(null, x => false);
-
 			Value.ColumnsMap.Add(header, new AggregatedContainer(x => getter((TModel)x), y => conditionTheme.Condition((TModel)y), conditionTheme.Style));
 		}
 		public TableConfigurationBuilder<TChildModel> RegisterChild<TChildModel>(string title, Func<TModel, IEnumerable<TChildModel>> getter) {
