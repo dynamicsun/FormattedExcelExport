@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Linq;
 using FormattedExcelExport.Style;
 using OfficeOpenXml.Style;
@@ -9,7 +7,6 @@ using OfficeOpenXml.Style;
 namespace FormattedExcelExport.TableWriters {
     public sealed class XlsxTableWriterComplex : XlsxTableWriterBase, ITableWriterComplex {
         private int _rowIndex = 1;
-        private string[] _lastParentHeader;
         private string[] _lastChildHeader;
         private byte _colorIndex;
 
@@ -22,7 +19,7 @@ namespace FormattedExcelExport.TableWriters {
                     SheetNumber = SheetNumber + 1;
                     WorkSheet = Package.Workbook.Worksheets.Add("Sheet " + SheetNumber);
                     _rowIndex = 1;
-                    WriteHeader(_lastParentHeader);
+                    WriteHeader(LastHeader);
                     WriteChildHeader(_lastChildHeader);
                 }
             }
@@ -31,20 +28,8 @@ namespace FormattedExcelExport.TableWriters {
         public XlsxTableWriterComplex(TableWriterStyle style) : base(style) {
         }
 
-        public void WriteHeader(params string[] cells) {
-            var font = ConvertCellStyle(Style.HeaderCell);
-            var columnIndex = 1;
-            foreach (var cell in cells) {
-                var newCell = WorkSheet.Cells[RowIndex, columnIndex];
-                newCell.Value = cell;
-                newCell.Style.Font.SetFromFont(font);
-                newCell.Style.Font.Color.SetColor(Color.FromArgb(Style.HeaderCell.FontColor.Red, Style.HeaderCell.FontColor.Green, Style.HeaderCell.FontColor.Blue));
-                newCell.Style.Fill.PatternType = ExcelFillStyle.Solid;
-                newCell.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(Style.HeaderCell.BackgroundColor.Red, Style.HeaderCell.BackgroundColor.Green, Style.HeaderCell.BackgroundColor.Blue));
-                newCell.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
-                columnIndex++;
-            }
-            _lastParentHeader = cells;
+        public void WriteHeader(IEnumerable<string> cells) {
+            WriteHeaderBase(cells, RowIndex);
             RowIndex++;
             _colorIndex = 0;
         }

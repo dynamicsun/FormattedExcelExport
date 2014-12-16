@@ -1,19 +1,16 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
 using FormattedExcelExport.Style;
 
 
 namespace FormattedExcelExport.TableWriters {
-	public sealed class DsvTableWriterComplex : ITableWriterComplex {
-		private readonly StringBuilder _stringBuilder = new StringBuilder();
+	public sealed class DsvTableWriterComplex : DsvTableWriteBase, ITableWriterComplex {
 		private readonly string _delimeter;
 		public DsvTableWriterComplex(string delimeter = "\t") {
 			_delimeter = delimeter;
 		}
 
-	    public void WriteHeader(params string[] cells) {
+	    public void WriteHeader(IEnumerable<string> cells) {
 			WriteRow(false, cells);
 		}
 
@@ -30,8 +27,8 @@ namespace FormattedExcelExport.TableWriters {
 			}
 			_stringBuilder.AppendLine();
 		}
-		public void WriteRow(bool prependDelimeter, params string[] cells) {
-			var cellsCount = cells.Length - 1;
+		public void WriteRow(bool prependDelimeter, IEnumerable<string> cells) {
+			var cellsCount = cells.ToList().Count - 1;
 			var i = 0;
 			if (prependDelimeter) _stringBuilder.Append(_delimeter);
 			foreach (var cell in cells) {
@@ -50,13 +47,5 @@ namespace FormattedExcelExport.TableWriters {
 			WriteRow(cells.ToList(), prependDelimeter);
 		}
 		public void AutosizeColumns() { }
-		public MemoryStream GetStream() {
-			var memoryStream = new MemoryStream();
-			var streamWriter = new StreamWriter(memoryStream, Encoding.UTF8);
-			streamWriter.WriteLine(_stringBuilder.ToString());
-			streamWriter.Flush();
-			memoryStream.Position = 0;
-			return memoryStream;
-		}
 	}
 }

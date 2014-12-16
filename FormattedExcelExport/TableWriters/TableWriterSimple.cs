@@ -7,7 +7,7 @@ using FormattedExcelExport.Style;
 
 namespace FormattedExcelExport.TableWriters {
 	public interface ITableWriterSimple {
-		void WriteHeader(List<string> cells);
+		void WriteHeader(IEnumerable<string> cells);
 		void WriteRow(List<KeyValuePair<dynamic, TableWriterStyle>> cells);
 		void AutosizeColumns();
 		MemoryStream GetStream();

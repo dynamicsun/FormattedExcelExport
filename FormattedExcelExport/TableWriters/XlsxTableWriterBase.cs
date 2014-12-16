@@ -16,6 +16,7 @@ namespace FormattedExcelExport.TableWriters {
         protected ExcelWorksheet WorkSheet;
         protected readonly TableWriterStyle Style;
         protected int SheetNumber;
+        protected List<string> LastHeader;
 
         protected XlsxTableWriterBase(TableWriterStyle style) {
             Package = new ExcelPackage();
@@ -84,6 +85,22 @@ namespace FormattedExcelExport.TableWriters {
             Package.SaveAs(memoryStream);
             memoryStream.Position = 0;
             return memoryStream;
+        }
+
+        protected void WriteHeaderBase(IEnumerable<string> cells, int rowIndex) {
+            var font = ConvertCellStyle(Style.HeaderCell);
+            var columnIndex = 1;
+            foreach (var cell in cells) {
+                var newCell = WorkSheet.Cells[rowIndex, columnIndex];
+                newCell.Value = cell;
+                newCell.Style.Font.SetFromFont(font);
+                newCell.Style.Font.Color.SetColor(Color.FromArgb(Style.HeaderCell.FontColor.Red, Style.HeaderCell.FontColor.Green, Style.HeaderCell.FontColor.Blue));
+                newCell.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                newCell.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(Style.HeaderCell.BackgroundColor.Red, Style.HeaderCell.BackgroundColor.Green, Style.HeaderCell.BackgroundColor.Blue));
+                newCell.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                columnIndex++;
+            }
+            LastHeader = cells.ToList();
         }
         protected void WriteRowBase(IEnumerable<KeyValuePair<dynamic, TableWriterStyle>> cells, int rowIndex, bool prependDelimeter = false, bool isChildRow = false) {
             var columnIndex = 1;

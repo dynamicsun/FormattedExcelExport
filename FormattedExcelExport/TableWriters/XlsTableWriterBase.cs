@@ -17,6 +17,7 @@ namespace FormattedExcelExport.TableWriters {
         protected ICellStyle CellStyle;
         protected ICellStyle HeaderCellStyle;
 	    protected ICellStyle DateCellStyle;
+        protected List<string> LastHeader;
 		protected XlsTableWriterBase(TableWriterStyle style) {
 			Workbook = new HSSFWorkbook();
 			Style = style ?? new TableWriterStyle();
@@ -68,6 +69,20 @@ namespace FormattedExcelExport.TableWriters {
 		        }
 		    }
 		}
+
+        protected void WriteHeaderBase(IEnumerable<string> cells, int rowIndex) {
+            var row = WorkSheet.CreateRow(rowIndex);
+            CellStyle.VerticalAlignment = VerticalAlignment.Top;
+
+            var columnIndex = 0;
+            foreach (var cell in cells) {
+                var newCell = row.CreateCell(columnIndex);
+                newCell.SetCellValue(cell);
+                newCell.CellStyle = HeaderCellStyle;
+                columnIndex++;
+            }
+            LastHeader = cells.ToList();
+	    }
         protected void WriteRowBase(IEnumerable<KeyValuePair<dynamic, TableWriterStyle>> cells, int rowIndex, bool prependDelimeter = false, bool isChildRow = false) {
             var row = WorkSheet.CreateRow(rowIndex);
             var columnIndex = 0;

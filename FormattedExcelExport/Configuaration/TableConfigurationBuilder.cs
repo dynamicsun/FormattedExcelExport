@@ -28,7 +28,6 @@ namespace FormattedExcelExport.Configuaration {
 			Value = new ChildTableConfiguration { Getter = getter, Title = title };
 			_culture = culture;
 		}
-
 		public void RegisterColumn(string header, Func<TModel, string> getter, ConditionTheme conditionTheme = null) {
             RegisterColumnIf(true, header, getter, conditionTheme);
 		}

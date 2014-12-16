@@ -67,6 +67,7 @@
     <Compile Include="Reflection\ReflectionWriter.cs" />
     <Compile Include="Reflection\ReflectionWriterComplex.cs" />
     <Compile Include="Reflection\ReflectionWriterSimple.cs" />
+    <Compile Include="TableWriters\DsvTableWriteBase.cs" />
     <Compile Include="TableWriters\DsvTableWriterComplex.cs" />
     <Compile Include="TableWriters\DsvTableWriterSimple.cs" />
     <Compile Include="Reflection\ExcelExportAttribute.cs" />

@@ -7,10 +7,9 @@ using NPOI.SS.UserModel;
 namespace FormattedExcelExport.TableWriters {
 	public sealed class XlsTableWriterComplex : XlsTableWriterBase, ITableWriterComplex {
 	    private int _rowIndex;
-	    private string[] _lastParentHeader;
 	    private string[] _lastChildHeader;
 		private byte _colorIndex;
-	    private List<ICellStyle> _childHeaderCellStyleList;
+	    private readonly List<ICellStyle> _childHeaderCellStyleList;
 
 	    public XlsTableWriterComplex(TableWriterStyle style) : base(style) {
             _childHeaderCellStyleList = new List<ICellStyle>();
@@ -37,7 +36,7 @@ namespace FormattedExcelExport.TableWriters {
 	                WorkSheet = Workbook.CreateSheet();
                     _rowIndex = 0;
 	                var lastChildHeaderBuffer = _lastChildHeader;
-	                WriteHeader(_lastParentHeader);
+	                WriteHeader(LastHeader);
 	                _lastChildHeader = lastChildHeaderBuffer;
 	                if (_lastChildHeader != null) {
 	                    WriteChildHeader(_lastChildHeader);
@@ -46,18 +45,8 @@ namespace FormattedExcelExport.TableWriters {
 	        }
 	    }
 
-	    public void WriteHeader(params string[] cells) {
-			var row = WorkSheet.CreateRow(RowIndex);
-			HeaderCellStyle.VerticalAlignment = VerticalAlignment.Top;
-
-			var columnIndex = 0;
-			foreach (var cell in cells) {
-				var newCell = row.CreateCell(columnIndex);
-				newCell.SetCellValue(cell);
-				newCell.CellStyle = HeaderCellStyle;
-				columnIndex++;
-			}
-	        _lastParentHeader = cells;
+	    public void WriteHeader(IEnumerable<string> cells) {
+            WriteHeaderBase(cells, RowIndex);
 	        _lastChildHeader = null;
 			RowIndex++;
 			_colorIndex = 0;
