@@ -591,7 +591,6 @@ namespace FormattedExcelExport.Tests {
 
 			var rowNumber = 0;
 			var row = sheet.GetRow(rowNumber);
-			//Assert.AreEqual(row.Height, 400);
 			for (var cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
 				CustomAssert.IsEqualFont(xlsFile, sheet, rowNumber, cellNumber, "Arial", 10, (short)FontBoldWeight.Bold);
 			}
@@ -766,7 +765,6 @@ namespace FormattedExcelExport.Tests {
 			for (var modelNumber = 0; modelNumber < modelsQuantity; modelNumber++) {
 				childsQuantity += 7 + simpleTestData.Models[modelNumber].Contacts.Count + simpleTestData.Models[modelNumber].Contracts.Count + simpleTestData.Models[modelNumber].Products.Count + simpleTestData.Models[modelNumber].EnumProps1.Count + simpleTestData.Models[modelNumber].EnumProps2.Count;
 				var row = sheet.GetRow(rowNumber);
-				//Assert.AreEqual(row.Height, 400);
 				for (var cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
 					CustomAssert.IsEqualFont(xlsFile, sheet, rowNumber, cellNumber, "Arial", 10, (short)FontBoldWeight.Bold);
 				}
@@ -781,7 +779,6 @@ namespace FormattedExcelExport.Tests {
 			}
 		}
 		[Test]
-		//[Ignore("Проблема с рублёвым форматом. Decimal - это просто число")]
 		public void ExcelReflectionSimpleExport() {
             var filename = "TestReflectionSimple.xls";
             DeleteTestFile(filename);
@@ -863,7 +860,6 @@ namespace FormattedExcelExport.Tests {
 		}
 
 		[Test]
-		//[Ignore("Временно исключён. Разные значения")]
 		public void ExcelSimpleXlsxExport() {
 		    const string filename = "TestSimple.xlsx";
             DeleteTestFile(filename);
@@ -1015,7 +1011,6 @@ namespace FormattedExcelExport.Tests {
             }
 		}
 		[Test]
-		//[Ignore("Временно исключён. Разные значения")]
 		public void ExcelStyleSimpleXlsxExport() {
 		    const string filename = "TestSimpleStyle.xlsx";
             DeleteTestFile(filename);
@@ -1052,7 +1047,6 @@ namespace FormattedExcelExport.Tests {
 
 			var rowNumber = 0;
 			var row = sheet.GetRow(rowNumber);
-			//Assert.AreEqual(row.Height, 400);
 			for (var cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
 				CustomAssert.IsEqualFont(xlsFile, rowNumber, cellNumber, "Arial", 10, (short)FontBoldWeight.Bold);
 			}
@@ -1065,7 +1059,6 @@ namespace FormattedExcelExport.Tests {
 			}
 		}
 		[Test]
-		//[Ignore("Слишком долго выполняется")]
 		public void ExcelComplexXlsxExport() {
 		    const string filename = "TestComplex.xlsx";
             DeleteTestFile(filename);
@@ -1194,7 +1187,6 @@ namespace FormattedExcelExport.Tests {
             }
 		}
 		[Test]
-		//[Ignore("Временно исключён. Не удаётся найти файл")]
 		public void ExcelStyleComplexXlsxExport() {
 		    const string filename = "TestComplexStyle.xlsx";
             DeleteTestFile(filename);
@@ -1213,19 +1205,12 @@ namespace FormattedExcelExport.Tests {
 			short[] red = { 255, 0, 0 };
 			short[] green = { 0, 255, 0 };
 			short[] blue = { 0, 0, 255 };
-
-            //CustomAssert.IsEqualExcelColor((XSSFColor)sheet.GetRow(1).GetCell(3).CellStyle.FillForegroundColorColor, green);
-            //CustomAssert.IsEqualExcelColor((XSSFColor)sheet.GetRow(3).GetCell(1).CellStyle.FillForegroundColorColor, blue);
-            //CustomAssert.IsEqualExcelColor((XSSFColor)sheet.GetRow(22).GetCell(1).CellStyle.FillForegroundColorColor, red);
-            //CustomAssert.IsEqualExcelColor((XSSFColor)sheet.GetRow(24).GetCell(1).CellStyle.FillForegroundColorColor, blue);
-
 			var modelsQuantity = simpleTestData.Models.Count;
 			var rowNumber = 0;
 			var childsQuantity = 0;
 			for (var modelNumber = 0; modelNumber < modelsQuantity; modelNumber++) {
 				childsQuantity += 7 + simpleTestData.Models[modelNumber].Contacts.Count + simpleTestData.Models[modelNumber].Contracts.Count + simpleTestData.Models[modelNumber].Products.Count + simpleTestData.Models[modelNumber].EnumProps1.Count + simpleTestData.Models[modelNumber].EnumProps2.Count;
 				var row = sheet.GetRow(rowNumber);
-				//Assert.AreEqual(row.Height, 400);
 				for (var cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
                     if (sheet.GetRow(rowNumber).GetCell(cellNumber) != null 
                         && !(sheet.GetRow(rowNumber).GetCell(cellNumber).CellType == CellType.String 
@@ -1264,7 +1249,6 @@ namespace FormattedExcelExport.Tests {
 			ExcelStyleReflectionSimpleExportTest(test, filename, true);
 		}
 		[Test]
-		//[Ignore("Временно исключён. Не совпадают шрифты")]
 		public void ExcelReflectionComplexXlsxExport() {
 		    const string filename = "TestReflectionComplex.xlsx";
             DeleteTestFile(filename);
@@ -1396,7 +1380,6 @@ namespace FormattedExcelExport.Tests {
 
 			var rowNumber = 0;
 			var row = sheet.GetRow(rowNumber);
-			//Assert.AreEqual(row.Height, 400);
 			for (var cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
 				if (isXlsx) {
 					CustomAssert.IsEqualFont((XSSFWorkbook)xlsFile, rowNumber, cellNumber, "Arial", 10, (short)FontBoldWeight.Bold);
@@ -1518,7 +1501,6 @@ namespace FormattedExcelExport.Tests {
 			var row = sheet.GetRow(rowNumber);
 			foreach (var model in models) {
 				int cellNumber;
-                //Assert.AreEqual(row.Height, 400);
 				for (cellNumber = 0; cellNumber < row.LastCellNum; cellNumber++) {
 					if (isXlsx) {
                         if (sheet.GetRow(rowNumber).GetCell(cellNumber) != null 
