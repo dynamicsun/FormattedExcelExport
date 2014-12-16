@@ -126,7 +126,7 @@ namespace FormattedExcelExport.TableWriters {
                     var customStyle = isChildRow ? cell.Value.RegularChildCell : cell.Value.RegularCell;
                     font = ConvertCellStyle(customStyle);
                     newCell.Style.Font.SetFromFont(font);
-                    newCell.Style.Font.Color.SetColor(Color.FromArgb(Style.HeaderCell.FontColor.Red, Style.HeaderCell.FontColor.Green, Style.HeaderCell.FontColor.Blue));
+                    newCell.Style.Font.Color.SetColor(Color.FromArgb(customStyle.FontColor.Red, customStyle.FontColor.Green, customStyle.FontColor.Blue));
                     if (customStyle.BackgroundColor != null) {
                         newCell.Style.Fill.PatternType = ExcelFillStyle.Solid;
                         newCell.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(customStyle.BackgroundColor.Red, customStyle.BackgroundColor.Green, customStyle.BackgroundColor.Blue));
