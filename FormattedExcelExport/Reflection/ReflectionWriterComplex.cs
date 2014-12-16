@@ -12,13 +12,7 @@ using FormattedExcelExport.TableWriters;
 namespace FormattedExcelExport.Reflection {
 	public static class ReflectionWriterComplex {
 		public static MemoryStream Write<T>(IEnumerable<T> models, ITableWriterComplex tableWriter, CultureInfo cultureInfo) {
-			var nonEnumerableProperties = typeof(T).GetProperties()
-				.Where(x => x.PropertyType == typeof(string)
-					|| x.PropertyType == typeof(DateTime) || x.PropertyType == typeof(DateTime?)
-					|| x.PropertyType == typeof(decimal) || x.PropertyType == typeof(decimal?)
-                    || x.PropertyType == typeof(float) || x.PropertyType == typeof(float?)
-					|| x.PropertyType == typeof(int) || x.PropertyType == typeof(int?)
-					|| x.PropertyType == typeof(bool) || x.PropertyType == typeof(bool?));
+            var nonEnumerableProperties = ReflectionWriter.ReflectionGetProperties(typeof(T));
 
 			var classAttribute = typeof(T).GetCustomAttribute<ExcelExportClassNameAttribute>();
 			var className = classAttribute != null ? classAttribute.Name : "";
@@ -49,16 +43,7 @@ namespace FormattedExcelExport.Reflection {
 
 					var propertyType = property.PropertyType;
 					var listType = propertyType.GetGenericArguments()[0];
-
-					var props = listType.GetProperties()
-					.Where(x => x.PropertyType == typeof(string)
-						|| x.PropertyType == typeof(DateTime) || x.PropertyType == typeof(DateTime?)
-						|| x.PropertyType == typeof(decimal) || x.PropertyType == typeof(decimal?)
-                        || x.PropertyType == typeof(float) || x.PropertyType == typeof(float?)
-						|| x.PropertyType == typeof(int) || x.PropertyType == typeof(int?)
-						|| x.PropertyType == typeof(bool) || x.PropertyType == typeof(bool?));
-
-
+                    var props = ReflectionWriter.ReflectionGetProperties(listType);
 					var nestedClassAttribute = listType.GetCustomAttribute<ExcelExportClassNameAttribute>();
 					var nestedClassName = nestedClassAttribute != null ? nestedClassAttribute.Name : "";
 					var childHeader = new List<string> { nestedClassName };

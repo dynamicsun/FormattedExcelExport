@@ -12,13 +12,7 @@ using FormattedExcelExport.TableWriters;
 namespace FormattedExcelExport.Reflection {
 	public static class ReflectionWriterSimple {
 		public static MemoryStream Write<T>(IEnumerable<T> models, ITableWriterSimple tableWriter, CultureInfo cultureInfo) {
-			var nonEnumerableProperties = typeof(T).GetProperties()
-				.Where(x => x.PropertyType == typeof(string)
-					|| x.PropertyType == typeof(DateTime) || x.PropertyType == typeof(DateTime?)
-					|| x.PropertyType == typeof(decimal) || x.PropertyType == typeof(decimal?)
-                    || x.PropertyType == typeof(float) || x.PropertyType == typeof(float?)
-					|| x.PropertyType == typeof(int) || x.PropertyType == typeof(int?)
-					|| x.PropertyType == typeof(bool) || x.PropertyType == typeof(bool?));
+            var nonEnumerableProperties = ReflectionWriter.ReflectionGetProperties(typeof(T));
 
 			var exportedProperties = new List<PropertyInfo>();
 			var header = new List<string>();
@@ -49,13 +43,7 @@ namespace FormattedExcelExport.Reflection {
 				var propertyType = enumerableProperties.ElementAt(i).PropertyType;
 				var listType = propertyType.GetGenericArguments()[0];
 
-				var props = listType.GetProperties()
-					.Where(x => x.PropertyType == typeof(string)
-						|| x.PropertyType == typeof(DateTime) || x.PropertyType == typeof(DateTime?)
-						|| x.PropertyType == typeof(decimal) || x.PropertyType == typeof(decimal?)
-                        || x.PropertyType == typeof(float) || x.PropertyType == typeof(float?)
-						|| x.PropertyType == typeof(int) || x.PropertyType == typeof(int?)
-						|| x.PropertyType == typeof(bool) || x.PropertyType == typeof(bool?));
+				var props = ReflectionWriter.ReflectionGetProperties(listType);
 
 				var counter = 1;
 				for (var j = 0; j < maxims[i]; j++) {
@@ -82,14 +70,7 @@ namespace FormattedExcelExport.Reflection {
 					
 					var propertyType = property.PropertyType;
 					var listType = propertyType.GetGenericArguments()[0];
-					
-					var props = listType.GetProperties()
-					.Where(x => x.PropertyType == typeof(string)
-						|| x.PropertyType == typeof(DateTime) || x.PropertyType == typeof(DateTime?)
-						|| x.PropertyType == typeof(decimal) || x.PropertyType == typeof(decimal?)
-                        || x.PropertyType == typeof(float) || x.PropertyType == typeof(float?)
-						|| x.PropertyType == typeof(int) || x.PropertyType == typeof(int?)
-						|| x.PropertyType == typeof(bool) || x.PropertyType == typeof(bool?));
+                    var props = ReflectionWriter.ReflectionGetProperties(listType);
 
 					foreach (var submodel in submodels) {
 						ReflectionWriter.GetValue(cultureInfo, props, row, submodel);
@@ -105,5 +86,7 @@ namespace FormattedExcelExport.Reflection {
 			var stream = tableWriter.GetStream();
 			return stream;
 		}
+
+	    
 	}
 }
