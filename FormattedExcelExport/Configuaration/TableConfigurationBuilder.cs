@@ -42,7 +42,7 @@ namespace FormattedExcelExport.Configuaration {
 
 		public void RegisterColumn(string header, Func<TModel, decimal?> getter, ConditionTheme conditionTheme = null) {
             RegisterColumnIf(true, header, x => {
-                double? value = getter(x) != null ? (double?)Convert.ToDouble(getter(x)) : null;
+                var value = getter(x) != null ? (double?)Convert.ToDouble(getter(x)) : null;
                 return value;
             }, conditionTheme);
 		}
@@ -56,7 +56,7 @@ namespace FormattedExcelExport.Configuaration {
 
 		public void RegisterColumn(string header, Func<TModel, bool?> getter, ConditionTheme conditionTheme = null) {
             RegisterColumnIf(true, header, x => {
-                bool? value = getter(x);
+                var value = getter(x);
                 var resultValue = value != null 
                     ? (value == true ? "Да" : "Нет") 
                     : string.Empty;
@@ -66,7 +66,7 @@ namespace FormattedExcelExport.Configuaration {
 
         public void RegisterColumn(string header, Func<TModel, float?> getter, ConditionTheme conditionTheme = null) {
             RegisterColumnIf(true, header, x => {
-                double? value = getter(x) != null ? (double?) Convert.ToDouble(getter(x)) : null;
+                var value = getter(x) != null ? (double?) Convert.ToDouble(getter(x)) : null;
                 return value;
             }, conditionTheme);
         }
@@ -81,7 +81,7 @@ namespace FormattedExcelExport.Configuaration {
 			Value.ColumnsMap.Add(header, new AggregatedContainer(x => getter((TModel)x), y => conditionTheme.Condition((TModel)y), conditionTheme.Style));
 		}
 		public TableConfigurationBuilder<TChildModel> RegisterChild<TChildModel>(string title, Func<TModel, IEnumerable<TChildModel>> getter) {
-			TableConfigurationBuilder<TChildModel> tableConfigurationBuilder = new TableConfigurationBuilder<TChildModel>(title, x => {
+			var tableConfigurationBuilder = new TableConfigurationBuilder<TChildModel>(title, x => {
 				if (getter((TModel)x) != null)
 					return getter((TModel)x).Cast<object>();
 

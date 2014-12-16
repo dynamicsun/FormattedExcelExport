@@ -9,58 +9,58 @@ using FormattedExcelExport.Style;
 namespace FormattedExcelExport.Tests {
     internal static class TestDataEntities {
         internal static TestData CreateSimpleTestData(bool style = false) {
-            TableConfigurationBuilder<ClientExampleModel> dataStructure = CreateSimpleTestDataConfigurationBuilder(style);           
+            var dataStructure = CreateSimpleTestDataConfigurationBuilder(style);           
             var data = CreateSimpleTestDataModels();
             return new TestData(dataStructure, data);
         }
         private static TableConfigurationBuilder<ClientExampleModel> CreateSimpleTestDataConfigurationBuilder(bool style = false) {
             if (style) {
-                TableWriterStyle condStyle = new TableWriterStyle();
+                var condStyle = new TableWriterStyle();
                 condStyle.RegularCell.BackgroundColor = new AdHocCellStyle.Color(255, 0, 0);
-                TableWriterStyle condStyle2 = new TableWriterStyle();
+                var condStyle2 = new TableWriterStyle();
                 condStyle2.RegularCell.BackgroundColor = new AdHocCellStyle.Color(0, 255, 0);
-                TableWriterStyle condStyle3 = new TableWriterStyle();
+                var condStyle3 = new TableWriterStyle();
                 condStyle3.RegularChildCell.BackgroundColor = new AdHocCellStyle.Color(0, 0, 255);
                 
-                TableConfigurationBuilder<ClientExampleModel> confBuilder = new TableConfigurationBuilder<ClientExampleModel>("Клиент", new CultureInfo("ru-RU"));
+                var confBuilder = new TableConfigurationBuilder<ClientExampleModel>("Клиент", new CultureInfo("ru-RU"));
                 confBuilder.RegisterColumn("Название", x => x.Title, new TableConfigurationBuilder<ClientExampleModel>.ConditionTheme(condStyle, x => x.Title == "Вторая компания"));
                 confBuilder.RegisterColumn("Дата регистрации", x => x.RegistrationDate);
                 confBuilder.RegisterColumn("Телефон", x => x.Phone, new TableConfigurationBuilder<ClientExampleModel>.ConditionTheme(condStyle2, x => x.Okato == "OPEEHBSSDD"));
                 confBuilder.RegisterColumn("ИНН", x => x.Inn);
                 confBuilder.RegisterColumn("Окато", x => x.Okato);
 
-                TableConfigurationBuilder<ClientExampleModel.Contact> contact = confBuilder.RegisterChild("Контакт", x => x.Contacts);
+                var contact = confBuilder.RegisterChild("Контакт", x => x.Contacts);
                 contact.RegisterColumn("Название", x => x.Title, new TableConfigurationBuilder<ClientExampleModel.Contact>.ConditionTheme(condStyle3, x => x.Title.StartsWith("О")));
                 contact.RegisterColumn("Email", x => x.Email);
 
-                TableConfigurationBuilder<ClientExampleModel.Contract> contract = confBuilder.RegisterChild("Контракт", x => x.Contracts);
+                var contract = confBuilder.RegisterChild("Контракт", x => x.Contracts);
                 contract.RegisterColumn("Дата начала", x => x.BeginDate);
                 contract.RegisterColumn("Дата окончания", x => x.EndDate);
                 contract.RegisterColumn("Статус", x => x.Status, new TableConfigurationBuilder<ClientExampleModel.Contract>.ConditionTheme(new TableWriterStyle(), x => true));
 
-                TableConfigurationBuilder<ClientExampleModel.Product> product = confBuilder.RegisterChild("Продукт", x => x.Products);
+                var product = confBuilder.RegisterChild("Продукт", x => x.Products);
                 product.RegisterColumn("Наименование", x => x.Title);
                 product.RegisterColumn("Количество", x => x.Amount);
                 return confBuilder;
             }
             else {
-                TableConfigurationBuilder<ClientExampleModel> confBuilder = new TableConfigurationBuilder<ClientExampleModel>("Клиент", new CultureInfo("ru-RU"));
+                var confBuilder = new TableConfigurationBuilder<ClientExampleModel>("Клиент", new CultureInfo("ru-RU"));
                 confBuilder.RegisterColumn("Название", x => x.Title);
                 confBuilder.RegisterColumn("Дата регистрации", x => x.RegistrationDate);
                 confBuilder.RegisterColumn("Телефон", x => x.Phone);
                 confBuilder.RegisterColumn("ИНН", x => x.Inn);
                 confBuilder.RegisterColumn("Окато", x => x.Okato);
 
-                TableConfigurationBuilder<ClientExampleModel.Contact> contact = confBuilder.RegisterChild("Контакт", x => x.Contacts);
+                var contact = confBuilder.RegisterChild("Контакт", x => x.Contacts);
                 contact.RegisterColumn("Название", x => x.Title);
                 contact.RegisterColumn("Email", x => x.Email);
 
-                TableConfigurationBuilder<ClientExampleModel.Contract> contract = confBuilder.RegisterChild("Контракт", x => x.Contracts);
+                var contract = confBuilder.RegisterChild("Контракт", x => x.Contracts);
                 contract.RegisterColumn("Дата начала", x => x.BeginDate);
                 contract.RegisterColumn("Дата окончания", x => x.EndDate);
                 contract.RegisterColumn("Статус", x => x.Status);
 
-                TableConfigurationBuilder<ClientExampleModel.Product> product = confBuilder.RegisterChild("Продукт", x => x.Products);
+                var product = confBuilder.RegisterChild("Продукт", x => x.Products);
                 product.RegisterColumn("Наименование", x => x.Title);
                 product.RegisterColumn("Количество", x => x.Amount);
                 return confBuilder;

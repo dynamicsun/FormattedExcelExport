@@ -9,41 +9,41 @@ using FormattedExcelExport.Style;
 namespace FormattedExcelExport.TableWriters {
 	public static class TableWriterComplex {
 		public static MemoryStream Write<TModel>(ITableWriterComplex writer, IEnumerable<TModel> models, TableConfiguration parentTableConfiguration) {
-			List<string> headerNamesList = parentTableConfiguration.ColumnsMap.Keys.ToList();
+			var headerNamesList = parentTableConfiguration.ColumnsMap.Keys.ToList();
 			headerNamesList.Insert(0, parentTableConfiguration.Title);
-			AggregatedContainer[] aggregatedContainers = parentTableConfiguration.ColumnsMap.Values.ToArray();
-			List<ChildTableConfiguration> childTableConfigurations = parentTableConfiguration.ChildrenMap;
+			var aggregatedContainers = parentTableConfiguration.ColumnsMap.Values.ToArray();
+			var childTableConfigurations = parentTableConfiguration.ChildrenMap;
 
-			foreach (TModel model in models) {
+			foreach (var model in models) {
 				writer.WriteHeader(headerNamesList.ToArray());
 
                 var cellsWithStyle = new List<KeyValuePair<dynamic, TableWriterStyle>>();
-				foreach (AggregatedContainer aggregatedContainer in aggregatedContainers) {
+				foreach (var aggregatedContainer in aggregatedContainers) {
 					TableWriterStyle cellStyle = null;
 					if (aggregatedContainer.ConditionFunc(model)) {
 						cellStyle = aggregatedContainer.Style;
 					}
-					dynamic cell = aggregatedContainer.ValueFunc(model);
+					var cell = aggregatedContainer.ValueFunc(model);
                     cellsWithStyle.Add(new KeyValuePair<dynamic, TableWriterStyle>(cell, cellStyle));
 				}
 				writer.WriteRow(cellsWithStyle, true);
 
-				foreach (ChildTableConfiguration childTableConfiguration in childTableConfigurations) {
-					IEnumerable<object> children = childTableConfiguration.Getter(model);
-					AggregatedContainer[] childAggregatedContainers = childTableConfiguration.ColumnsMap.Values.ToArray();
-					List<string> childHeaderNamesList = childTableConfiguration.ColumnsMap.Keys.ToList();
+				foreach (var childTableConfiguration in childTableConfigurations) {
+					var children = childTableConfiguration.Getter(model);
+					var childAggregatedContainers = childTableConfiguration.ColumnsMap.Values.ToArray();
+					var childHeaderNamesList = childTableConfiguration.ColumnsMap.Keys.ToList();
 					childHeaderNamesList.Insert(0, childTableConfiguration.Title);
 					writer.WriteChildHeader(childHeaderNamesList.ToArray());
 
-					foreach (object child in children) {
+					foreach (var child in children) {
                         var childCellsWithStyle = new List<KeyValuePair<dynamic, TableWriterStyle>>();
 
-						foreach (AggregatedContainer childTableCellValueGetter in childAggregatedContainers) {
+						foreach (var childTableCellValueGetter in childAggregatedContainers) {
 							TableWriterStyle cellStyle = null;
 							if (childTableCellValueGetter.ConditionFunc(child)) {
 								cellStyle = childTableCellValueGetter.Style;
 							}
-							dynamic cell = childTableCellValueGetter.ValueFunc(child);
+							var cell = childTableCellValueGetter.ValueFunc(child);
                             childCellsWithStyle.Add(new KeyValuePair<dynamic, TableWriterStyle>(cell, cellStyle));
 						}
 						writer.WriteChildRow(childCellsWithStyle, true);

@@ -1,9 +1,6 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using FormattedExcelExport.Style;
-using NPOI.HSSF.UserModel;
-using NPOI.HSSF.Util;
 using NPOI.SS.UserModel;
 
 
@@ -17,12 +14,12 @@ namespace FormattedExcelExport.TableWriters {
 
 	    public XlsTableWriterComplex(TableWriterStyle style) : base(style) {
             _childHeaderCellStyleList = new List<ICellStyle>();
-	        for (int i = 0; i < Style.ColorsCollection.Count; i++) {
-	            AdHocCellStyle.Color color = Style.ColorsCollection.ElementAt(i);
+	        for (var i = 0; i < Style.ColorsCollection.Count; i++) {
+	            var color = Style.ColorsCollection.ElementAt(i);
 	            if (color != null) {
-	                HSSFPalette palette = Workbook.GetCustomPalette();
-	                HSSFColor similarColor = palette.FindSimilarColor(color.Red, color.Green, color.Blue);
-                    ICellStyle childHeaderCellStyle = ConvertToNpoiStyle(Style.HeaderChildCell);
+	                var palette = Workbook.GetCustomPalette();
+	                var similarColor = palette.FindSimilarColor(color.Red, color.Green, color.Blue);
+                    var childHeaderCellStyle = ConvertToNpoiStyle(Style.HeaderChildCell);
 	                childHeaderCellStyle.FillForegroundColor = similarColor.GetIndex();
 	                childHeaderCellStyle.FillPattern = FillPattern.SolidForeground;
                     _childHeaderCellStyleList.Add(childHeaderCellStyle);
@@ -39,7 +36,7 @@ namespace FormattedExcelExport.TableWriters {
 	            else {
 	                WorkSheet = Workbook.CreateSheet();
                     _rowIndex = 0;
-	                string[] lastChildHeaderBuffer = _lastChildHeader;
+	                var lastChildHeaderBuffer = _lastChildHeader;
 	                WriteHeader(_lastParentHeader);
 	                _lastChildHeader = lastChildHeaderBuffer;
 	                if (_lastChildHeader != null) {
@@ -50,14 +47,12 @@ namespace FormattedExcelExport.TableWriters {
 	    }
 
 	    public void WriteHeader(params string[] cells) {
-			IRow row = WorkSheet.CreateRow(RowIndex);
-			//row.Height = Style.HeaderHeight;
-			
+			var row = WorkSheet.CreateRow(RowIndex);
 			HeaderCellStyle.VerticalAlignment = VerticalAlignment.Top;
 
-			int columnIndex = 0;
-			foreach (string cell in cells) {
-				ICell newCell = row.CreateCell(columnIndex);
+			var columnIndex = 0;
+			foreach (var cell in cells) {
+				var newCell = row.CreateCell(columnIndex);
 				newCell.SetCellValue(cell);
 				newCell.CellStyle = HeaderCellStyle;
 				columnIndex++;
@@ -68,54 +63,18 @@ namespace FormattedExcelExport.TableWriters {
 			_colorIndex = 0;
 		}
         public void WriteRow(List<KeyValuePair<dynamic, TableWriterStyle>> cells, bool prependDelimeter = false) {
-			IRow row = WorkSheet.CreateRow(RowIndex);
-			int columnIndex = 0;
-			if (prependDelimeter) {
-				ICell newCell = row.CreateCell(columnIndex);
-				newCell.SetCellValue("");
-				newCell.CellStyle = CellStyle;
-
-				columnIndex++;
-			}
-            foreach (KeyValuePair<dynamic, TableWriterStyle> cell in cells) {
-				ICell newCell = row.CreateCell(columnIndex);
-				newCell.SetCellValue(cell.Key ?? string.Empty);
-                if (cell.Key != null && cell.Key is DateTime?) {
-                    newCell.CellStyle = DateCellStyle;
-                }
-                else {
-                    if (cell.Value != null) {
-                        ICellStyle customCellStyle = ConvertToNpoiStyle(cell.Value.RegularCell);
-                        newCell.CellStyle = customCellStyle;
-                    }
-                    else {
-                        newCell.CellStyle = CellStyle;
-                    }
-                }
-                columnIndex++;
-			}
+			WriteRowBase(cells, RowIndex, prependDelimeter);
 			RowIndex++;
 		}
 		public void WriteChildHeader(params string[] cells) {
-			IRow row = WorkSheet.CreateRow(RowIndex);
-			int columnIndex = 0;
-			List<string> cellsList = cells.ToList();
-			//_childHeaderCellStyle = ConvertToNpoiStyle(Style.HeaderChildCell);
-
+			var row = WorkSheet.CreateRow(RowIndex);
+			var columnIndex = 0;
+			var cellsList = cells.ToList();
 			if (_colorIndex >= Style.ColorsCollection.Count)
 				_colorIndex = 0;
-
-			/*AdHocCellStyle.Color color = Style.ColorsCollection.ElementAt(_colorIndex);
-			if (color != null) {
-				HSSFPalette palette = Workbook.GetCustomPalette();
-				HSSFColor similarColor = palette.FindSimilarColor(color.Red, color.Green, color.Blue);
-				_childHeaderCellStyle.FillForegroundColor = similarColor.GetIndex();
-				_childHeaderCellStyle.FillPattern = FillPattern.SolidForeground;
-				_colorIndex++;
-			}*/
-            ICellStyle childHeaderCellStyle = _childHeaderCellStyleList[_colorIndex];
-			foreach (string cell in cellsList) {
-				ICell newCell = row.CreateCell(columnIndex);
+            var childHeaderCellStyle = _childHeaderCellStyleList[_colorIndex];
+			foreach (var cell in cellsList) {
+				var newCell = row.CreateCell(columnIndex);
 				newCell.SetCellValue(cell);
 			    newCell.CellStyle = childHeaderCellStyle;
 				columnIndex++;
@@ -126,33 +85,8 @@ namespace FormattedExcelExport.TableWriters {
 		}
 
 	    public void WriteChildRow(IEnumerable<KeyValuePair<dynamic, TableWriterStyle>> cells, bool prependDelimeter = false) {
-			IRow row = WorkSheet.CreateRow(RowIndex);
-
-			int columnIndex = 0;
-			if (prependDelimeter) {
-				ICell newCell = row.CreateCell(columnIndex);
-				newCell.SetCellValue("");
-				newCell.CellStyle = CellStyle;
-
-				columnIndex++;
-			}
-            foreach (KeyValuePair<dynamic, TableWriterStyle> cell in cells) {
-				ICell newCell = row.CreateCell(columnIndex);
-				newCell.SetCellValue(cell.Key);
-                if (cell.Key != null && cell.Key is DateTime?) {
-                    newCell.CellStyle = DateCellStyle;
-                }
-                else {
-                    if (cell.Value != null) {
-                        ICellStyle customCellStyle = ConvertToNpoiStyle(cell.Value.RegularChildCell);
-                        newCell.CellStyle = customCellStyle;
-                    }
-                    else {
-                        newCell.CellStyle = CellStyle;
-                    }
-                }
-                columnIndex++;
-			}
+            const bool isChildRow = true;
+            WriteRowBase(cells, RowIndex, prependDelimeter, isChildRow);
 			RowIndex++;
 		}
 	}

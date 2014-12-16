@@ -18,9 +18,9 @@ namespace FormattedExcelExport.TableWriters {
 		}
 
 	    public void WriteRow(List<KeyValuePair<dynamic, TableWriterStyle>> cells) {
-			int cellsCount = cells.Count() - 1;
-			int i = 0;
-			foreach (KeyValuePair<dynamic, TableWriterStyle> cell in cells) {
+			var cellsCount = cells.Count() - 1;
+			var i = 0;
+			foreach (var cell in cells) {
 				if (cell.Key != null)
 					_stringBuilder.Append(cell.Key);
 
@@ -33,8 +33,8 @@ namespace FormattedExcelExport.TableWriters {
 
 		public void AutosizeColumns() { }
 		public MemoryStream GetStream() {
-			MemoryStream memoryStream = new MemoryStream();
-			StreamWriter streamWriter = new StreamWriter(memoryStream, Encoding.UTF8);
+			var memoryStream = new MemoryStream();
+			var streamWriter = new StreamWriter(memoryStream, Encoding.UTF8);
 			streamWriter.WriteLine(_stringBuilder.ToString());
 			streamWriter.Flush();
 			memoryStream.Position = 0;

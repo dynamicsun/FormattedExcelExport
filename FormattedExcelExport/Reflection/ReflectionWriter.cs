@@ -8,10 +8,10 @@ using FormattedExcelExport.Style;
 namespace FormattedExcelExport.Reflection {
     public static class ReflectionWriter {
         public static void GetValue<T>(CultureInfo cultureInfo, IEnumerable<PropertyInfo> exportedProperties, List<KeyValuePair<dynamic, TableWriterStyle>> row, T model) {
-            TableWriterStyle style = new TableWriterStyle();
+            var style = new TableWriterStyle();
             style.RegularCell.BackgroundColor = new AdHocCellStyle.Color(255, 0, 0);
             style.RegularChildCell.BackgroundColor = new AdHocCellStyle.Color(255, 0, 0);
-            foreach (PropertyInfo propertyInfo in exportedProperties) {
+            foreach (var propertyInfo in exportedProperties) {
                 var propertyTypeName = propertyInfo.PropertyType.Name;
                 bool? value;
                 switch (propertyTypeName) {
@@ -30,7 +30,7 @@ namespace FormattedExcelExport.Reflection {
                         }
                         break;
                     case "Decimal":
-                        Type conditionType = propertyInfo.GetCustomAttribute<ExcelExportAttribute>().ConditionType;
+                        var conditionType = propertyInfo.GetCustomAttribute<ExcelExportAttribute>().ConditionType;
                         if (conditionType != null) {
                             row.Add(new KeyValuePair<dynamic, TableWriterStyle>(propertyInfo.GetValue(model) != null ? (double?)Convert.ToDouble(propertyInfo.GetValue(model)) : null, style));
                         } else {

@@ -1,9 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using FormattedExcelExport.Style;
 using NPOI.HSSF.UserModel;
-using NPOI.HSSF.Util;
 using NPOI.SS.UserModel;
 
 
@@ -36,16 +36,16 @@ namespace FormattedExcelExport.TableWriters {
 		}
 
 		public void AutosizeColumns() {
-		    for (int sheetNumber = 0; sheetNumber < Workbook.NumberOfSheets; sheetNumber++) {
+		    for (var sheetNumber = 0; sheetNumber < Workbook.NumberOfSheets; sheetNumber++) {
 		        var columnLengths = new List<int>();
 		        WorkSheet = Workbook.GetSheetAt(sheetNumber);
-		        for (int columnNum = 0; columnNum < WorkSheet.GetRow(0).LastCellNum; columnNum++) {
-		            int columnMaximumLength = 0;
-		            for (int rowNum = 0; rowNum <= WorkSheet.LastRowNum; rowNum++) {
-		                IRow currentRow = WorkSheet.GetRow(rowNum);
+		        for (var columnNum = 0; columnNum < WorkSheet.GetRow(0).LastCellNum; columnNum++) {
+		            var columnMaximumLength = 0;
+		            for (var rowNum = 0; rowNum <= WorkSheet.LastRowNum; rowNum++) {
+		                var currentRow = WorkSheet.GetRow(rowNum);
 
 		                if (!currentRow.Cells.Any()) continue;
-		                ICell cell = currentRow.GetCell(columnNum);
+		                var cell = currentRow.GetCell(columnNum);
 		                if (cell == null) continue;
                         if (cell.CellType == CellType.String) 
                             if (cell.StringCellValue.Length > columnMaximumLength) 
@@ -57,10 +57,10 @@ namespace FormattedExcelExport.TableWriters {
 		            columnLengths.Add(columnMaximumLength);
 		        }
 
-		        for (int i = 0; i < WorkSheet.GetRow(0).LastCellNum; i++) {
-		            int width = columnLengths.ElementAt(i)*Style.FontFactor + Style.FontAbsoluteTerm;
+		        for (var i = 0; i < WorkSheet.GetRow(0).LastCellNum; i++) {
+		            var width = columnLengths.ElementAt(i)*Style.FontFactor + Style.FontAbsoluteTerm;
                     WorkSheet.SetColumnWidth(i, width < MaxWidth ? width : MaxWidth);
-		            for (int j = 0; j < WorkSheet.LastRowNum; j++) {
+		            for (var j = 0; j < WorkSheet.LastRowNum; j++) {
 		                if (WorkSheet.GetRow(j).GetCell(i) != null) {
 		                    WorkSheet.GetRow(j).GetCell(i).CellStyle.WrapText = true;
 		                }
@@ -68,9 +68,34 @@ namespace FormattedExcelExport.TableWriters {
 		        }
 		    }
 		}
-
+        protected void WriteRowBase(IEnumerable<KeyValuePair<dynamic, TableWriterStyle>> cells, int rowIndex, bool prependDelimeter = false, bool isChildRow = false) {
+            var row = WorkSheet.CreateRow(rowIndex);
+            var columnIndex = 0;
+            if (prependDelimeter) {
+                var newCell = row.CreateCell(columnIndex);
+                newCell.SetCellValue("");
+                newCell.CellStyle = CellStyle;
+                columnIndex++;
+            }
+            foreach (var cell in cells) {
+                var newCell = row.CreateCell(columnIndex);
+                newCell.SetCellValue(cell.Key ?? string.Empty);
+                if (cell.Key != null && cell.Key is DateTime?) {
+                    newCell.CellStyle = DateCellStyle;
+                } else {
+                    if (cell.Value != null) {
+                        ICellStyle customCellStyle;
+                        customCellStyle = ConvertToNpoiStyle(isChildRow ? cell.Value.RegularChildCell : cell.Value.RegularCell);
+                        newCell.CellStyle = customCellStyle;
+                    } else {
+                        newCell.CellStyle = CellStyle;
+                    }
+                }
+                columnIndex++;
+            }
+        }
 		protected ICellStyle ConvertToNpoiStyle(AdHocCellStyle adHocCellStyle, short dateFormat = 0) {
-			IFont cellFont = Workbook.CreateFont();
+			var cellFont = Workbook.CreateFont();
 
 			cellFont.FontName = adHocCellStyle.FontName;
 			cellFont.FontHeightInPoints = adHocCellStyle.FontHeightInPoints;
@@ -78,11 +103,11 @@ namespace FormattedExcelExport.TableWriters {
 			cellFont.Underline = adHocCellStyle.Underline ? FontUnderlineType.Single : FontUnderlineType.None;
 			cellFont.Boldweight = (short)adHocCellStyle.BoldWeight;
 
-			HSSFPalette palette = Workbook.GetCustomPalette();
-			HSSFColor similarColor = palette.FindSimilarColor(adHocCellStyle.FontColor.Red, adHocCellStyle.FontColor.Green, adHocCellStyle.FontColor.Blue);
+			var palette = Workbook.GetCustomPalette();
+			var similarColor = palette.FindSimilarColor(adHocCellStyle.FontColor.Red, adHocCellStyle.FontColor.Green, adHocCellStyle.FontColor.Blue);
 			cellFont.Color = similarColor.GetIndex();
 
-			ICellStyle cellStyle = Workbook.CreateCellStyle();
+			var cellStyle = Workbook.CreateCellStyle();
 			cellStyle.SetFont(cellFont);
 
 			if (adHocCellStyle.BackgroundColor != null) {
@@ -95,7 +120,7 @@ namespace FormattedExcelExport.TableWriters {
 		}
 
 		public MemoryStream GetStream() {
-			MemoryStream memoryStream = new MemoryStream();
+			var memoryStream = new MemoryStream();
 
 			Workbook.Write(memoryStream);
 			memoryStream.Position = 0;

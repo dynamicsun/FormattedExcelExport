@@ -1,8 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using FormattedExcelExport.Style;
 using OfficeOpenXml;
+using OfficeOpenXml.Style;
 
 namespace FormattedExcelExport.TableWriters {
     public abstract class XlsxTableWriterBase {
@@ -24,10 +27,10 @@ namespace FormattedExcelExport.TableWriters {
         public void AutosizeColumns() {
             const int conversionFactorWidth = 256;
             foreach (var sheet in Package.Workbook.Worksheets) {
-                List<int> columnLengths = new List<int>();
-                for (int columnNum = 1; columnNum <= sheet.Dimension.End.Column; columnNum++) {
-                    int columnMaxixumLength = 0;
-                    for (int rowNum = 1; rowNum <= sheet.Dimension.End.Row; rowNum++) {
+                var columnLengths = new List<int>();
+                for (var columnNum = 1; columnNum <= sheet.Dimension.End.Column; columnNum++) {
+                    var columnMaxixumLength = 0;
+                    for (var rowNum = 1; rowNum <= sheet.Dimension.End.Row; rowNum++) {
                         if (WorkSheet.Cells[rowNum, columnNum] == null) continue;
 
                         if (WorkSheet.Cells[rowNum, columnNum].Value != null && WorkSheet.Cells[rowNum, columnNum].Value.ToString().Length > columnMaxixumLength) {
@@ -36,9 +39,9 @@ namespace FormattedExcelExport.TableWriters {
                     }
                     columnLengths.Add(columnMaxixumLength);
                 }
-                for (int i = 1; i <= sheet.Dimension.End.Column; i++) {
+                for (var i = 1; i <= sheet.Dimension.End.Column; i++) {
                     var a = sheet.Cells[1, i].Value;
-                    int width = columnLengths.ElementAt(i - 1)*Style.FontFactor + Style.FontAbsoluteTerm;
+                    var width = columnLengths.ElementAt(i - 1)*Style.FontFactor + Style.FontAbsoluteTerm;
                     sheet.Column(i).Width = (width < MaxWidth ? width : MaxWidth)/conversionFactorWidth;
                     sheet.Column(i).Style.WrapText = true;
                 }
@@ -75,6 +78,51 @@ namespace FormattedExcelExport.TableWriters {
                 font = new Font(adHocCellStyle.FontName, adHocCellStyle.FontHeightInPoints);
             }
             return font;
+        }
+        public MemoryStream GetStream() {
+            var memoryStream = new MemoryStream();
+            Package.SaveAs(memoryStream);
+            memoryStream.Position = 0;
+            return memoryStream;
+        }
+        protected void WriteRowBase(IEnumerable<KeyValuePair<dynamic, TableWriterStyle>> cells, int rowIndex, bool prependDelimeter = false, bool isChildRow = false) {
+            var columnIndex = 1;
+            var defaultStyle = isChildRow ? Style.RegularChildCell : Style.RegularCell;
+            var font = ConvertCellStyle(defaultStyle);
+            if (prependDelimeter) {
+                var newCell = WorkSheet.Cells[rowIndex, columnIndex];
+                newCell.Value = "";
+                if (defaultStyle.BackgroundColor != null) {
+                    newCell.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                    newCell.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(defaultStyle.BackgroundColor.Red, defaultStyle.BackgroundColor.Green, defaultStyle.BackgroundColor.Blue));
+                }
+                columnIndex++;
+            }
+            foreach (var cell in cells) {
+                var newCell = WorkSheet.Cells[rowIndex, columnIndex];
+                if (cell.Key != null) if (cell.Key is DateTime?) {
+                        var date = (DateTime)cell.Key;
+                        newCell.Formula = "=Date(" + date.Year + "," + date.Month + "," + date.Day + ")";
+                        newCell.Style.Numberformat.Format = "dd.mm.yyyy";
+                    } else newCell.Value = cell.Key;
+                if (cell.Value != null) {
+                    var customStyle = isChildRow ? cell.Value.RegularChildCell : cell.Value.RegularCell;
+                    font = ConvertCellStyle(customStyle);
+                    newCell.Style.Font.SetFromFont(font);
+                    newCell.Style.Font.Color.SetColor(Color.FromArgb(Style.HeaderCell.FontColor.Red, Style.HeaderCell.FontColor.Green, Style.HeaderCell.FontColor.Blue));
+                    if (customStyle.BackgroundColor != null) {
+                        newCell.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                        newCell.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(customStyle.BackgroundColor.Red, customStyle.BackgroundColor.Green, customStyle.BackgroundColor.Blue));
+                    }
+                    newCell.Style.VerticalAlignment = ExcelVerticalAlignment.Bottom;
+                } else {
+                    newCell.Style.Font.SetFromFont(font);
+                    newCell.Style.Font.Color.SetColor(Color.FromArgb(defaultStyle.FontColor.Red, defaultStyle.FontColor.Green, defaultStyle.FontColor.Blue));
+                    newCell.Style.Fill.PatternType = ExcelFillStyle.None;
+                    newCell.Style.VerticalAlignment = ExcelVerticalAlignment.Bottom;
+                }
+                columnIndex++;
+            }
         }
     }
 }

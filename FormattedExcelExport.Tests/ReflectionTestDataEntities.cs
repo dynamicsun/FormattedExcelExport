@@ -14,10 +14,10 @@ namespace FormattedExcelExport.Tests {
         private readonly List<EnumProp5> _enumField5;
 
         public ReflectionTestDataEntities() {
-            List<Type> generalTypes = GeneralTypes;
-            List<PropertyInfo> nonEnumerableProperties = GetType().GetProperties().Where(x => generalTypes.Contains(x.PropertyType)).ToList();
-            Random rand = new Random();
-	        foreach (PropertyInfo nonEnumerableProperty in nonEnumerableProperties) {
+            var generalTypes = GeneralTypes;
+            var nonEnumerableProperties = GetType().GetProperties().Where(x => generalTypes.Contains(x.PropertyType)).ToList();
+            var rand = new Random();
+	        foreach (var nonEnumerableProperty in nonEnumerableProperties) {
 	            Object value;
 	            switch (nonEnumerableProperty.PropertyType.Name) {
                     case "String":
@@ -35,23 +35,23 @@ namespace FormattedExcelExport.Tests {
                 }
             }
 	        _enumField1 = new List<EnumProp1>();
-            for (int i = 0; i < rand.Next(4); i++) {
+            for (var i = 0; i < rand.Next(4); i++) {
                 _enumField1.Add(new EnumProp1());
             }
             _enumField2 = new List<EnumProp2>();
-            for (int i = 0; i < rand.Next(4); i++) {
+            for (var i = 0; i < rand.Next(4); i++) {
                 _enumField2.Add(new EnumProp2());
             }
             _enumField3 = new List<EnumProp3>();
-            for (int i = 0; i < rand.Next(4); i++) {
+            for (var i = 0; i < rand.Next(4); i++) {
                 _enumField3.Add(new EnumProp3());
             }
             _enumField4 = new List<EnumProp4>();
-            for (int i = 0; i < rand.Next(4); i++) {
+            for (var i = 0; i < rand.Next(4); i++) {
                 _enumField4.Add(new EnumProp4());
             }
             _enumField5 = new List<EnumProp5>();
-            for (int i = 0; i < rand.Next(4); i++) {
+            for (var i = 0; i < rand.Next(4); i++) {
                 _enumField5.Add(new EnumProp5());
             }
         }
@@ -174,10 +174,10 @@ namespace FormattedExcelExport.Tests {
         [ExcelExportClassName(Name = "Перечисл. свойство1")]
         public sealed class EnumProp1 {
             public EnumProp1() {
-                List<Type> generalTypes = GeneralTypes;
-                List<PropertyInfo> nonEnumerableProperties = GetType().GetProperties().Where(x => generalTypes.Contains(x.PropertyType)).ToList();
-                Random rand = new Random();
-	            foreach (PropertyInfo nonEnumerableProperty in nonEnumerableProperties) {
+                var generalTypes = GeneralTypes;
+                var nonEnumerableProperties = GetType().GetProperties().Where(x => generalTypes.Contains(x.PropertyType)).ToList();
+                var rand = new Random();
+	            foreach (var nonEnumerableProperty in nonEnumerableProperties) {
 	                Object value;
 	                switch (nonEnumerableProperty.PropertyType.Name) {
                         case "String":
@@ -218,10 +218,10 @@ namespace FormattedExcelExport.Tests {
         [ExcelExportClassName(Name = "Перечисл. свойство2")]
         public sealed class EnumProp2 {
             public EnumProp2() {
-                List<Type> generalTypes = GeneralTypes;
-                List<PropertyInfo> nonEnumerableProperties = GetType().GetProperties().Where(x => generalTypes.Contains(x.PropertyType)).ToList();
-                Random rand = new Random();
-	            foreach (PropertyInfo nonEnumerableProperty in nonEnumerableProperties) {
+                var generalTypes = GeneralTypes;
+                var nonEnumerableProperties = GetType().GetProperties().Where(x => generalTypes.Contains(x.PropertyType)).ToList();
+                var rand = new Random();
+	            foreach (var nonEnumerableProperty in nonEnumerableProperties) {
 	                Object value;
 	                switch (nonEnumerableProperty.PropertyType.Name) {
                         case "String":
@@ -274,10 +274,10 @@ namespace FormattedExcelExport.Tests {
         [ExcelExportClassName(Name = "Перечисл. свойство3")]
         public sealed class EnumProp3 {
             public EnumProp3() {
-                List<Type> generalTypes = GeneralTypes;
-                List<PropertyInfo> nonEnumerableProperties = GetType().GetProperties().Where(x => generalTypes.Contains(x.PropertyType)).ToList();
-                Random rand = new Random();
-	            foreach (PropertyInfo nonEnumerableProperty in nonEnumerableProperties) {
+                var generalTypes = GeneralTypes;
+                var nonEnumerableProperties = GetType().GetProperties().Where(x => generalTypes.Contains(x.PropertyType)).ToList();
+                var rand = new Random();
+	            foreach (var nonEnumerableProperty in nonEnumerableProperties) {
 	                Object value;
 	                switch (nonEnumerableProperty.PropertyType.Name) {
                         case "String":
@@ -330,10 +330,10 @@ namespace FormattedExcelExport.Tests {
         [ExcelExportClassName(Name = "Перечисл. свойство4")]
         public sealed class EnumProp4 {
             public EnumProp4() {
-                List<Type> generalTypes = GeneralTypes;
-                List<PropertyInfo> nonEnumerableProperties = GetType().GetProperties().Where(x => generalTypes.Contains(x.PropertyType)).ToList();
-                Random rand = new Random();
-	            foreach (PropertyInfo nonEnumerableProperty in nonEnumerableProperties) {
+                var generalTypes = GeneralTypes;
+                var nonEnumerableProperties = GetType().GetProperties().Where(x => generalTypes.Contains(x.PropertyType)).ToList();
+                var rand = new Random();
+	            foreach (var nonEnumerableProperty in nonEnumerableProperties) {
 	                Object value;
 	                switch (nonEnumerableProperty.PropertyType.Name) {
                         case "String":
@@ -380,10 +380,10 @@ namespace FormattedExcelExport.Tests {
         [ExcelExportClassName(Name = "Перечисл. свойство5")]
         public sealed class EnumProp5 {
             public EnumProp5() {
-                List<Type> generalTypes = GeneralTypes;
-                List<PropertyInfo> nonEnumerableProperties = GetType().GetProperties().Where(x => generalTypes.Contains(x.PropertyType)).ToList();
-                Random rand = new Random();
-	            foreach (PropertyInfo nonEnumerableProperty in nonEnumerableProperties) {
+                var generalTypes = GeneralTypes;
+                var nonEnumerableProperties = GetType().GetProperties().Where(x => generalTypes.Contains(x.PropertyType)).ToList();
+                var rand = new Random();
+	            foreach (var nonEnumerableProperty in nonEnumerableProperties) {
 	                Object value;
 	                switch (nonEnumerableProperty.PropertyType.Name) {
                         case "String":
@@ -435,7 +435,7 @@ namespace FormattedExcelExport.Tests {
 
         private static List<Type> GeneralTypes {
             get {
-                List<Type> generalTypes = new List<Type> {
+                var generalTypes = new List<Type> {
                     typeof (string),
                     typeof (DateTime),
                     typeof (decimal),

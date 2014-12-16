@@ -12,11 +12,11 @@ namespace FormattedExcelExport.Example {
     class Program {
         static void Main(string[] args) {
             var confBuilder = new TableConfigurationBuilder<ClientExampleModel>("Клиент", new CultureInfo("ru-RU"));
-            TableWriterStyle condStyle = new TableWriterStyle();
+            var condStyle = new TableWriterStyle();
             condStyle.RegularCell.BackgroundColor = new AdHocCellStyle.Color(255, 0, 0);
-            TableWriterStyle condStyle2 = new TableWriterStyle();
+            var condStyle2 = new TableWriterStyle();
             condStyle2.RegularCell.BackgroundColor = new AdHocCellStyle.Color(0, 255, 0);
-            TableWriterStyle condStyle3 = new TableWriterStyle();
+            var condStyle3 = new TableWriterStyle();
             condStyle3.RegularChildCell.BackgroundColor = new AdHocCellStyle.Color(0, 0, 255);
 
             confBuilder.RegisterColumn("Название", x => x.Title, new TableConfigurationBuilder<ClientExampleModel>.ConditionTheme(condStyle, x => x.Title == "Вторая компания"));
@@ -38,12 +38,12 @@ namespace FormattedExcelExport.Example {
             product.RegisterColumn("Наименование", x => x.Title);
             product.RegisterColumn("Количество", x => x.Amount);
 
-            List<ClientExampleModel> models = InitializeModels();
+            var models = InitializeModels();
 
-            MemoryStream ms = TableWriterComplex.Write(new DsvTableWriterComplex(), models, confBuilder.Value);
+            var ms = TableWriterComplex.Write(new DsvTableWriterComplex(), models, confBuilder.Value);
             WriteToFile(ms, "TestComplex.txt");
 
-            TableWriterStyle style = new TableWriterStyle();
+            var style = new TableWriterStyle();
             ms = TableWriterComplex.Write(new XlsTableWriterComplex(style), models, confBuilder.Value);
             WriteToFile(ms, "TestComplex.xls");
 
@@ -73,8 +73,8 @@ namespace FormattedExcelExport.Example {
         }
 
         private static void WriteToFile(MemoryStream ms, string fileName) {
-            using (FileStream file = new FileStream(fileName, FileMode.Create, FileAccess.Write)) {
-                byte[] bytes = new byte[ms.Length];
+            using (var file = new FileStream(fileName, FileMode.Create, FileAccess.Write)) {
+                var bytes = new byte[ms.Length];
                 ms.Read(bytes, 0, (int)ms.Length);
                 file.Write(bytes, 0, bytes.Length);
                 ms.Close();

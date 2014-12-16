@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using FormattedExcelExport.Style;
 using NPOI.SS.UserModel;
 
@@ -25,13 +24,12 @@ namespace FormattedExcelExport.TableWriters {
 	    }
 
 	    public void WriteHeader(List<string> cells) {
-			IRow row = WorkSheet.CreateRow(RowIndex);
-			//row.Height = Style.HeaderHeight;
+			var row = WorkSheet.CreateRow(RowIndex);
 			CellStyle.VerticalAlignment = VerticalAlignment.Top;
 
-			int columnIndex = 0;
-			foreach (string cell in cells) {
-				ICell newCell = row.CreateCell(columnIndex);
+			var columnIndex = 0;
+			foreach (var cell in cells) {
+				var newCell = row.CreateCell(columnIndex);
 				newCell.SetCellValue(cell);
 				newCell.CellStyle = HeaderCellStyle;
 				columnIndex++;
@@ -40,33 +38,7 @@ namespace FormattedExcelExport.TableWriters {
 			RowIndex++;
 		}
         public void WriteRow(List<KeyValuePair<dynamic, TableWriterStyle>> cells) {
-			IRow row = WorkSheet.CreateRow(RowIndex);
-		    int columnIndex = 0;
-            
-            
-            foreach (KeyValuePair<dynamic, TableWriterStyle> cell in cells) {
-				ICell newCell = row.CreateCell(columnIndex);
-				if (cell.Key != null)
-					newCell.SetCellValue(cell.Key);
-                if (cell.Key != null && cell.Key is DateTime?) {
-                    newCell.CellStyle = DateCellStyle;
-                }
-                else {
-                    if (cell.Value != null) {
-                        ICellStyle customCellStyle = ConvertToNpoiStyle(cell.Value.RegularCell);
-                        if (cell.Value.RegularCell.BackgroundColor != null) {
-                            newCell.CellStyle = customCellStyle;
-                        }
-                        if (cell.Value.RegularChildCell.BackgroundColor != null) {
-                            newCell.CellStyle = customCellStyle;
-                        }
-                    }
-                    else {
-                        newCell.CellStyle = CellStyle;
-                    }
-                }
-                columnIndex++;
-			}
+			WriteRowBase(cells, RowIndex);
 			RowIndex++;
 		}
 	}
