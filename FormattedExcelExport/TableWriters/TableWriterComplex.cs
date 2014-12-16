@@ -2,8 +2,6 @@
 using System.IO;
 using System.Linq;
 using FormattedExcelExport.Configuaration;
-using FormattedExcelExport.Infrastructure;
-using FormattedExcelExport.Style;
 
 
 namespace FormattedExcelExport.TableWriters {
@@ -17,16 +15,8 @@ namespace FormattedExcelExport.TableWriters {
 			foreach (var model in models) {
 				writer.WriteHeader(headerNamesList.ToArray());
 
-                var cellsWithStyle = new List<KeyValuePair<dynamic, TableWriterStyle>>();
-				foreach (var aggregatedContainer in aggregatedContainers) {
-					TableWriterStyle cellStyle = null;
-					if (aggregatedContainer.ConditionFunc(model)) {
-						cellStyle = aggregatedContainer.Style;
-					}
-					var cell = aggregatedContainer.ValueFunc(model);
-                    cellsWithStyle.Add(new KeyValuePair<dynamic, TableWriterStyle>(cell, cellStyle));
-				}
-				writer.WriteRow(cellsWithStyle, true);
+			    var cellsWithStyle = TableWriterBase.AddCellStyles(aggregatedContainers, model);
+				writer.WriteRow(cellsWithStyle.ToList(), true);
 
 				foreach (var childTableConfiguration in childTableConfigurations) {
 					var children = childTableConfiguration.Getter(model);
@@ -36,16 +26,7 @@ namespace FormattedExcelExport.TableWriters {
 					writer.WriteChildHeader(childHeaderNamesList.ToArray());
 
 					foreach (var child in children) {
-                        var childCellsWithStyle = new List<KeyValuePair<dynamic, TableWriterStyle>>();
-
-						foreach (var childTableCellValueGetter in childAggregatedContainers) {
-							TableWriterStyle cellStyle = null;
-							if (childTableCellValueGetter.ConditionFunc(child)) {
-								cellStyle = childTableCellValueGetter.Style;
-							}
-							var cell = childTableCellValueGetter.ValueFunc(child);
-                            childCellsWithStyle.Add(new KeyValuePair<dynamic, TableWriterStyle>(cell, cellStyle));
-						}
+					    var childCellsWithStyle = TableWriterBase.AddCellStyles(childAggregatedContainers, child);
 						writer.WriteChildRow(childCellsWithStyle, true);
 					}
 				}

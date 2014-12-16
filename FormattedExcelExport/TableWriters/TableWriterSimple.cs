@@ -6,13 +6,6 @@ using FormattedExcelExport.Style;
 
 
 namespace FormattedExcelExport.TableWriters {
-	public interface ITableWriterSimple {
-		void WriteHeader(IEnumerable<string> cells);
-		void WriteRow(List<KeyValuePair<dynamic, TableWriterStyle>> cells);
-		void AutosizeColumns();
-		MemoryStream GetStream();
-	}
-
 	public static class TableWriterSimple {
 		public static MemoryStream Write<TModel>(ITableWriterSimple writer, IEnumerable<TModel> models, TableConfiguration parentTableConfiguration) {
 			var parentNamesList = parentTableConfiguration.ColumnsMap.Keys.ToList();
@@ -53,41 +46,20 @@ namespace FormattedExcelExport.TableWriters {
 			writer.WriteHeader(parentNamesList.ToList());
 
 			foreach (var model in models) {
-                var cellsWithStyle = new List<KeyValuePair<dynamic, TableWriterStyle>>();
-
-				foreach (var aggregatedContainer in aggregatedContainers) {
-					TableWriterStyle cellStyle = null;
-					if (aggregatedContainer.ConditionFunc(model)) {
-						cellStyle = aggregatedContainer.Style;
-					}
-					var cell = aggregatedContainer.ValueFunc(model);
-                    cellsWithStyle.Add(new KeyValuePair<dynamic, TableWriterStyle>(cell, cellStyle));
-				}
-
+			    var cellsWithStyle = TableWriterBase.AddCellStyles(aggregatedContainers, model).ToList();
 				var counter3 = 0;
 				foreach (var childTableConfiguration in childTableConfigurations) {
 					var children = childTableConfiguration.Getter(model);
 					var childAggregatedContainers = childTableConfiguration.ColumnsMap.Values.ToArray();
-
 					foreach (var child in children) {
-						foreach (var childTableCellValueGetter in childAggregatedContainers) {
-							TableWriterStyle cellStyle = null;
-							if (childTableCellValueGetter.ConditionFunc(child)) {
-								cellStyle = childTableCellValueGetter.Style;
-							}
-							var cell = childTableCellValueGetter.ValueFunc(child);
-                            cellsWithStyle.Add(new KeyValuePair<dynamic, TableWriterStyle>(cell, cellStyle));
-						}
+                        cellsWithStyle.AddRange(TableWriterBase.AddCellStyles(childAggregatedContainers, child));
 					}
-
 					var difference = (maximums[counter3] - children.Count()) * childAggregatedContainers.Count();
-
 					for (var i = 0; i < difference; i++) {
                         cellsWithStyle.Add(new KeyValuePair<dynamic, TableWriterStyle>(null, null));
 					}
 					counter3++;
 				}
-
 				writer.WriteRow(cellsWithStyle);
 			}
 			writer.AutosizeColumns();

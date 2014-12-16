@@ -35,7 +35,6 @@ namespace FormattedExcelExport.Configuaration {
             Value = new ChildTableConfiguration { Getter = getter, Title = title };
             _culture = culture;
         }
-        //todo подумать как убрать дублирование (сейчас нужно для контроля типов, т.к. дальше применяется dynamic)
         public void RegisterColumn(string header, Func<TModel, string> getter, ConditionTheme conditionTheme = null) {
             RegisterColumnIf(header, getter, conditionTheme);
         }

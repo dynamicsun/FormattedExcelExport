@@ -71,6 +71,8 @@
     <Compile Include="TableWriters\DsvTableWriterComplex.cs" />
     <Compile Include="TableWriters\DsvTableWriterSimple.cs" />
     <Compile Include="Reflection\ExcelExportAttribute.cs" />
+    <Compile Include="TableWriters\ITableWriterSimple.cs" />
+    <Compile Include="TableWriters\TableWriterBase.cs" />
     <Compile Include="TableWriters\XlsTableWriterBase.cs" />
     <Compile Include="TableWriters\XlsTableWriterComplex.cs" />
     <Compile Include="TableWriters\XlsTableWriterSimple.cs" />
