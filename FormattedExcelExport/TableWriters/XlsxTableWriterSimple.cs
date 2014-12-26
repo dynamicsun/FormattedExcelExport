@@ -1,8 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
 using FormattedExcelExport.Style;
-using OfficeOpenXml.Style;
 
 namespace FormattedExcelExport.TableWriters {
     public sealed class XlsxTableWriterSimple : XlsxTableWriterBase, ITableWriterSimple {

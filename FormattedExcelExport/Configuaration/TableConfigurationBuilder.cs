@@ -4,8 +4,6 @@ using System.Globalization;
 using System.Linq;
 using FormattedExcelExport.Infrastructure;
 using FormattedExcelExport.Style;
-using NPOI.HSSF.Record.Chart;
-
 
 namespace FormattedExcelExport.Configuaration {
 	public sealed class TableConfigurationBuilder<TModel> {

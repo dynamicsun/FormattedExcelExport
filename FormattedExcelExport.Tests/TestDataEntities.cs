@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Security.Cryptography.X509Certificates;
 using FormattedExcelExport.Configuaration;
 using FormattedExcelExport.Reflection;
 using FormattedExcelExport.Style;
