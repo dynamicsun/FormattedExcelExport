@@ -20,7 +20,7 @@ namespace FormattedExcelExport.Reflection {
 				if (attribute == null || !attribute.IsExportable) {
 					continue;
 				}
-				header.Add(attribute.PropertyName);
+				header.Add(Common.GetHeader(propertyInfo.Name, attribute.PropertyName));
 				exportedProperties.Add(propertyInfo);
 			}
 
