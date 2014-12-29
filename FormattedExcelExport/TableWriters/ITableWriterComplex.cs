@@ -5,10 +5,10 @@ using FormattedExcelExport.Style;
 
 namespace FormattedExcelExport.TableWriters {
 	public interface ITableWriterComplex {
-		void WriteHeader(params string[] cells);
-		void WriteRow(IEnumerable<KeyValuePair<string, TableWriterStyle>> cells, bool prependDelimeter = false);
+		void WriteHeader(IEnumerable<string> cells);
+        void WriteRow(List<KeyValuePair<dynamic, TableWriterStyle>> cells, bool prependDelimeter = false);
 		void WriteChildHeader(params string[] cells);
-		void WriteChildRow(IEnumerable<KeyValuePair<string, TableWriterStyle>> cells, bool prependDelimeter = false);
+        void WriteChildRow(IEnumerable<KeyValuePair<dynamic, TableWriterStyle>> cells, bool prependDelimeter = false);
 		void AutosizeColumns();
 		MemoryStream GetStream();
 	}

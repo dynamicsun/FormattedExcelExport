@@ -12,11 +12,11 @@ namespace FormattedExcelExport.Example {
     class Program {
         static void Main(string[] args) {
             var confBuilder = new TableConfigurationBuilder<ClientExampleModel>("Клиент", new CultureInfo("ru-RU"));
-            TableWriterStyle condStyle = new TableWriterStyle();
+            var condStyle = new TableWriterStyle();
             condStyle.RegularCell.BackgroundColor = new AdHocCellStyle.Color(255, 0, 0);
-            TableWriterStyle condStyle2 = new TableWriterStyle();
+            var condStyle2 = new TableWriterStyle();
             condStyle2.RegularCell.BackgroundColor = new AdHocCellStyle.Color(0, 255, 0);
-            TableWriterStyle condStyle3 = new TableWriterStyle();
+            var condStyle3 = new TableWriterStyle();
             condStyle3.RegularChildCell.BackgroundColor = new AdHocCellStyle.Color(0, 0, 255);
 
             confBuilder.RegisterColumn("Название", x => x.Title, new TableConfigurationBuilder<ClientExampleModel>.ConditionTheme(condStyle, x => x.Title == "Вторая компания"));
@@ -38,12 +38,12 @@ namespace FormattedExcelExport.Example {
             product.RegisterColumn("Наименование", x => x.Title);
             product.RegisterColumn("Количество", x => x.Amount);
 
-            List<ClientExampleModel> models = InitializeModels();
+            var models = InitializeModels();
 
-            MemoryStream ms = TableWriterComplex.Write(new DsvTableWriterComplex(), models, confBuilder.Value);
+            var ms = TableWriterComplex.Write(new DsvTableWriterComplex(), models, confBuilder.Value);
             WriteToFile(ms, "TestComplex.txt");
 
-            TableWriterStyle style = new TableWriterStyle();
+            var style = new TableWriterStyle();
             ms = TableWriterComplex.Write(new XlsTableWriterComplex(style), models, confBuilder.Value);
             WriteToFile(ms, "TestComplex.xls");
 
@@ -52,23 +52,29 @@ namespace FormattedExcelExport.Example {
 
             ms = TableWriterSimple.Write(new XlsTableWriterSimple(style), models, confBuilder.Value);
             WriteToFile(ms, "TestSimple.xls");
-            
+
             ms = ReflectionWriterSimple.Write(models, new DsvTableWriterSimple(), new CultureInfo("ru-Ru"));
             WriteToFile(ms, "TestReflectionSimple.txt");
 
             ms = ReflectionWriterSimple.Write(models, new XlsTableWriterSimple(new TableWriterStyle()), new CultureInfo("ru-Ru"));
             WriteToFile(ms, "TestReflectionSimple.xls");
 
+			ms = ReflectionWriterSimple.Write(models, new XlsxTableWriterSimple(new TableWriterStyle()), new CultureInfo("ru-Ru"));
+			WriteToFile(ms, "TestReflectionSimple.xlsx");
+
             ms = ReflectionWriterComplex.Write(models, new DsvTableWriterComplex(), new CultureInfo("ru-Ru"));
             WriteToFile(ms, "TestReflectionSimple.txt");
 
             ms = ReflectionWriterComplex.Write(models, new XlsTableWriterComplex(new TableWriterStyle()), new CultureInfo("ru-Ru"));
             WriteToFile(ms, "TestReflectionComplex.xls");
+
+			ms = ReflectionWriterComplex.Write(models, new XlsxTableWriterComplex(new TableWriterStyle()), new CultureInfo("ru-Ru"));
+			WriteToFile(ms, "TestReflectionComplex.xlsx");
         }
 
         private static void WriteToFile(MemoryStream ms, string fileName) {
-            using (FileStream file = new FileStream(fileName, FileMode.Create, FileAccess.Write)) {
-                byte[] bytes = new byte[ms.Length];
+            using (var file = new FileStream(fileName, FileMode.Create, FileAccess.Write)) {
+                var bytes = new byte[ms.Length];
                 ms.Read(bytes, 0, (int)ms.Length);
                 file.Write(bytes, 0, bytes.Length);
                 ms.Close();
@@ -125,13 +131,13 @@ namespace FormattedExcelExport.Example {
             private readonly string _phone;
             private readonly string _inn;
             private readonly string _okato;
-            private readonly decimal _revenue;
+            private readonly decimal? _revenue;
             private readonly int _employeeCount;
             private readonly bool _isActive;
             private readonly List<Contact> _contacts;
             private readonly List<Contract> _contracts;
             private readonly List<Product> _products;
-            public ClientExampleModel(string title, DateTime registrationDate, string phone, string inn, string okato, decimal revenue, int employeeCount, bool isActive, List<Contact> contacts, List<Contract> contracts, List<Product> products) {
+            public ClientExampleModel(string title, DateTime registrationDate, string phone, string inn, string okato, decimal? revenue, int employeeCount, bool isActive, List<Contact> contacts, List<Contract> contracts, List<Product> products) {
                 _title = title;
                 _registrationDate = registrationDate;
                 _phone = phone;
@@ -177,7 +183,7 @@ namespace FormattedExcelExport.Example {
                 get { return _inn; }
             }
             [ExcelExport(PropertyName = "Прибыль за прошлый год")]
-            public decimal Revenue {
+            public decimal? Revenue {
                 get { return _revenue; }
             }
             [ExcelExport(IsExportable = false)]
