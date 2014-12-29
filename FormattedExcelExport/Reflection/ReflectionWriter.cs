@@ -21,6 +21,8 @@ namespace FormattedExcelExport.Reflection {
             style.RegularCell.BackgroundColor = new AdHocCellStyle.Color(255, 0, 0);
             style.RegularChildCell.BackgroundColor = new AdHocCellStyle.Color(255, 0, 0);
             foreach (var propertyInfo in exportedProperties) {
+				if (propertyInfo.GetCustomAttribute<ExcelExportAttribute>() == null) continue;
+
                 if (propertyInfo.PropertyType.FullName.Contains("DateTime")) {
                     if (propertyInfo.GetCustomAttribute<ExcelExportAttribute>().ConditionType != null) {
                         row.Add(new KeyValuePair<dynamic, TableWriterStyle>((DateTime?)propertyInfo.GetValue(model), style));

@@ -11,7 +11,6 @@ namespace FormattedExcelExport.TableWriters {
     public abstract class XlsxTableWriterBase {
         protected const int MaxRowIndex = 1048575;
         protected const int MaxWidth = 5000;
-        protected const int MinWidth = 2000;
         protected readonly ExcelPackage Package;
         protected ExcelWorksheet WorkSheet;
         protected readonly TableWriterStyle Style;
@@ -28,7 +27,9 @@ namespace FormattedExcelExport.TableWriters {
         public void AutosizeColumns() {
             const int conversionFactorWidth = 256;
             foreach (var sheet in Package.Workbook.Worksheets) {
-                var columnLengths = new List<int>();
+				if (sheet.Dimension == null) continue;
+                
+				var columnLengths = new List<int>();
                 for (var columnNum = 1; columnNum <= sheet.Dimension.End.Column; columnNum++) {
                     var columnMaxixumLength = 0;
                     for (var rowNum = 1; rowNum <= sheet.Dimension.End.Row; rowNum++) {
@@ -41,7 +42,6 @@ namespace FormattedExcelExport.TableWriters {
                     columnLengths.Add(columnMaxixumLength);
                 }
                 for (var i = 1; i <= sheet.Dimension.End.Column; i++) {
-                    var a = sheet.Cells[1, i].Value;
                     var width = columnLengths.ElementAt(i - 1)*Style.FontFactor + Style.FontAbsoluteTerm;
                     sheet.Column(i).Width = (width < MaxWidth ? width : MaxWidth)/conversionFactorWidth;
                     sheet.Column(i).Style.WrapText = true;

@@ -8,6 +8,7 @@ using Extensions;
 using FormattedExcelExport.Configuaration;
 using FormattedExcelExport.Reflection;
 using FormattedExcelExport.Style;
+using FormattedExcelExport.Tests.Models;
 using NPOI.HSSF.UserModel;
 using NPOI.HSSF.Util;
 using NPOI.SS.UserModel;
@@ -1264,6 +1265,32 @@ namespace FormattedExcelExport.Tests {
 			ExcelReflectionComplexExportTest(test, filename, true);
 
 			ExcelStyleReflectionComplexExportTest(test, filename, true);
+		}
+		[Test]
+		public void ExcelReflectionSimpleEmptyXlsExport() {
+			const string filename = "TestReflectionEmptySimple.xls";
+			DeleteTestFile(filename);
+
+			Assert.DoesNotThrow(() => {
+				var contacts = new Contact().EmptyList;
+				
+				var memoryStream = ReflectionWriterComplex.Write(contacts, new XlsTableWriterComplex(new TableWriterStyle()), new CultureInfo("ru-Ru"));
+				WriteToFile(memoryStream, filename);
+
+			});
+		}
+		[Test]
+		public void ExcelReflectionSimpleEmptyXlsxExport() {
+			const string filename = "TestReflectionEmptySimple.xlsx";
+			DeleteTestFile(filename);
+
+			Assert.DoesNotThrow(() => {
+				var contacts = new Contact().EmptyList;
+
+				var memoryStream = ReflectionWriterComplex.Write(contacts, new XlsxTableWriterComplex(new TableWriterStyle()), new CultureInfo("ru-Ru"));
+				WriteToFile(memoryStream, filename);
+
+			});
 		}
 		private static void ExcelReflectionSimpleExportTest<T>(List<T> models, string filename, bool isXlsx = false) {
 			var firstModel = models.FirstOrDefault();
