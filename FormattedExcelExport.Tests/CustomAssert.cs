@@ -19,13 +19,10 @@ namespace FormattedExcelExport.Tests {
 
         internal static void IsEqualFont(IWorkbook xlsFile, ISheet sheet, int rowNumber, int cellNumber, string fontName, short fontSize, short fontBoldWeight) {
             var cellFont = sheet.GetRow(rowNumber).GetCell(cellNumber).CellStyle.GetFont(xlsFile);
-            if (cellFont.FontName == fontName) {
-                if (cellFont.FontHeightInPoints == fontSize) {
-                    if (cellFont.Boldweight == fontBoldWeight) {
-                    }
-                    else Assert.Fail("Expected {0}, but was {1}", (int) fontBoldWeight, cellFont.Boldweight);
-                } else Assert.Fail("Expected {0}, but was {1}", fontSize, cellFont.FontHeightInPoints);
-            } else Assert.Fail("Expected {0}, but was {1}", fontName, cellFont.FontName);            
+
+	        Assert.AreEqual(fontName, cellFont.FontName);
+			Assert.AreEqual(fontSize, cellFont.FontHeightInPoints);
+			Assert.AreEqual(fontBoldWeight, cellFont.Boldweight, 500);
         }
 
         internal static void IsEqualFont(XSSFWorkbook xlsFile, int rowNumber, int cellNumber, string fontName, short fontSize, short fontBoldWeight) {
