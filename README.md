@@ -6,7 +6,7 @@
 ***
 ###Table of contents###
 1. [Description](#description). 
-2. [Examples](#example).
+2. [Examples](#examples).
 
 ####Description##
 The *formatted excel export* library may help you to export plain tables from *IEnumerable* objects to Excel files (both *.xls* and *.xlsx* formats). Faster then ever. 
