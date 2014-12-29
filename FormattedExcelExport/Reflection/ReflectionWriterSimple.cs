@@ -24,7 +24,14 @@ namespace FormattedExcelExport.Reflection {
 				exportedProperties.Add(propertyInfo);
 			}
 
-			var enumerableProperties = typeof(T).GetProperties().Where(x => x.PropertyType.IsGenericType && x.PropertyType.GetGenericTypeDefinition() == typeof(List<>));
+			var enumerableProperties = typeof(T).GetProperties().Where(x => 
+				x.PropertyType.IsGenericType 
+				&& (
+					x.PropertyType.GetGenericTypeDefinition() == typeof(IEnumerable<>)
+					|| x.PropertyType.GetGenericTypeDefinition() == typeof(IReadOnlyList<>)
+					|| x.PropertyType.GetGenericTypeDefinition() == typeof(ICollection<>)
+				));
+
 			var maxims = new int[enumerableProperties.Count()];
 			for (var i = 0; i < maxims.Count(); i++) {
 				maxims[i] = 0;
