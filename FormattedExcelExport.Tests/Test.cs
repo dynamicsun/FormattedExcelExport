@@ -783,6 +783,7 @@ namespace FormattedExcelExport.Tests {
             var filename = "TestReflectionSimple.xls";
             DeleteTestFile(filename);
 		    var testData = TestDataEntities.CreateSimpleTestDataModels();
+			
             var memoryStream1 = ReflectionWriterSimple.Write(testData, new XlsTableWriterSimple(), new CultureInfo("ru-Ru"));
 
             WriteToFile(memoryStream1, filename);
